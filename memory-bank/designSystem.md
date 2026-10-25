@@ -32,6 +32,7 @@ Defined in `src/styles/tokens.css` as OKLCH custom properties (light base, dark 
 | type scale | `text-micro`, `text-caption`, `text-body`, `text-title`, `text-readout`, `text-hero` | |
 | radii | `rounded-control` (4 px), `rounded-panel` (6 px) | |
 | layout widths | `w-panel-left` (320), `w-panel-right` (380), `w-drawer` | |
+| `--wave-p` / `--wave-s` | `wave-p` / `wave-s` | `bg-wave-p` (legend keys; same RGB as the deck.gl curtains) |
 
 Custom utilities: `num` (mono, tabular figures), `label-micro`, `graticule` (faint dot grid behind empty areas), `ruler` (tick texture for scales).
 
@@ -106,7 +107,9 @@ Rules: every pair used for text meets WCAG 2.2 AA (4.5:1 body, 3:1 large text an
 
 - Built on Radix primitives following shadcn/ui patterns, written into `src/components/ui/` with the token vocabulary above (no shadcn color names). When adopting another shadcn component, copy it and translate its classes to these tokens.
 - Built (phase 0): `Button` (primary, secondary, ghost; sm, md, icon), `ToggleGroup` (segmented control), `Tooltip`, `Tabs`, `Panel` (header, title, body), `EmptyState`, `Sheet` (modal side drawer, Radix Dialog), `BottomSheet` (non-modal phone region with snap heights, drag, click and arrow-key control).
-- To build: slider with scale, timeline (scale presets, event markers, scrub handle), station row with sparkline, waveform panel, stat readout, legend (continuous and categorical), layer toggle row, event log row, toast for alerts, popover, dialog.
+- Built (phase 2): `Slider` (accessible name on the thumb); feature-level: timeline bar (play/pause, slider over a ruler, speed segmented control), preset cards, scenario summary readouts (definition grid), district arrival table with MMI swatches, map legend (continuous MMI scale with Roman numerals, wave keys), simulation watermark.
+- To build: timeline scale presets and event markers, station row with sparkline, waveform panel, layer toggle row, event log row, toast for alerts, popover, dialog.
+- MMI colours come from `src/lib/color/mmi.ts` (ShakeMap scale); the same module feeds the raster, legend and swatches.
 - Touch targets grow on coarse pointers (`pointer-coarse:` variants) to at least 44 px.
 - Every interactive component has visible focus, hover, active, disabled and loading states.
 

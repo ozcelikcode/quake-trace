@@ -68,25 +68,27 @@ export default defineConfig([
   // Layer boundaries (see memory-bank/systemPatterns.md).
   {
     files: ['src/engine/**/*.ts'],
-    rules: restrict({
-      group: [
-        'react',
-        'react-dom',
-        'react/*',
-        'maplibre-gl',
-        '@deck.gl/*',
-        'zustand',
-        'zustand/*',
-        'i18next',
-        'react-i18next',
-        '@/*',
-        '!@/lib/math',
-        '!@/lib/math/*',
-        '!@/types',
-        '!@/types/*',
-      ],
-      message: 'The engine is pure TypeScript: only @/lib/math and @/types are allowed.',
-    }),
+    rules: restrict(
+      {
+        group: [
+          'react',
+          'react-dom',
+          'react/*',
+          'maplibre-gl',
+          '@deck.gl/*',
+          'zustand',
+          'zustand/*',
+          'i18next',
+          'react-i18next',
+        ],
+        message: 'The engine is pure TypeScript without UI or browser libraries.',
+      },
+      {
+        // A regex, because gitignore-style negations cannot re-include paths under @/lib.
+        regex: '^@/(?!lib/math(/|$)|types(/|$))',
+        message: 'The engine may only import @/lib/math and @/types.',
+      },
+    ),
   },
   {
     files: ['src/workers/**/*.ts'],

@@ -8,3 +8,4 @@ package-lock.json
 worker/worker-configuration.d.ts
 memory-bank/
 memory-bank.md
+tests/fixtures/

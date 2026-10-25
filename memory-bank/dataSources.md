@@ -15,10 +15,13 @@ Built 2026-10-25 with `uv run quaketrace-pipeline build --all` (run from `pipeli
 | `districtStats` | `district-stats.json` | İBB Açık Veri "2017 Yılı Mahalle Bazlı Bina Sayıları" + `population` | İBB Açık Veri Lisansı | İstanbul: observed buildings by period and storeys (1.166 M; Eyüp → Eyüpsultan alias; Windows-1254 CSV). Other provinces: **estimated** from İstanbul districts below 2,000 people/km² (6.51 persons per building), marked `buildingSource: "estimated"` |
 | `vs30` | `vs30.f32` | USGS Global Vs30 mosaic (`global_vs30.grd`, 610 MB, cached) | Public domain | Averaged to 1 km; 180–900 m/s, median 544 |
 | `stations` | `stations.json` | FDSN station services: KOERI EIDA node (KO) + EIDA federator (others) | Open access via EIDA; cite network DOIs | 81 permanent stations (KO 77, TK 1, TU 1, HT 1, HI 1), 50 with accelerometers. Temporary networks (codes starting with a digit or X/Y/Z, e.g. ZQ, 6G) excluded |
+| `elevation` | `elevation.f32` | Copernicus DEM GLO-90 COG tiles on AWS (`copernicus-dem-90m`), doi:10.5270/ESA-c5d3d65 | Copernicus DEM licence (free, attribution) | 15 tiles averaged to 1 km; sea 0 m; max 2,433 m. Lifts 3D scenario elements onto the terrain (phase 2) |
 | `bathymetry` | `bathymetry.f32` | EMODnet Bathymetry DTM via WCS (`emodnet:mean`) | CC-BY 4.0 | 500 m grid; elevation m, NaN on land; Çınarcık Basin below −1,000 m |
 | `infra` | `infra.geojson` | OpenStreetMap, Geofabrik Türkiye extract | ODbL 1.0 | 705 hospitals, 184 fire stations, 499 police, 575 assembly points, 2,118 substations (points; areas reduced to centroids), 226 gas pipelines. İBB has no assembly-area dataset in its CKAN catalog |
 | `roads` | `roads.bin` | OpenStreetMap, Geofabrik Türkiye extract | ODbL 1.0 | motorway…tertiary (+ links): 194,810 nodes, 354,612 directed edges, 5.6 MB. Flags: bridge, tunnel, one-way, link |
 | `cells` | `cells.bin` | OpenCelliD, MCC 286 | CC-BY-SA 4.0 | **Pending:** needs a free API key in `pipeline/.env` (`OPENCELLID_API_KEY`). Module and tests are ready; the app treats cells as optional |
+
+Test fixtures (`uv run quaketrace-pipeline fixtures`, written to `tests/fixtures/`): `gmpe/asb14-rjb-mean.json`, the 540-row ASB14 Rjb verification table from OpenQuake hazardlib `v3.26.2` (PGA, PGV, SA 0.3 s, SA 1.0 s medians), with its source URL and reference inside the file.
 
 Validation-only source (phase 5): İBB Açık Veri "Deprem Senaryosu Analiz Sonuçları" (959 neighbourhoods; damage, casualties and pipe damage for the İBB 2019 Mw 7.5 scenario).
 

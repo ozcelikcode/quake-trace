@@ -1,5 +1,6 @@
+import type { GridSpec } from '@/types/grid';
+
 import { DataError } from './errors';
-import type { GridSpec } from './manifest';
 
 /**
  * A regular lon/lat grid, north-up: row 0 is the northern edge, columns run west to east.

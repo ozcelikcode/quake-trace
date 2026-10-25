@@ -9,6 +9,8 @@ import { isLanguage, supportedLanguages, toLanguage } from '@/i18n';
 import { useUiStore } from '@/state/ui-store';
 
 import { BrandMark } from './brand-mark';
+import { ScenarioStatus } from './scenario-status';
+import { SimulationClock } from './simulation-clock';
 import type { LayoutMode } from './use-layout-mode';
 
 function IconButton({
@@ -66,16 +68,13 @@ export function StatusBar({ layout }: { layout: LayoutMode }) {
 
       <div className="flex min-w-0 items-baseline gap-2" aria-live="off">
         {layout !== 'phone' && <span className="label-micro">{t('status.clock')}</span>}
-        <span className="num text-title text-fg">T+ --.-</span>
+        <SimulationClock />
       </div>
 
       {layout !== 'phone' && (
         <>
           <Divider />
-          <span className="inline-flex items-center gap-1.5 text-caption text-fg-muted">
-            <span aria-hidden className="size-1.5 rounded-full bg-fg-muted" />
-            {t('status.idle')}
-          </span>
+          <ScenarioStatus />
         </>
       )}
 

@@ -12,13 +12,14 @@
       "toLight": "Switch to light theme"
     },
     "openLeft": "Open scenario panel",
-    "openRight": "Open information panel"
+    "openRight": "Open information panel",
+    "computing": "Computing…",
+    "failed": "Computation failed",
+    "simulation": "Simulation · Mw {{mw}}"
   },
   "panels": {
     "scenario": {
-      "title": "Scenario",
-      "emptyTitle": "No scenario selected",
-      "emptyBody": "Fault, magnitude and depth parameters appear here once a scenario is selected."
+      "title": "Scenario"
     },
     "telemetry": {
       "title": "Telemetry",
@@ -42,10 +43,20 @@
   "timeline": {
     "label": "Timeline",
     "idle": "The timeline becomes active when a scenario runs.",
-    "play": "Play"
+    "play": "Play",
+    "pause": "Pause",
+    "seek": "Simulation time",
+    "speed": "Playback speed"
   },
   "map": {
-    "label": "3D topographic map of the Marmara region"
+    "label": "3D topographic map of the Marmara region",
+    "watermark": "Simulation",
+    "legend": {
+      "intensity": "Intensity (MMI)",
+      "pWave": "P wave",
+      "sWave": "S wave",
+      "rupture": "Fault rupture"
+    }
   },
   "sheet": {
     "title": "Control panel",
@@ -57,5 +68,45 @@
   },
   "common": {
     "close": "Close"
+  },
+  "scenario": {
+    "presetsTitle": "Preset scenarios",
+    "extent": "Longitude {{from}} – {{to}} E",
+    "error": "The scenario could not be computed. Reload the page and try again.",
+    "disclaimer": "Median ground-motion and intensity estimates; not a warning and not definitive damage information.",
+    "summary": {
+      "title": "Rupture and computation",
+      "magnitude": "Magnitude",
+      "length": "Rupture length",
+      "width": "Rupture width",
+      "depth": "Focal depth",
+      "ruptureDuration": "Rupture duration",
+      "computeTime": "Compute time"
+    },
+    "presets": {
+      "north-marmara": {
+        "name": "North Marmara (Central Marmara – Princes' Islands)",
+        "description": "The seismic gap of the Main Marmara Fault between the 1912 and 1999 ruptures."
+      },
+      "kumburgaz": {
+        "name": "Kumburgaz segment",
+        "description": "The central Marmara part of the fault, south of İstanbul."
+      },
+      "princes-islands": {
+        "name": "Princes' Islands segment",
+        "description": "The part closest to İstanbul's Asian side."
+      },
+      "izmit-1999": {
+        "name": "İzmit (1999-like)",
+        "description": "Extent and focus of the 17 August 1999 rupture."
+      }
+    }
+  },
+  "impact": {
+    "title": "Arrival by district",
+    "reached": "{{count}} of {{total}} districts reached",
+    "district": "District",
+    "sArrival": "S-wave arrival",
+    "intensity": "Peak intensity"
   }
 }

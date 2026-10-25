@@ -31,15 +31,18 @@ tests/
 
 | Module | Reference |
 |---|---|
-| `gmpe` | Akkar, Sandıkkaya and Bommer (2014) values generated with OpenQuake hazardlib (`AkkarEtAlRjb2014`), ln tolerance 1e-4 |
-| `velocity` | Analytic travel times in a homogeneous half-space and a two-layer model with head waves |
-| `rupture` | Wells and Coppersmith (1994) and Leonard (2014) scaling tables |
-| `intensity` | Bilal and Askan (2014) published conversion points |
+| `gmpe` **(built)** | OpenQuake hazardlib's 540-row ASB14 Rjb verification table (`tests/fixtures/gmpe/asb14-rjb-mean.json`, PGA, PGV, SA 0.3 s, SA 1.0 s); ln difference below 1e-6 |
+| `velocity` **(built)** | Analytic travel times in a half-space; two-layer head wave, critical and crossover distances; vertical ray through IASP91 layers; continuity across interfaces; monotonicity; tabulated curve against the exact solution |
+| `rupture` **(built)** | Wells and Coppersmith (1994) Table 2A areas and magnitudes; rupture geometry (width, area, dip direction, hypocentre, front timing) on a synthetic fault |
+| `intensity` **(built)** | Worden et al. (2012) segment formulas, ShakeMap low-amplitude extension, clamping, PGA/PGV blending |
+| `sim` **(built)** | Synthetic fault on a small grid (S after P, epicentral first arrival, strongest along the rupture, determinism); presets on the real data in `tests/integration/engine/` (under 2 s, Mw range, Fatih S arrival and intensity, 1999-like strongest near İzmit Bay) |
 | `tsunami` | Okada (1985) published test case; shallow-water wave speed √(gh) on a flat bottom; mass conservation |
 | `routing` | A* equals Dijkstra on random graphs |
 | `etas` | Omori-Utsu decay recovered from generated catalogs within tolerance |
 | `damage` | Damage-state probabilities sum to 1; monotonic in ground motion |
 | `random` | Same seed gives identical streams across runs |
+
+Map frame logic (`features/map/lib/simulation-frames.ts`, `layer-order.ts`) is unit-tested as pure functions; the imperative `SimulationRenderer` is covered by e2e and screenshot review.
 
 ## E2E flows
 

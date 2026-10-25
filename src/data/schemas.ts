@@ -31,7 +31,7 @@ export const faultsSchema = featureCollection(
   z.discriminatedUnion('type', [lineString, multiLineString]),
   z.object({
     id: z.string(),
-    faultType: z.enum(['normal', 'reverse', 'strike-slip', 'unknown']),
+    faultType: z.enum(['normal', 'reverse', 'right-lateral', 'left-lateral']),
     strikeDeg: range,
     dipDeg: range,
     rakeDeg: range,

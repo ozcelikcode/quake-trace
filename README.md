@@ -8,7 +8,7 @@ Everything runs in the browser. There is no server to operate and no paid servic
 
 ## Status
 
-Phases 0 and 1 are in place: responsive application shell, design tokens, Turkish and English interface, dark and light themes, 3D terrain map with faults, district boundaries and seismic stations, data proxy, prepared regional datasets and CI. The simulation engine follows next; see [`memory-bank/progress.md`](memory-bank/progress.md).
+Phases 0–2 are in place. Pick a Main Marmara Fault scenario and watch it in the browser: the rupture spreads along the fault, P and S wavefronts cross the region as curtains of light over the 3D terrain, and the intensity map (MMI) fills in as the S wave arrives. A timeline plays it back or scrubs it at any speed, and a table lists when the S wave reaches each district. Ground motion uses the Akkar–Sandıkkaya–Bommer (2014) model, verified against OpenQuake's reference values. Telemetry, early warning, damage and the other modules follow; see [`memory-bank/progress.md`](memory-bank/progress.md).
 
 ## Quick start
 
@@ -62,7 +62,7 @@ Cloudflare Workers' free plan serves the static site and the proxy.
 - Terrain: [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/), © Mapzen and [contributors](https://github.com/tilezen/joerd/blob/master/docs/attribution.md)
 - Earthquake data (live mode): AFAD, Boğaziçi University Kandilli Observatory (KOERI), EMSC, USGS
 
-Prepared datasets: faults (EFSM20), districts (geoBoundaries), population (WorldPop), Vs30 (USGS), building counts (İBB), seismic stations (KOERI, EIDA), bathymetry (EMODnet), infrastructure and roads (OpenStreetMap). The full list with licenses is generated into [`public/data/ATTRIBUTION.md`](public/data/ATTRIBUTION.md); sources and processing are described in [`memory-bank/dataSources.md`](memory-bank/dataSources.md).
+Prepared datasets: faults (EFSM20), districts (geoBoundaries), population (WorldPop), Vs30 (USGS), elevation (Copernicus DEM), building counts (İBB), seismic stations (KOERI, EIDA), bathymetry (EMODnet), infrastructure and roads (OpenStreetMap). The full list with licenses is generated into [`public/data/ATTRIBUTION.md`](public/data/ATTRIBUTION.md); sources and processing are described in [`memory-bank/dataSources.md`](memory-bank/dataSources.md).
 
 ### Rebuilding the data (developers only)
 

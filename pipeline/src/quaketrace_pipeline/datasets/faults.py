@@ -26,8 +26,8 @@ SOURCE = Source(
 )
 OUTPUT_FILE = "faults.geojson"
 
-# EFSM20 fault type codes.
-FAULT_TYPES = {"N": "normal", "R": "reverse", "S": "strike-slip"}
+# EFSM20 fault type codes (normal, reverse, right-lateral and left-lateral strike-slip).
+FAULT_TYPES = {"N": "normal", "R": "reverse", "RL": "right-lateral", "LL": "left-lateral"}
 
 
 def _range(props: dict[str, Any], key: str) -> dict[str, float]:
@@ -40,6 +40,9 @@ def _range(props: dict[str, Any], key: str) -> dict[str, float]:
 
 def transform(feature: Feature) -> Feature:
     props = feature["properties"]
+    code = str(props["faulttype"])
+    if code not in FAULT_TYPES:
+        raise ValueError(f"unknown EFSM20 fault type {code!r} for {props['idfs']}")
     return {
         "type": "Feature",
         "geometry": {
@@ -48,7 +51,7 @@ def transform(feature: Feature) -> Feature:
         },
         "properties": {
             "id": props["idfs"],
-            "faultType": FAULT_TYPES.get(str(props["faulttype"]), "unknown"),
+            "faultType": FAULT_TYPES[code],
             "strikeDeg": _range(props, "strike"),
             "dipDeg": _range(props, "dip"),
             "rakeDeg": _range(props, "rake"),

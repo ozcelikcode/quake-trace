@@ -35,7 +35,7 @@ const parsers: { [K in JsonDatasetId]: (value: unknown) => JsonDataset<K> } = {
   stations: (value) => jsonDatasets.stations.parse(value),
   infra: (value) => jsonDatasets.infra.parse(value),
 };
-export type GridDatasetId = 'population' | 'vs30' | 'bathymetry' | 'districtCells';
+export type GridDatasetId = 'population' | 'vs30' | 'bathymetry' | 'districtCells' | 'elevation';
 
 const decoder = new TextDecoder();
 

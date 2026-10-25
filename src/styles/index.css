@@ -25,6 +25,8 @@
   --color-warning: var(--state-warning);
   --color-ok: var(--state-ok);
   --color-info: var(--state-info);
+  --color-wave-p: var(--wave-p);
+  --color-wave-s: var(--wave-s);
 
   --font-*: initial;
   --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;

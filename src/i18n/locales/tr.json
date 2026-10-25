@@ -12,13 +12,14 @@
       "toLight": "Açık temaya geç"
     },
     "openLeft": "Senaryo panelini aç",
-    "openRight": "Bilgi panelini aç"
+    "openRight": "Bilgi panelini aç",
+    "computing": "Hesaplanıyor…",
+    "failed": "Hesaplama başarısız",
+    "simulation": "Simülasyon · Mw {{mw}}"
   },
   "panels": {
     "scenario": {
-      "title": "Senaryo",
-      "emptyTitle": "Senaryo seçilmedi",
-      "emptyBody": "Bir senaryo seçildiğinde fay, büyüklük ve derinlik parametreleri burada görünür."
+      "title": "Senaryo"
     },
     "telemetry": {
       "title": "Telemetri",
@@ -42,10 +43,20 @@
   "timeline": {
     "label": "Zaman çizelgesi",
     "idle": "Zaman çizelgesi bir senaryo çalıştığında etkinleşir.",
-    "play": "Oynat"
+    "play": "Oynat",
+    "pause": "Duraklat",
+    "seek": "Simülasyon zamanı",
+    "speed": "Oynatma hızı"
   },
   "map": {
-    "label": "Marmara bölgesi 3B topografik harita"
+    "label": "Marmara bölgesi 3B topografik harita",
+    "watermark": "Simülasyon",
+    "legend": {
+      "intensity": "Şiddet (MMI)",
+      "pWave": "P dalgası",
+      "sWave": "S dalgası",
+      "rupture": "Fay kırılması"
+    }
   },
   "sheet": {
     "title": "Kontrol paneli",
@@ -57,5 +68,45 @@
   },
   "common": {
     "close": "Kapat"
+  },
+  "scenario": {
+    "presetsTitle": "Hazır senaryolar",
+    "extent": "Boylam {{from}} – {{to}} D",
+    "error": "Senaryo hesaplanamadı. Sayfayı yenileyip yeniden deneyin.",
+    "disclaimer": "Medyan yer hareketi ve şiddet tahminleridir; gerçek bir uyarı ya da kesin hasar bilgisi değildir.",
+    "summary": {
+      "title": "Kırılma ve hesap",
+      "magnitude": "Büyüklük",
+      "length": "Kırılma uzunluğu",
+      "width": "Kırılma genişliği",
+      "depth": "Odak derinliği",
+      "ruptureDuration": "Kırılma süresi",
+      "computeTime": "Hesap süresi"
+    },
+    "presets": {
+      "north-marmara": {
+        "name": "Kuzey Marmara (Orta Marmara – Adalar)",
+        "description": "Ana Marmara Fayı'nda 1912 ve 1999 kırılmaları arasında kalan sismik boşluk."
+      },
+      "kumburgaz": {
+        "name": "Kumburgaz segmenti",
+        "description": "İstanbul'un güneyinde, fayın orta Marmara bölümü."
+      },
+      "princes-islands": {
+        "name": "Adalar segmenti",
+        "description": "İstanbul Anadolu yakasına en yakın bölüm."
+      },
+      "izmit-1999": {
+        "name": "İzmit (1999 benzeri)",
+        "description": "17 Ağustos 1999 kırılmasının uzanımı ve odağı."
+      }
+    }
+  },
+  "impact": {
+    "title": "İlçelere varış",
+    "reached": "{{count}} / {{total}} ilçeye ulaştı",
+    "district": "İlçe",
+    "sArrival": "S dalgası varışı",
+    "intensity": "En yüksek şiddet"
   }
 }

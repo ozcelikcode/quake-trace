@@ -1,10 +1,12 @@
 from typing import Any
 
+import pytest
+
 from quaketrace_pipeline.datasets.faults import select
 
 PROPERTIES: dict[str, Any] = {
     "idfs": "TRCF00X",
-    "faulttype": "S",
+    "faulttype": "RL",
     "strikemin": 260,
     "strikeavg": 265,
     "strikemax": 270,
@@ -49,9 +51,16 @@ def test_select_keeps_region_faults_and_normalizes_fields() -> None:
 
     assert [f["properties"]["id"] for f in selected] == ["TRCF00A", "TRCF00Z"]
     props = selected[1]["properties"]
-    assert props["faultType"] == "strike-slip"
+    assert props["faultType"] == "right-lateral"
     assert props["dipDeg"] == {"min": 85.0, "avg": 89.0, "max": 90.0}
     assert props["lowerDepthKm"] == 18.0
     assert props["slipRateMmYr"]["mean"] == 15.0
     assert props["mwMax"]["avg"] == 7.3
     assert selected[1]["geometry"]["coordinates"][0] == [28.12346, 40.8]
+
+
+def test_select_rejects_unknown_fault_types() -> None:
+    bad = feature("TRCF00Q", [[28.0, 40.8], [28.5, 40.85]])
+    bad["properties"]["faulttype"] = "XX"
+    with pytest.raises(ValueError, match="unknown EFSM20 fault type"):
+        select({"features": [bad]})

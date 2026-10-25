@@ -8,6 +8,7 @@ import type {
 import type { Districts, Faults, Station } from '@/data/schemas';
 import type { Theme } from '@/state/ui-store';
 
+import { overlayAnchorLayerId } from './layer-order';
 import { REFERENCE_PALETTE } from './layer-palette';
 
 /**
@@ -109,10 +110,6 @@ export function triangleIcon(size = 32): { width: number; height: number; data: 
 
 const LINE_LAYER_TYPES = new Set(['line']);
 
-function firstLabelLayerId(map: MapLibreMap): string | undefined {
-  return map.getStyle().layers.find((layer) => layer.type === 'symbol')?.id;
-}
-
 function upsertSource(map: MapLibreMap, id: string, data: GeoJSON.GeoJSON): void {
   const source = map.getSource<GeoJSONSource>(id);
   // setData resolves once the worker has parsed the data; nothing waits on it.
@@ -131,7 +128,7 @@ export function applyReferenceLayers(map: MapLibreMap, data: ReferenceData, them
   if (data.stations)
     upsertSource(map, REFERENCE_SOURCES.stations, stationsToGeoJson(data.stations));
 
-  const beforeLabels = firstLabelLayerId(map);
+  const beforeLabels = overlayAnchorLayerId(map.getStyle().layers);
   for (const spec of referenceLayerSpecs(theme)) {
     if (!('source' in spec) || typeof spec.source !== 'string') continue;
     if (map.getLayer(spec.id) || !map.getSource(spec.source)) continue;

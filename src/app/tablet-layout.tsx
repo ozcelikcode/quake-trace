@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Sheet, SheetClose, SheetContent, SheetTitle } from '@/components/ui/she
 import { MapViewport } from '@/features/map';
 import { ScenarioPanel } from '@/features/scenario';
 import { TimelineBar } from '@/features/timeline';
+import { useScenarioStore } from '@/state/scenario-store';
 import { useUiStore, type DrawerSide } from '@/state/ui-store';
 
 import { RightPanelTabs } from './right-panel-tabs';
@@ -50,6 +51,13 @@ function SideSheet({
 
 export function TabletLayout() {
   const { t } = useTranslation();
+  const status = useScenarioStore((state) => state.status);
+  const setOpenDrawer = useUiStore((state) => state.setOpenDrawer);
+
+  // A started scenario is watched on the map: the drawer that covers it closes.
+  useEffect(() => {
+    if (status === 'computing') setOpenDrawer(null);
+  }, [status, setOpenDrawer]);
 
   return (
     <div className="flex h-dvh flex-col">

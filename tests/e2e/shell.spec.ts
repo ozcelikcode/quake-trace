@@ -78,7 +78,7 @@ test('tablet: panels open as drawers', async ({ page }) => {
   await page.goto('/');
 
   await page.getByRole('button', { name: 'Senaryo panelini aç' }).click();
-  await expect(page.getByRole('dialog').getByText('Senaryo seçilmedi')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Hazır senaryolar')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toBeHidden();
 
@@ -101,7 +101,7 @@ test('phone: bottom sheet tabs reach every panel', async ({ page }) => {
     ['Olaylar', 'Olay kaydı boş'],
     ['Etki', 'Etki verisi yok'],
     ['Telemetri', 'İstasyon kaydı yok'],
-    ['Senaryo', 'Senaryo seçilmedi'],
+    ['Senaryo', 'Hazır senaryolar'],
   ] as const) {
     await sheet.getByRole('tab', { name: tab }).click();
     await expect(sheet.getByText(emptyTitle)).toBeVisible();

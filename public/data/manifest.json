@@ -114,12 +114,33 @@
         "provinces": 14
       }
     },
+    "elevation": {
+      "path": "elevation.f32",
+      "format": "float32-grid",
+      "bytes": 400000,
+      "sha256": "20cbfa7be89cc4b090dec6c4a3942a63b9b1bd45ffeb67cdffdee1100f01a262",
+      "generatedAt": "2026-10-25T17:53:17Z",
+      "sources": [
+        {
+          "name": "Copernicus DEM GLO-90",
+          "url": "https://doi.org/10.5270/ESA-c5d3d65",
+          "license": "Copernicus DEM licence (free, attribution required)",
+          "attribution": "© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA"
+        }
+      ],
+      "grid": "marmara-1km",
+      "units": "m above sea level",
+      "stats": {
+        "tiles": 15,
+        "max": 2432.9
+      }
+    },
     "faults": {
       "path": "faults.geojson",
       "format": "geojson",
-      "bytes": 20609,
-      "sha256": "f507fb09c05055701b1ab33dfbb08032a6e75643581dff8517d3a81073625e31",
-      "generatedAt": "2026-10-25T17:30:12Z",
+      "bytes": 20717,
+      "sha256": "636f09ac1586a3d823a875c62f4172c59f5b31a67384c811269059b47c9cecde",
+      "generatedAt": "2026-10-25T17:53:08Z",
       "sources": [
         {
           "name": "European Fault-Source Model 2020 (EFSM20), crustal faults",

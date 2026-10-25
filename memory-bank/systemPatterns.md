@@ -89,7 +89,11 @@ Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `ee
 - **Lazy data.** `manifest.json` lists assets; roads, cells and bathymetry load only when their module is enabled.
 - **Data repository.** `DataRepository` (src/data/repository.ts) fetches the manifest once and exposes typed, zod-validated loaders: `json(id)`, `grid(id)`, `roads()`, `cells()`. React reads them through TanStack Query hooks (`use-dataset.ts`) with infinite stale time. Binary datasets (`roads.bin`, `cells.bin`) are sectioned files described by the manifest `layout` and viewed without copying.
 - **One grid convention across languages.** North-up, row-major float32 (row 0 = north). Python writes it (`grid.py`), TypeScript reads it (`grid.ts`); both are tested on the same real points (Fatih population, Çınarcık depth, Kadıköy district index).
-- **Draped versus floating layers.** deck.gl layers are not draped on MapLibre terrain (they render at sea level and the terrain hides them). Static 2D context (districts, faults, stations, later infrastructure) uses MapLibre native GeoJSON layers, re-applied on every `style.load`. deck.gl is reserved for dynamic, GPU-heavy simulation layers; how they meet the terrain is decided in the phase 2 spike.
+- **Draped versus floating layers.** deck.gl layers are not draped on MapLibre terrain (they render at sea level and the terrain hides them). Static 2D context (districts, faults, stations, later infrastructure) uses MapLibre native GeoJSON layers, re-applied on every `style.load`. Dynamic rasters (intensity) use a MapLibre `image` source updated with `updateImage({ image: ImageData })`: with terrain, MapLibre caches draped rasters and only a source update invalidates that cache (a `canvas` source stays stale). Dynamic 3D geometry (wavefront curtains, rupture, epicentre) uses deck.gl, lifted onto the terrain with the elevation grid × terrain exaggeration.
+- **Overlay order.** quakeTrace overlays go before the first label that follows the basemap's last line layer (`layer-order.ts`): above roads and boundaries, below place names. Intensity sits below the reference lines.
+- **Frames outside React.** The map subscribes to the scenario and playback stores with `store.subscribe` and draws through `SimulationRenderer`; React renders only the panels, which select narrow slices (for example the number of districts reached, not the clock).
+- **Simulation in a worker.** `src/workers/simulation.worker.ts` exposes `simulate` through Comlink and transfers the result arrays; `simulation-client.ts` starts the worker lazily. Features call it (`use-run-scenario.ts`), write `state/scenario-store.ts` and reset `state/playback-store.ts`.
+- **Shared types.** Types used by both the engine and the UI (`GridSpec`, `Scenario`, `SimulationResult`) live in `src/types/`, because features may not import the engine.
 
 ## Critical paths
 
@@ -113,3 +117,6 @@ Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `ee
 | 2026-10-25 | Building stock outside İstanbul estimated from İstanbul's low-density districts and flagged | No open building inventory for other provinces |
 | 2026-10-25 | MapLibre native layers for static reference data; deck.gl only for dynamic layers | deck.gl layers are not draped on MapLibre terrain |
 | 2026-10-25 | Prepared data committed (about 9.5 MB) with SHA-256 in the manifest | Zero-install for users; reproducible and verifiable |
+| 2026-10-25 | Engine coefficients only from verifiable sources (OpenQuake hazardlib, USGS esi-shakelib, ObsPy IASP91); W&C94 and Worden 2012 chosen over Leonard 2014 and Bilal & Askan 2014 for that reason | No coefficient is typed from memory |
+| 2026-10-25 | Presets on EFSM20 `TRCF045` defined by longitude ranges | The Main Marmara Fault is one 520 km source without segment names |
+| 2026-10-25 | Intensity raster via MapLibre `image` source + `updateImage(ImageData)` | Canvas sources are not refreshed under terrain |

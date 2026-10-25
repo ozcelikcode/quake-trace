@@ -22,6 +22,8 @@ Versions are pinned exactly in `package.json`; the lines below were current on n
 | Fonts | @fontsource-variable/ibm-plex-sans, @fontsource/ibm-plex-mono (latin + latin-ext) | 5.x | Self-hosted, full Turkish coverage |
 | Validation | zod | 4.x | Schemas for the manifest and every prepared dataset (later: feeds, URL state) |
 | Data fetching | @tanstack/react-query | 5.x | Caching and status for dataset loads (later: live feed polling) |
+| Workers | Comlink | 4.x | Typed RPC to the simulation worker, transferable result arrays |
+| Dynamic layers | @deck.gl/layers | 9.4 | `LineLayer` with binary attributes for wavefront curtains, `PathLayer`, `ScatterplotLayer` |
 | Unit/integration tests | Vitest + jsdom + @vitest/coverage-v8 | 5.x | Vite-native |
 | E2E | @playwright/test + @axe-core/playwright | 1.64 / 4.14 | Flows, responsive projects, WCAG scans |
 | Lint/format | ESLint 10 (flat) + typescript-eslint (strictTypeChecked) + react-hooks + react-refresh; Prettier 3 + tailwind plugin | | Layer boundaries enforced with `no-restricted-imports` |
@@ -29,7 +31,9 @@ Versions are pinned exactly in `package.json`; the lines below were current on n
 | Data prep | Python 3.13 via uv (`uv.lock`) | uv 0.13 | numpy, rasterio (GDAL 3.12 with netCDF), geopandas/shapely/pyogrio, osmium (pyosmium 4), httpx, affine |
 | Pipeline quality | ruff, pyright (strict, root `pyrightconfig.json`), pytest | | Same gates locally and in CI |
 
-Planned for later phases (add a row with the reason when adopted): Comlink (workers), uPlot (waveforms), seisplotjs (miniSEED, FDSN), lz-string (URL state), jsPDF (reports), `@deck.gl/layers` (dynamic layers, removed in phase 1 until needed), obspy (validation scripts).
+Planned for later phases (add a row with the reason when adopted): uPlot (waveforms), seisplotjs (miniSEED, FDSN), lz-string (URL state), jsPDF (reports), obspy (validation scripts).
+
+Bundle (phase 2): shell chunk about 190 KB gzipped (React, Radix, i18next, zod, TanStack Query); the lazy map chunk about 480 KB gzipped (MapLibre, deck.gl); the simulation worker is a separate chunk.
 
 Not adopted:
 
