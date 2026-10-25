@@ -13,6 +13,7 @@ const api = {
       result.pgaG.buffer,
       result.pgvCms.buffer,
       result.mmi.buffer,
+      result.records.accelCmS2.buffer,
     ]);
   },
 };

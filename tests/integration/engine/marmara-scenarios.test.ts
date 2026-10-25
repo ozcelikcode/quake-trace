@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import { valueAt, type Grid } from '@/data/grid';
 import { DataRepository, type DataFetcher } from '@/data/repository';
-import type { Districts, Faults } from '@/data/schemas';
+import type { Districts, Faults, Stations } from '@/data/schemas';
 import { simulate } from '@/engine/sim/simulate';
 import { resolvePreset, SCENARIO_PRESETS } from '@/features/scenario/lib/presets';
 import type { SimulationResult } from '@/types/simulation';
@@ -19,13 +19,15 @@ let faults: Faults;
 let districts: Districts;
 let vs30: Grid;
 let districtCells: Grid;
+let stations: Stations;
 
 beforeAll(async () => {
-  [faults, districts, vs30, districtCells] = await Promise.all([
+  [faults, districts, vs30, districtCells, stations] = await Promise.all([
     repository.json('faults'),
     repository.json('districts'),
     repository.grid('vs30'),
     repository.grid('districtCells'),
+    repository.json('stations'),
   ]);
 });
 
@@ -37,6 +39,7 @@ function run(presetId: string): SimulationResult {
     grid: vs30.spec,
     vs30: vs30.values,
     districtCells: districtCells.values,
+    stations: stations.stations.filter((station) => station.accelerometer),
   });
 }
 
@@ -79,5 +82,20 @@ describe('Marmara scenario presets on the prepared data', () => {
     // within the model's aleatory variability (σ ≈ 0.7 in ln PGA).
     expect(atGolcuk).toBeGreaterThan(7.5);
     expect(atGolcuk).toBeGreaterThan(atIstanbul);
+  });
+
+  it('records every accelerometer station and triggers each shortly after its P arrival', () => {
+    const { records } = run('north-marmara');
+    const accelerometers = stations.stations.filter((station) => station.accelerometer);
+    expect(records.stations).toHaveLength(accelerometers.length);
+    for (const station of records.stations) {
+      const lag = (station.triggerS ?? Number.NaN) - station.pArrivalS;
+      expect(lag).toBeGreaterThanOrEqual(-0.02);
+      expect(lag).toBeLessThan(1);
+    }
+    const byDistance = [...records.stations].sort((a, b) => a.rjbKm - b.rjbKm);
+    const nearest = byDistance[0];
+    const farthest = byDistance.at(-1);
+    expect(nearest?.pgaCmS2).toBeGreaterThan(5 * (farthest?.pgaCmS2 ?? Number.POSITIVE_INFINITY));
   });
 });

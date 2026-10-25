@@ -22,6 +22,46 @@ export interface DistrictImpact {
   maxMmi: number;
 }
 
+/** A recording site passed to the engine. */
+export interface StationSite {
+  id: string;
+  lon: number;
+  lat: number;
+}
+
+/** Record components, in storage order. */
+export const RECORD_COMPONENTS = ['Z', 'N', 'E'] as const;
+export type RecordComponent = (typeof RECORD_COMPONENTS)[number];
+
+export interface StationRecord {
+  id: string;
+  lon: number;
+  lat: number;
+  epicentralKm: number;
+  /** Joyner–Boore distance to the rupture, km. */
+  rjbKm: number;
+  vs30: number;
+  pArrivalS: number;
+  sArrivalS: number;
+  /** ASB14 median PGA at the station (geometric mean of the horizontals), cm/s². */
+  pgaCmS2: number;
+  /** First STA/LTA trigger on the vertical component, s after origin; null if none. */
+  triggerS: number | null;
+}
+
+/** Synthetic accelerograms for every station, starting at the origin time. */
+export interface StationRecords {
+  sampleRateHz: number;
+  /** Samples per component. */
+  samples: number;
+  /**
+   * Acceleration, cm/s²: station-major, then components in `RECORD_COMPONENTS` order; component
+   * c of station s starts at (s × 3 + c) × samples.
+   */
+  accelCmS2: Float32Array<ArrayBuffer>;
+  stations: StationRecord[];
+}
+
 /** Everything a scenario produces, indexed like the grid (row-major, north-up). */
 export interface SimulationResult {
   scenarioId: string;
@@ -38,7 +78,8 @@ export interface SimulationResult {
   mmi: Float32Array<ArrayBuffer>;
   rupture: RuptureSummary;
   districts: DistrictImpact[];
-  /** Time by which the S wave has crossed the whole grid, rounded up, seconds. */
+  records: StationRecords;
+  /** Time by which the S wave has crossed the grid and station shaking has ended, seconds. */
   durationS: number;
   computeMs: number;
 }

@@ -10,11 +10,12 @@ export function useRunScenario() {
   const faults = useJsonDataset('faults').data;
   const vs30 = useGridDataset('vs30').data;
   const districtCells = useGridDataset('districtCells').data;
-  const ready = Boolean(faults && vs30 && districtCells);
+  const stations = useJsonDataset('stations').data;
+  const ready = Boolean(faults && vs30 && districtCells && stations);
 
   const run = async (presetId: PresetId) => {
     const preset = SCENARIO_PRESETS.find((candidate) => candidate.id === presetId);
-    if (!preset || !faults || !vs30 || !districtCells) return;
+    if (!preset || !faults || !vs30 || !districtCells || !stations) return;
     const scenarioStore = useScenarioStore.getState();
     scenarioStore.start(presetId);
     try {
@@ -23,6 +24,10 @@ export function useRunScenario() {
         grid: vs30.spec,
         vs30: vs30.values,
         districtCells: districtCells.values,
+        // Strong-motion records come from the stations with accelerometers.
+        stations: stations.stations
+          .filter((station) => station.accelerometer)
+          .map(({ id, lon, lat }) => ({ id, lon, lat })),
       });
       scenarioStore.succeed(result);
       usePlaybackStore.getState().load(result.durationS);

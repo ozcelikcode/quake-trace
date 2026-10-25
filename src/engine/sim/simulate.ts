@@ -1,14 +1,15 @@
-import { EARTH_RADIUS_KM, LocalProjection, unitVector } from '@/lib/math/geo';
+import { LocalProjection } from '@/lib/math/geo';
 import type { GridSpec } from '@/types/grid';
 import type { Scenario } from '@/types/scenario';
-import type { DistrictImpact, SimulationResult } from '@/types/simulation';
+import type { DistrictImpact, SimulationResult, StationSite } from '@/types/simulation';
 
 import { asb14LnMedian } from '../gmpe/asb14';
 import { combinedMmi } from '../intensity/worden2012';
 import { buildRupture } from '../rupture/finite-fault';
 import { IASP91_CRUST, layerIndexAt, type VelocityLayer } from '../velocity/layered-model';
-import { TravelTimeCurve } from '../velocity/travel-time';
+import { RuptureArrivals } from './arrivals';
 import { PolygonDistance } from './polygon-distance';
+import { planStations, synthesizeRecords } from './stations';
 
 export interface SimulationInput {
   scenario: Scenario;
@@ -17,6 +18,8 @@ export interface SimulationInput {
   vs30: Float32Array;
   /** District index per grid cell (NaN outside districts), for per-district impact. */
   districtCells?: Float32Array;
+  /** Stations that receive synthetic records. */
+  stations?: readonly StationSite[];
   model?: readonly VelocityLayer[];
 }
 
@@ -27,9 +30,10 @@ const MAX_DISTANCE_KM = 700;
 const DURATION_PADDING_S = 5;
 
 /**
- * Turns a scenario into arrival times, ground motion and intensity on every grid cell.
- * Arrival per cell = min over subfaults of (rupture-front time + first-arrival travel time);
- * ground motion = ASB14 median at the cell's Joyner–Boore distance and Vs30.
+ * Turns a scenario into arrival times, ground motion and intensity on every grid cell, and
+ * synthetic records at the stations. Arrival per cell = min over subfaults of (rupture-front
+ * time + first-arrival travel time); ground motion = ASB14 median at the cell's Joyner–Boore
+ * distance and Vs30.
  */
 export function simulate(input: SimulationInput): SimulationResult {
   const started = performance.now();
@@ -44,34 +48,13 @@ export function simulate(input: SimulationInput): SimulationResult {
   const rupture = buildRupture(spec, {
     ruptureVelocityKmS: RUPTURE_VELOCITY_FRACTION * hypocentreLayer.vsKmS,
   });
-
-  // One travel-time curve per distinct subfault depth.
-  const { subfaults } = rupture;
-  const curves = new Map<number, { p: TravelTimeCurve; s: TravelTimeCurve }>();
-  const pCurves: TravelTimeCurve[] = [];
-  const sCurves: TravelTimeCurve[] = [];
-  const subfaultVectors = new Float64Array(subfaults.count * 3);
-  for (let j = 0; j < subfaults.count; j++) {
-    const depth = subfaults.depthKm[j] ?? 0;
-    let pair = curves.get(depth);
-    if (!pair) {
-      pair = {
-        p: new TravelTimeCurve(model, 'P', depth, MAX_DISTANCE_KM),
-        s: new TravelTimeCurve(model, 'S', depth, MAX_DISTANCE_KM),
-      };
-      curves.set(depth, pair);
-    }
-    pCurves.push(pair.p);
-    sCurves.push(pair.s);
-    unitVector(subfaults.lon[j] ?? 0, subfaults.lat[j] ?? 0, subfaultVectors, j * 3);
-  }
+  const arrivals = new RuptureArrivals(rupture, model, MAX_DISTANCE_KM);
 
   const tP = new Float32Array(cellCount);
   const tS = new Float32Array(cellCount);
   const pgaG = new Float32Array(cellCount);
   const pgvCms = new Float32Array(cellCount);
   const mmi = new Float32Array(cellCount);
-  const cellVector = new Float64Array(3);
   const projection = new LocalProjection(rupture.hypocenter.lon, rupture.hypocenter.lat);
   const surface = new PolygonDistance(rupture.surfaceProjection, projection);
   const rakeDeg = spec.fault.rakeDeg;
@@ -81,27 +64,9 @@ export function simulate(input: SimulationInput): SimulationResult {
     for (let col = 0; col < grid.nx; col++) {
       const lon = grid.west + (col + 0.5) * grid.dLon;
       const cell = row * grid.nx + col;
-      unitVector(lon, lat, cellVector, 0);
-      const cx = cellVector[0] ?? 0;
-      const cy = cellVector[1] ?? 0;
-      const cz = cellVector[2] ?? 0;
-
-      let bestP = Number.POSITIVE_INFINITY;
-      let bestS = Number.POSITIVE_INFINITY;
-      for (let j = 0; j < subfaults.count; j++) {
-        const dx = cx - (subfaultVectors[j * 3] ?? 0);
-        const dy = cy - (subfaultVectors[j * 3 + 1] ?? 0);
-        const dz = cz - (subfaultVectors[j * 3 + 2] ?? 0);
-        // Chord length; within 700 km it differs from the arc by less than 0.1 %.
-        const distanceKm = EARTH_RADIUS_KM * Math.sqrt(dx * dx + dy * dy + dz * dz);
-        const start = subfaults.timeS[j] ?? 0;
-        const p = start + (pCurves[j]?.time(distanceKm) ?? Number.POSITIVE_INFINITY);
-        const s = start + (sCurves[j]?.time(distanceKm) ?? Number.POSITIVE_INFINITY);
-        if (p < bestP) bestP = p;
-        if (s < bestS) bestS = s;
-      }
-      tP[cell] = bestP;
-      tS[cell] = bestS;
+      arrivals.locate(lon, lat);
+      tP[cell] = arrivals.pArrivalS;
+      tS[cell] = arrivals.sArrivalS;
 
       const motion = {
         mw: rupture.mw,
@@ -119,6 +84,16 @@ export function simulate(input: SimulationInput): SimulationResult {
 
   let lastArrival = 0;
   for (const value of tS) if (Number.isFinite(value) && value > lastArrival) lastArrival = value;
+  const stations = planStations(input.stations ?? [], {
+    rupture,
+    arrivals,
+    surface,
+    grid,
+    vs30,
+    rakeDeg,
+  });
+  for (const station of stations) lastArrival = Math.max(lastArrival, station.endS);
+  const durationS = Math.ceil(lastArrival) + DURATION_PADDING_S;
 
   return {
     scenarioId: scenario.id,
@@ -139,7 +114,8 @@ export function simulate(input: SimulationInput): SimulationResult {
       ruptureDurationS: rupture.durationS,
     },
     districts: input.districtCells ? districtImpacts(input.districtCells, tP, tS, mmi) : [],
-    durationS: Math.ceil(lastArrival) + DURATION_PADDING_S,
+    records: synthesizeRecords(stations, scenario.seed, durationS),
+    durationS,
     computeMs: performance.now() - started,
   };
 }

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useGridDataset } from '@/data/use-dataset';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
+import { resolveFocusedStation, useTelemetryStore } from '@/state/telemetry-store';
 import { useUiStore } from '@/state/ui-store';
 
 import { useReferenceData } from '../hooks/use-reference-data';
@@ -24,7 +25,7 @@ import {
   MAX_BOUNDS,
   MAX_PITCH,
 } from '../lib/map-config';
-import { applyReferenceLayers } from '../lib/reference-layers';
+import { applyReferenceLayers, STATION_LAYER } from '../lib/reference-layers';
 import { SimulationRenderer } from '../lib/simulation-renderer';
 import { applyTerrain } from '../lib/terrain';
 import { MapLegend } from './map-legend';
@@ -33,6 +34,18 @@ import { SimulationWatermark } from './simulation-watermark';
 setWorkerUrl(maplibreWorkerUrl);
 
 const currentTime = () => usePlaybackStore.getState().timeS;
+
+function focusedStationIndex(): number {
+  const records = useScenarioStore.getState().result?.records;
+  if (!records) return -1;
+  return resolveFocusedStation(records, useTelemetryStore.getState().focusedStationId);
+}
+
+/** Whether a station has a record in the current scenario, so it can open in telemetry. */
+function hasRecord(id: unknown): id is string {
+  const records = useScenarioStore.getState().result?.records;
+  return typeof id === 'string' && Boolean(records?.stations.some((station) => station.id === id));
+}
 
 export function MapView() {
   const { t } = useTranslation();
@@ -81,6 +94,20 @@ export function MapView() {
       rendererRef.current?.attach();
       rendererRef.current?.render(currentTime());
     });
+    map.on('click', STATION_LAYER, (event) => {
+      const id: unknown = event.features?.[0]?.properties.id;
+      if (!hasRecord(id)) return;
+      useTelemetryStore.getState().focusStation(id);
+      useUiStore.getState().setRightPanel('telemetry');
+      useUiStore.getState().setPhonePanel('telemetry');
+    });
+    map.on('mousemove', STATION_LAYER, (event) => {
+      const id: unknown = event.features?.[0]?.properties.id;
+      map.getCanvas().style.cursor = hasRecord(id) ? 'pointer' : '';
+    });
+    map.on('mouseleave', STATION_LAYER, () => {
+      map.getCanvas().style.cursor = '';
+    });
     void map.once('load').then(() => {
       const overlay = new MapLibreOverlay({ interleaved: true, layers: [] });
       map.addControl(overlay);
@@ -125,14 +152,27 @@ export function MapView() {
     renderer.render(currentTime());
   }, [renderer, elevation]);
 
+  useEffect(() => {
+    if (!renderer) return;
+    renderer.setTheme(theme);
+    renderer.render(currentTime());
+  }, [renderer, theme]);
+
   // Frames are drawn outside React: the clock changes up to 60 times a second.
   useEffect(() => {
     if (!renderer) return;
     renderer.setResult(useScenarioStore.getState().result);
+    renderer.setFocusedStation(focusedStationIndex());
     renderer.render(currentTime());
     const unsubscribeResult = useScenarioStore.subscribe((state, previous) => {
       if (state.result === previous.result) return;
       renderer.setResult(state.result);
+      renderer.setFocusedStation(focusedStationIndex());
+      renderer.render(currentTime());
+    });
+    const unsubscribeFocus = useTelemetryStore.subscribe((state, previous) => {
+      if (state.focusedStationId === previous.focusedStationId) return;
+      renderer.setFocusedStation(focusedStationIndex());
       renderer.render(currentTime());
     });
     const unsubscribeClock = usePlaybackStore.subscribe((state, previous) => {
@@ -140,6 +180,7 @@ export function MapView() {
     });
     return () => {
       unsubscribeResult();
+      unsubscribeFocus();
       unsubscribeClock();
     };
   }, [renderer]);

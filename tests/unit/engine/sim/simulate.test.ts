@@ -27,9 +27,15 @@ const input: SimulationInput = {
       hypocenterKm: 60,
       hypocenterDepthKm: 12,
     },
+    seed: 7,
   },
   grid,
   vs30: new Float32Array(cells).fill(400),
+  stations: [
+    { id: 'XX.NEAR', lon: 29.0, lat: 40.85 },
+    { id: 'XX.FAR', lon: 29.9, lat: 41.15 },
+    { id: 'XX.OUT', lon: 31.5, lat: 41.0 },
+  ],
 };
 
 describe('scenario simulation', () => {
@@ -62,10 +68,53 @@ describe('scenario simulation', () => {
     expect(at(29, 40.81)).toBeGreaterThan(7);
   });
 
-  it('is deterministic', () => {
+  it('is deterministic for a scenario and seed', () => {
     const again = simulate(input);
     expect(again.tS).toEqual(result.tS);
     expect(again.mmi).toEqual(result.mmi);
+    expect(again.records.accelCmS2).toEqual(result.records.accelCmS2);
+    const reseeded = simulate({ ...input, scenario: { ...input.scenario, seed: 8 } });
+    expect(reseeded.records.accelCmS2).not.toEqual(result.records.accelCmS2);
+    expect(reseeded.mmi).toEqual(result.mmi);
+  });
+});
+
+describe('station records', () => {
+  const { records } = simulate(input);
+  const rate = records.sampleRateHz;
+  const component = (station: number, c: number) =>
+    records.accelCmS2.subarray(
+      (station * 3 + c) * records.samples,
+      (station * 3 + c + 1) * records.samples,
+    );
+  const peak = (values: Float32Array) => values.reduce((max, v) => Math.max(max, Math.abs(v)), 0);
+
+  it('covers the stations inside the grid for the whole scenario at 100 Hz', () => {
+    expect(records.stations.map((s) => s.id)).toEqual(['XX.NEAR', 'XX.FAR']);
+    expect(rate).toBe(100);
+    expect(records.accelCmS2).toHaveLength(2 * 3 * records.samples);
+    const result = simulate(input);
+    expect(records.samples).toBe(Math.floor(result.durationS * rate) + 1);
+  });
+
+  it('reaches the ASB14 median as the geometric mean of the horizontal peaks', () => {
+    records.stations.forEach((station, index) => {
+      const measured = Math.sqrt(peak(component(index, 1)) * peak(component(index, 2)));
+      expect(measured / station.pgaCmS2).toBeCloseTo(1, 2);
+    });
+    const [near, far] = records.stations;
+    expect(near?.pgaCmS2).toBeGreaterThan(far?.pgaCmS2 ?? Number.POSITIVE_INFINITY);
+  });
+
+  it('stays at the noise floor before the P arrival and triggers shortly after it', () => {
+    records.stations.forEach((station, index) => {
+      const beforeP = component(index, 0).subarray(0, Math.floor(station.pArrivalS * rate) - 5);
+      expect(peak(beforeP)).toBeLessThan(0.3);
+      expect(station.triggerS).not.toBeNull();
+      expect(station.triggerS ?? 0).toBeGreaterThanOrEqual(station.pArrivalS - 0.02);
+      expect(station.triggerS ?? 0).toBeLessThan(station.pArrivalS + 1);
+      expect(station.sArrivalS).toBeGreaterThan(station.pArrivalS);
+    });
   });
 });
 

@@ -108,5 +108,36 @@
     "district": "District",
     "sArrival": "S-wave arrival",
     "intensity": "Peak intensity"
+  },
+  "telemetry": {
+    "synthetic": "Synthetic record",
+    "method": "Stochastic method (Boore 2003), scaled to the ASB14 median",
+    "instrument": "Accelerometer, 100 Hz",
+    "epicentral": "Epicentral",
+    "rjb": "Rjb",
+    "vs30": "Vs30",
+    "trigger": "Trigger",
+    "pending": "Pending",
+    "peak": "Peak, {{component}}",
+    "component": {
+      "Z": "vertical",
+      "N": "north",
+      "E": "east"
+    },
+    "legend": {
+      "p": "P trigger (STA/LTA)",
+      "s": "S arrival (model)",
+      "scale": "Scale ±{{value}} cm/s²"
+    },
+    "stationsTitle": "Stations",
+    "triggered": "{{count}} of {{total}} triggered",
+    "columns": {
+      "station": "Station",
+      "trace": "Vertical trace",
+      "peak": "Peak cm/s²"
+    },
+    "stateTriggered": "triggered",
+    "stateWaiting": "waiting",
+    "scaleNote": "Each trace is scaled to its own peak."
   }
 }

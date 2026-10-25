@@ -28,6 +28,7 @@ export const REFERENCE_SOURCES = {
 } as const;
 
 export const STATION_ICON = 'quaketrace-station-triangle';
+export const STATION_LAYER = 'quaketrace-stations';
 
 export function stationsToGeoJson(stations: Station[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
   return {
@@ -70,7 +71,7 @@ export function referenceLayerSpecs(theme: Theme): LayerSpecification[] {
       },
     },
     {
-      id: 'quaketrace-stations',
+      id: STATION_LAYER,
       type: 'symbol',
       source: REFERENCE_SOURCES.stations,
       layout: {

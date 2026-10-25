@@ -21,6 +21,8 @@ export interface ScenarioPreset {
 export type PresetId = 'north-marmara' | 'kumburgaz' | 'princes-islands' | 'izmit-1999';
 
 const MAIN_MARMARA_FAULT = 'TRCF045';
+/** Presets use a fixed seed, so every run of a preset produces the same records. */
+const PRESET_SEED = 1;
 
 export const SCENARIO_PRESETS: readonly ScenarioPreset[] = [
   {
@@ -104,5 +106,6 @@ export function resolvePreset(preset: ScenarioPreset, faults: Faults): Scenario 
       hypocenterKm: at(preset.hypocenterLon),
       hypocenterDepthKm: preset.hypocenterDepthKm,
     },
+    seed: PRESET_SEED,
   };
 }

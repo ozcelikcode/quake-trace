@@ -1,3 +1,4 @@
+import { cellIndex } from '@/lib/math/grid';
 import type { GridSpec } from '@/types/grid';
 
 import { DataError } from './errors';
@@ -23,14 +24,6 @@ export function decodeGrid(buffer: ArrayBuffer, spec: GridSpec): Grid {
     );
   }
   return { spec, values: new Float32Array(buffer) };
-}
-
-/** Flat index of the cell containing (lon, lat), or -1 outside the grid. */
-export function cellIndex(spec: GridSpec, lon: number, lat: number): number {
-  const ix = Math.floor((lon - spec.west) / spec.dLon);
-  const iy = Math.floor((spec.north - lat) / spec.dLat);
-  if (ix < 0 || ix >= spec.nx || iy < 0 || iy >= spec.ny) return -1;
-  return iy * spec.nx + ix;
 }
 
 export function valueAt(grid: Grid, lon: number, lat: number): number {

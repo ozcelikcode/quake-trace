@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DataError } from '@/data/errors';
-import { cellIndex, decodeGrid, valueAt } from '@/data/grid';
+import { decodeGrid, valueAt } from '@/data/grid';
 import type { GridSpec } from '@/data/manifest';
 
 const spec: GridSpec = {
@@ -18,13 +18,6 @@ const spec: GridSpec = {
 describe('grid decoding', () => {
   it('rejects buffers whose size does not match the grid', () => {
     expect(() => decodeGrid(new ArrayBuffer(12), spec)).toThrow(DataError);
-  });
-
-  it('indexes cells north-up, west to east', () => {
-    expect(cellIndex(spec, 26.1, 40.9)).toBe(0);
-    expect(cellIndex(spec, 27.9, 40.1)).toBe(7);
-    expect(cellIndex(spec, 25.9, 40.5)).toBe(-1);
-    expect(cellIndex(spec, 27, 41.1)).toBe(-1);
   });
 
   it('reads values and returns NaN outside the grid', () => {

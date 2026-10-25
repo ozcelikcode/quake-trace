@@ -3,10 +3,12 @@ import { LineLayer, PathLayer, ScatterplotLayer } from '@deck.gl/layers';
 import type { MapLibreOverlay } from '@deck.gl/maplibre';
 import type { ImageSource, Map as MapLibreMap } from 'maplibre-gl';
 
+import type { Theme } from '@/state/ui-store';
 import type { GridSpec } from '@/types/grid';
-import type { SimulationResult } from '@/types/simulation';
+import type { SimulationResult, StationRecord } from '@/types/simulation';
 
 import { overlayAnchorLayerId } from './layer-order';
+import { REFERENCE_PALETTE } from './layer-palette';
 import { TERRAIN_EXAGGERATION } from './map-config';
 import {
   mercatorRowMap,
@@ -19,9 +21,9 @@ import {
 } from './simulation-frames';
 
 /**
- * Draws a scenario at a given time: the intensity raster as a MapLibre canvas source (draped on
- * the terrain, below the reference lines) and the wavefronts, rupture and epicentre as deck.gl
- * layers lifted onto the terrain with the elevation grid.
+ * Draws a scenario at a given time: the intensity raster as a MapLibre image source (draped on
+ * the terrain, below the reference lines) and the wavefronts, rupture, epicentre and station
+ * triggers as deck.gl layers lifted onto the terrain with the elevation grid.
  */
 
 const INTENSITY_SOURCE = 'quaketrace-intensity';
@@ -40,6 +42,14 @@ const P_STYLE: CurtainStyle = {
 };
 const S_STYLE: CurtainStyle = { ...P_STYLE, color: [255, 166, 77] };
 const RUPTURE_LIFT_M = 200;
+/** A triggered station flashes with one expanding ring, then keeps a steady P-coloured dot. */
+const TRIGGER_PULSE_S = 1.2;
+const STATION_LIFT_M = 60;
+
+interface StationPoint {
+  station: StationRecord;
+  position: [number, number, number];
+}
 
 function curtainLayer(id: string, curtain: CurtainBuffers): LineLayer {
   return new LineLayer({
@@ -67,6 +77,9 @@ export class SimulationRenderer {
   #pixels: Uint32Array | null = null;
   #rowMap: Int32Array | null = null;
   #lastTimeS = Number.NaN;
+  #theme: Theme = 'dark';
+  #focusedStation = -1;
+  readonly #reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(map: MapLibreMap, overlay: MapLibreOverlay) {
     this.#map = map;
@@ -76,6 +89,17 @@ export class SimulationRenderer {
   /** Ground elevation on the result's grid (m), used to lift 3D elements onto the terrain. */
   setElevation(values: Float32Array | undefined): void {
     this.#elevation = values;
+    this.#lastTimeS = Number.NaN;
+  }
+
+  setTheme(theme: Theme): void {
+    this.#theme = theme;
+    this.#lastTimeS = Number.NaN;
+  }
+
+  /** Index of the focused station's record, or -1. */
+  setFocusedStation(index: number): void {
+    this.#focusedStation = index;
     this.#lastTimeS = Number.NaN;
   }
 
@@ -187,8 +211,71 @@ export class SimulationRenderer {
         'scenario-p-wave',
         wavefrontCurtain(result.tP, result.grid, timeS, this.#elevation, P_STYLE),
       ),
+      ...this.#stationLayers(result, timeS),
     ];
     this.#overlay.setProps({ layers });
+  }
+
+  #stationLayers(result: SimulationResult, timeS: number): Layer[] {
+    const points: StationPoint[] = result.records.stations.map((station) => ({
+      station,
+      position: [
+        station.lon,
+        station.lat,
+        this.#groundAt(result.grid, station.lon, station.lat) + STATION_LIFT_M,
+      ],
+    }));
+    const triggered = points.filter(
+      ({ station }) => station.triggerS !== null && station.triggerS <= timeS,
+    );
+    const phase = ({ station }: StationPoint) =>
+      (timeS - (station.triggerS ?? 0)) / TRIGGER_PULSE_S;
+    const pulsing = this.#reducedMotion.matches
+      ? []
+      : triggered.filter((point) => phase(point) < 1);
+    const focused = points[this.#focusedStation];
+    const [r, g, b] = P_STYLE.color;
+
+    return [
+      new ScatterplotLayer<StationPoint>({
+        id: 'scenario-station-pulse',
+        data: pulsing,
+        getPosition: (point) => point.position,
+        getRadius: (point) => 5 + 18 * phase(point),
+        getLineColor: (point) => [r, g, b, Math.round(255 * (1 - phase(point)))],
+        radiusUnits: 'pixels',
+        stroked: true,
+        filled: false,
+        getLineWidth: 2,
+        lineWidthUnits: 'pixels',
+        updateTriggers: { getRadius: timeS, getLineColor: timeS },
+      }),
+      new ScatterplotLayer<StationPoint>({
+        id: 'scenario-station-triggered',
+        data: triggered,
+        getPosition: (point) => point.position,
+        getRadius: 3.5,
+        radiusUnits: 'pixels',
+        getFillColor: [r, g, b, 255],
+        stroked: true,
+        getLineColor: [13, 17, 23, 200],
+        getLineWidth: 1,
+        lineWidthUnits: 'pixels',
+      }),
+      new ScatterplotLayer<StationPoint>({
+        id: 'scenario-station-focus',
+        data: focused ? [focused] : [],
+        getPosition: (point) => point.position,
+        getRadius: 9,
+        radiusUnits: 'pixels',
+        stroked: true,
+        filled: false,
+        getLineColor: [...REFERENCE_PALETTE[this.#theme].selection, 255],
+        getLineWidth: 2,
+        lineWidthUnits: 'pixels',
+        updateTriggers: { getLineColor: this.#theme },
+      }),
+    ];
   }
 
   dispose(): void {

@@ -108,5 +108,36 @@
     "district": "İlçe",
     "sArrival": "S dalgası varışı",
     "intensity": "En yüksek şiddet"
+  },
+  "telemetry": {
+    "synthetic": "Sentetik kayıt",
+    "method": "Stokastik yöntem (Boore 2003), ASB14 medyanına ölçekli",
+    "instrument": "İvmeölçer, 100 Hz",
+    "epicentral": "Episantr",
+    "rjb": "Rjb",
+    "vs30": "Vs30",
+    "trigger": "Tetiklenme",
+    "pending": "Bekleniyor",
+    "peak": "Tepe, {{component}}",
+    "component": {
+      "Z": "düşey",
+      "N": "kuzey",
+      "E": "doğu"
+    },
+    "legend": {
+      "p": "P tetiklenmesi (STA/LTA)",
+      "s": "S varışı (model)",
+      "scale": "Ölçek ±{{value}} cm/s²"
+    },
+    "stationsTitle": "İstasyonlar",
+    "triggered": "{{count}} / {{total}} tetiklendi",
+    "columns": {
+      "station": "İstasyon",
+      "trace": "Düşey iz",
+      "peak": "Tepe cm/s²"
+    },
+    "stateTriggered": "tetiklendi",
+    "stateWaiting": "bekliyor",
+    "scaleNote": "Her iz kendi tepe değerine ölçeklidir."
   }
 }

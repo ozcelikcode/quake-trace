@@ -28,7 +28,7 @@ const PGV_RELATION: Relation = {
 };
 
 /** g in cm/s², rounded as in ShakeMap so intensities match its maps. */
-const G_CMS2 = 981;
+export const G_CMS2 = 981;
 export const MMI_MIN = 1;
 export const MMI_MAX = 10;
 

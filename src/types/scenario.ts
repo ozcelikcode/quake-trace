@@ -25,4 +25,6 @@ export interface RuptureSpec {
 export interface Scenario {
   id: string;
   rupture: RuptureSpec;
+  /** Seed for every random draw (synthetic records), so a scenario always reproduces. */
+  seed: number;
 }
