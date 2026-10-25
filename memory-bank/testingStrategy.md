@@ -58,10 +58,17 @@ Viewports: 1440×900 desktop, 1024×768 tablet, 390×844 phone (iPhone class), 4
 - Rest of `src/`: behavior-focused; no coverage chasing on presentational components.
 - Coverage is a signal, not the goal: every engine formula has at least one test against a cited reference.
 
+## Prepared data checks
+
+- `tests/pipeline/test_outputs.py` verifies every file in `public/data` against the manifest (size, SHA-256, sources) and spot-checks real values: Fatih population, Çınarcık depth, Vs30 on Uludağ versus the Adapazarı basin, the Kadıköy district index.
+- `tests/integration/data/repository.test.ts` loads the same files through `DataRepository` from disk, validates every JSON dataset with its zod schema, decodes the grids and the road graph, and repeats the spot checks. Python and TypeScript therefore agree on grid orientation.
+- Schema validation has already caught a real data issue (an OSM hospital with `beds=0`); fix such issues in the pipeline, not by loosening the schema.
+
 ## Environments and accessibility
 
 - Vitest runs in Node by default; files that need the DOM declare `// @vitest-environment jsdom` at the top.
-- Every e2e run includes an axe scan (WCAG 2.0–2.2 A/AA tags) in both themes; serious and critical violations fail the test. The map canvas is excluded.
+- Every e2e run includes an axe scan (WCAG 2.0–2.2 A/AA tags) in both themes; serious and critical violations fail the test and list their target selectors. The map canvas is excluded. The scan runs with `reducedMotion: 'reduce'` so it never measures colors mid-transition.
+- Playwright runs with 2 workers and a 60 s timeout: headless browsers render the 3D map with software WebGL, and more workers starve the main thread.
 - E2E specs pin `locale: 'tr-TR'` so language detection is deterministic.
 - Visual checks during development: screenshots via a Playwright script (the Playwright MCP is unavailable on this machine because it expects Google Chrome).
 

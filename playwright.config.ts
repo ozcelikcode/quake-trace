@@ -6,6 +6,10 @@ const isCi = Boolean(process.env.CI);
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
+  // Headless browsers render the 3D map with software WebGL; more workers starve the main
+  // thread and make page evaluation (axe) time out.
+  workers: 2,
+  timeout: 60_000,
   forbidOnly: isCi,
   retries: isCi ? 2 : 0,
   reporter: isCi

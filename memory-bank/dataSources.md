@@ -1,24 +1,26 @@
 # Data Sources
 
-Every dataset and feed used by quakeTrace, with license and handling. Add a row before using anything new. Attribution is mirrored in `public/data/ATTRIBUTION.md` and the in-app About page.
+Every dataset and feed used by quakeTrace, with license and handling. Add a row before using anything new. `public/data/ATTRIBUTION.md` is generated from the manifest by the pipeline; the in-app About page (phase 11) reads the same sources.
 
 ## Prepared datasets (`pipeline/` → `public/data/`)
 
-| Output | Source | License | Notes |
-|---|---|---|---|
-| `faults.geojson` | EFSM20 (EFEHR); GEM Global Active Faults | CC-BY 4.0; CC-BY-SA 4.0 | Marmara segments with dip, seismogenic depths, rake, slip rate |
-| `districts.geojson` | geoBoundaries ADM2 | CC-BY 4.0 | Marmara provinces, simplified with mapshaper |
-| `population.bin` | GHSL GHS-POP | CC-BY 4.0 | District totals scaled to TÜİK ADNKS 2024 |
-| `vs30.bin` | USGS Global Vs30 (topographic slope) | Public domain | Resampled to the engine grid |
-| `buildings.json` | İBB Open Data "Deprem Senaryosu Analiz Sonuçları"; TÜİK building statistics outside İstanbul | İBB open data license; TÜİK terms | Building counts by type and construction period |
-| `stations.json` | FDSN station services (KO, TK, GE and others) | Network-specific open data terms | Coordinates, sensor type, network codes |
-| `cells.bin` | OpenCelliD (MCC 286) | CC-BY-SA 4.0 | Cells within 50 m merged into sites; derived data shared alike |
-| `roads.bin` | OpenStreetMap via Geofabrik | ODbL 1.0 | motorway to tertiary, bridge flags; CSR graph |
-| `infra.geojson` | OpenStreetMap; İBB assembly areas | ODbL 1.0; İBB open data license | Hospitals, fire stations, police, schools, bridges, pipelines |
-| `bathymetry.bin` | EMODnet Bathymetry DTM | CC-BY 4.0 | About 500 m tsunami grid |
-| `tests/fixtures/gmpe/*.json` | OpenQuake hazardlib | AGPL-3.0 tool; generated numbers only | Reference values for unit tests |
+Built 2026-10-25 with `uv run quaketrace-pipeline build --all` (run from `pipeline/`). Grids are north-up float32 (see `systemPatterns.md`).
 
-Status: none prepared yet. Verify each source's availability, exact license text and download path during phase 1, then update this table.
+| Dataset id | File | Source | License | Notes |
+|---|---|---|---|---|
+| `faults` | `faults.geojson` | EFSM20 crustal fault top traces via WFS (`services.seismofaults.eu/EFSM20/ows`, `EFSM20:efsm20_cf_top`), doi:10.13127/efsm20 | CC-BY 4.0 | 27 segments touching the region. Strike, dip, rake (min/avg/max), seismogenic depths, length, width, slip rate, Mw max (Leonard 2014). No segment names; right-hand-rule traces (dip azimuth = strike + 90°). Chosen over GEM GAF-DB, which carries fewer parameters and no dip direction |
+| `districts` | `districts.geojson` | geoBoundaries TUR ADM2 + ADM1 (commit `9469f09`) | ODbL 1.0 (ADM2), CC-BY-SA 2.0 (ADM1) | 143 districts in 14 provinces (İstanbul 39). Coverage-simplified at about 200 m. Names normalized: "Prince Islands" → "Adalar", "X (merkez)" → "Merkez" |
+| `districtCells` | `district-cells.f32` | Derived from `districts` | ODbL 1.0 | 1 km grid; value = district `index`, NaN outside districts |
+| `population` | `population.f32` | WorldPop Global2 R2025A, Türkiye 2025, 1 km, constrained, UN-adjusted | CC-BY 4.0 | 26.37 M people in the region (İstanbul 16.14 M; TÜİK ADNKS 2024: 15.70 M). Replaces the planned GHSL + TÜİK scaling: WorldPop is already calibrated and small |
+| `districtStats` | `district-stats.json` | İBB Açık Veri "2017 Yılı Mahalle Bazlı Bina Sayıları" + `population` | İBB Açık Veri Lisansı | İstanbul: observed buildings by period and storeys (1.166 M; Eyüp → Eyüpsultan alias; Windows-1254 CSV). Other provinces: **estimated** from İstanbul districts below 2,000 people/km² (6.51 persons per building), marked `buildingSource: "estimated"` |
+| `vs30` | `vs30.f32` | USGS Global Vs30 mosaic (`global_vs30.grd`, 610 MB, cached) | Public domain | Averaged to 1 km; 180–900 m/s, median 544 |
+| `stations` | `stations.json` | FDSN station services: KOERI EIDA node (KO) + EIDA federator (others) | Open access via EIDA; cite network DOIs | 81 permanent stations (KO 77, TK 1, TU 1, HT 1, HI 1), 50 with accelerometers. Temporary networks (codes starting with a digit or X/Y/Z, e.g. ZQ, 6G) excluded |
+| `bathymetry` | `bathymetry.f32` | EMODnet Bathymetry DTM via WCS (`emodnet:mean`) | CC-BY 4.0 | 500 m grid; elevation m, NaN on land; Çınarcık Basin below −1,000 m |
+| `infra` | `infra.geojson` | OpenStreetMap, Geofabrik Türkiye extract | ODbL 1.0 | 705 hospitals, 184 fire stations, 499 police, 575 assembly points, 2,118 substations (points; areas reduced to centroids), 226 gas pipelines. İBB has no assembly-area dataset in its CKAN catalog |
+| `roads` | `roads.bin` | OpenStreetMap, Geofabrik Türkiye extract | ODbL 1.0 | motorway…tertiary (+ links): 194,810 nodes, 354,612 directed edges, 5.6 MB. Flags: bridge, tunnel, one-way, link |
+| `cells` | `cells.bin` | OpenCelliD, MCC 286 | CC-BY-SA 4.0 | **Pending:** needs a free API key in `pipeline/.env` (`OPENCELLID_API_KEY`). Module and tests are ready; the app treats cells as optional |
+
+Validation-only source (phase 5): İBB Açık Veri "Deprem Senaryosu Analiz Sonuçları" (959 neighbourhoods; damage, casualties and pipe damage for the İBB 2019 Mw 7.5 scenario).
 
 ## Runtime services
 
@@ -40,7 +42,8 @@ AFAD strong-motion network (TK) is mostly absent from EIDA; its own services are
 
 ## Handling rules
 
-- Raw downloads go to `pipeline/.cache/` (ignored by Git). Only prepared outputs are committed.
-- Every prepared file is listed in `public/data/manifest.json` with version, source, license and generation date.
+- Raw downloads go to `pipeline/.cache/` (ignored by Git; about 1.3 GB with the OSM extract and the Vs30 grid). Only prepared outputs are committed.
+- Every prepared file is listed in `public/data/manifest.json` with size, SHA-256, generation time, sources and licenses; `.gitattributes` keeps `public/data/**` byte-exact.
+- Pinned upstream versions where the source allows it (geoBoundaries commit). Moving sources (OSM, stations) are refreshed by rebuilding; station queries are cached per day.
 - Real data is always labeled with its source in the interface; simulated data is always labeled as simulation.
 - Live services are never called from tests; recorded responses live in `tests/fixtures/feeds/`.

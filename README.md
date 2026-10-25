@@ -8,7 +8,7 @@ Everything runs in the browser. There is no server to operate and no paid servic
 
 ## Status
 
-Phase 0 (skeleton) is in place: responsive application shell, design tokens, Turkish and English interface, dark and light themes, 3D terrain map, data proxy and CI. The simulation engine and data layers follow in later phases; see [`memory-bank/progress.md`](memory-bank/progress.md).
+Phases 0 and 1 are in place: responsive application shell, design tokens, Turkish and English interface, dark and light themes, 3D terrain map with faults, district boundaries and seismic stations, data proxy, prepared regional datasets and CI. The simulation engine follows next; see [`memory-bank/progress.md`](memory-bank/progress.md).
 
 ## Quick start
 
@@ -62,7 +62,18 @@ Cloudflare Workers' free plan serves the static site and the proxy.
 - Terrain: [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/), © Mapzen and [contributors](https://github.com/tilezen/joerd/blob/master/docs/attribution.md)
 - Earthquake data (live mode): AFAD, Boğaziçi University Kandilli Observatory (KOERI), EMSC, USGS
 
-Full dataset licenses are listed in [`memory-bank/dataSources.md`](memory-bank/dataSources.md).
+Prepared datasets: faults (EFSM20), districts (geoBoundaries), population (WorldPop), Vs30 (USGS), building counts (İBB), seismic stations (KOERI, EIDA), bathymetry (EMODnet), infrastructure and roads (OpenStreetMap). The full list with licenses is generated into [`public/data/ATTRIBUTION.md`](public/data/ATTRIBUTION.md); sources and processing are described in [`memory-bank/dataSources.md`](memory-bank/dataSources.md).
+
+### Rebuilding the data (developers only)
+
+The datasets are committed, so running the app never needs this. To rebuild them, install [uv](https://docs.astral.sh/uv/) and run from `pipeline/`:
+
+```sh
+uv sync
+uv run quaketrace-pipeline build --all
+```
+
+A full build downloads about 1.3 GB into `pipeline/.cache/`. Cell sites need a free [OpenCelliD](https://opencellid.org) key in `pipeline/.env` (see `pipeline/.env.example`).
 
 ## License
 

@@ -14,7 +14,12 @@ async function expectNoSeriousA11yViolations(page: Page) {
   const serious = results.violations.filter(
     (violation) => violation.impact === 'serious' || violation.impact === 'critical',
   );
-  expect(serious.map((violation) => `${violation.id}: ${violation.help}`)).toEqual([]);
+  expect(
+    serious.map(
+      (violation) =>
+        `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`,
+    ),
+  ).toEqual([]);
 }
 
 test('renders the shell and the 3D map without errors', async ({ page }) => {
@@ -104,6 +109,8 @@ test('phone: bottom sheet tabs reach every panel', async ({ page }) => {
 });
 
 test('meets WCAG 2.2 AA in both themes', async ({ page }) => {
+  // Without transitions, axe never measures colors halfway through a theme change.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'quakeTrace' })).toBeVisible();
   await expectNoSeriousA11yViolations(page);

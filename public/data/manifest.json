@@ -1,0 +1,314 @@
+{
+  "version": 1,
+  "grids": {
+    "marmara-1km": {
+      "west": 26.0,
+      "north": 41.8,
+      "dLon": 0.01,
+      "dLat": 0.01,
+      "nx": 500,
+      "ny": 200,
+      "rowOrder": "north-to-south",
+      "encoding": "float32-le"
+    },
+    "marmara-500m": {
+      "west": 26.0,
+      "north": 41.8,
+      "dLon": 0.005,
+      "dLat": 0.005,
+      "nx": 1000,
+      "ny": 400,
+      "rowOrder": "north-to-south",
+      "encoding": "float32-le"
+    }
+  },
+  "datasets": {
+    "bathymetry": {
+      "path": "bathymetry.f32",
+      "format": "float32-grid",
+      "bytes": 1600000,
+      "sha256": "3d32037b6e3ac20205832f04c18fc791898cf17e39e20cbdf5351b03c8f16797",
+      "generatedAt": "2026-10-25T15:05:36Z",
+      "sources": [
+        {
+          "name": "EMODnet Digital Bathymetry (DTM)",
+          "url": "https://emodnet.ec.europa.eu/en/bathymetry",
+          "license": "CC-BY-4.0",
+          "attribution": "EMODnet Bathymetry Consortium, EMODnet Digital Bathymetry (DTM)"
+        }
+      ],
+      "grid": "marmara-500m",
+      "units": "m (elevation, negative below sea level)",
+      "stats": {
+        "seaCells": 125080,
+        "minElevation": -1988.5
+      }
+    },
+    "districtCells": {
+      "path": "district-cells.f32",
+      "format": "float32-grid",
+      "bytes": 400000,
+      "sha256": "9dc5f7d3da0daea993575d8d0c9e96ee10d6e6e53bb7a12e275745f84977bc4c",
+      "generatedAt": "2026-10-25T15:07:22Z",
+      "sources": [
+        {
+          "name": "geoBoundaries TUR ADM2 (districts), 2021",
+          "url": "https://www.geoboundaries.org",
+          "license": "ODbL-1.0",
+          "attribution": "geoBoundaries (Runfola et al., 2020); data © OpenStreetMap contributors"
+        }
+      ],
+      "grid": "marmara-1km",
+      "units": "district index",
+      "notes": "Index into districts.geojson features (property `index`); NaN outside districts.",
+      "stats": {
+        "cellsInDistricts": 61242
+      }
+    },
+    "districtStats": {
+      "path": "district-stats.json",
+      "format": "json",
+      "bytes": 36350,
+      "sha256": "6904e1e9e07262125a82b9be1b0a3aea2c646706a53633066a1e709445bead7a",
+      "generatedAt": "2026-10-25T15:08:40Z",
+      "sources": [
+        {
+          "name": "İBB Açık Veri: 2017 Yılı Mahalle Bazlı Bina Sayıları",
+          "url": "https://data.ibb.gov.tr/dataset/mahalle-bazli-bina-analiz-verisi",
+          "license": "İBB Açık Veri Lisansı",
+          "attribution": "İstanbul Büyükşehir Belediyesi, Deprem Risk Yönetimi ve Kentsel İyileştirme"
+        }
+      ],
+      "notes": "Population from the population dataset; building counts outside İstanbul are estimates (see `estimation`).",
+      "stats": {
+        "districts": 143,
+        "observed": 39,
+        "referenceDistricts": 8,
+        "personsPerBuilding": 6.51,
+        "unassignedPopulation": 524607,
+        "buildingsTotal": 2655379
+      }
+    },
+    "districts": {
+      "path": "districts.geojson",
+      "format": "geojson",
+      "bytes": 361701,
+      "sha256": "c0207e0b6f93acb7e2d03b16173d051362951c38d3fb66f8126b51e5c1ec0da2",
+      "generatedAt": "2026-10-25T15:07:22Z",
+      "sources": [
+        {
+          "name": "geoBoundaries TUR ADM2 (districts), 2021",
+          "url": "https://www.geoboundaries.org",
+          "license": "ODbL-1.0",
+          "attribution": "geoBoundaries (Runfola et al., 2020); data © OpenStreetMap contributors"
+        },
+        {
+          "name": "geoBoundaries TUR ADM1 (provinces), 2021",
+          "url": "https://www.geoboundaries.org",
+          "license": "CC-BY-SA-2.0",
+          "attribution": "geoBoundaries (Runfola et al., 2020); data © OpenStreetMap contributors"
+        }
+      ],
+      "stats": {
+        "features": 143,
+        "provinces": 14
+      }
+    },
+    "faults": {
+      "path": "faults.geojson",
+      "format": "geojson",
+      "bytes": 20609,
+      "sha256": "f507fb09c05055701b1ab33dfbb08032a6e75643581dff8517d3a81073625e31",
+      "generatedAt": "2026-10-25T17:30:12Z",
+      "sources": [
+        {
+          "name": "European Fault-Source Model 2020 (EFSM20), crustal faults",
+          "url": "https://doi.org/10.13127/efsm20",
+          "license": "CC-BY-4.0",
+          "attribution": "Basili et al. (2024), EFSM20, EFEHR"
+        }
+      ],
+      "stats": {
+        "features": 27
+      }
+    },
+    "infra": {
+      "path": "infra.geojson",
+      "format": "geojson",
+      "bytes": 799326,
+      "sha256": "98acdd706abb1947134c468d3a2062ef59312842d90bff1798b80216a6b60f22",
+      "generatedAt": "2026-10-25T17:29:45Z",
+      "sources": [
+        {
+          "name": "OpenStreetMap, Geofabrik Türkiye extract",
+          "url": "https://download.geofabrik.de/europe/turkey.html",
+          "license": "ODbL-1.0",
+          "attribution": "© OpenStreetMap contributors"
+        }
+      ],
+      "stats": {
+        "assemblyPoint": 575,
+        "fireStation": 184,
+        "gasPipeline": 226,
+        "hospital": 705,
+        "police": 499,
+        "substation": 2118
+      }
+    },
+    "population": {
+      "path": "population.f32",
+      "format": "float32-grid",
+      "bytes": 400000,
+      "sha256": "9a12a0dce36875343fd2f1d381c09afcab5eab6045800c1b10f55011bc460a35",
+      "generatedAt": "2026-10-25T15:03:41Z",
+      "sources": [
+        {
+          "name": "WorldPop Global2 R2025A, Türkiye 2025, 1 km, constrained, UN-adjusted",
+          "url": "https://hub.worldpop.org/geodata/listing?id=135",
+          "license": "CC-BY-4.0",
+          "attribution": "WorldPop (www.worldpop.org), University of Southampton"
+        }
+      ],
+      "grid": "marmara-1km",
+      "units": "persons",
+      "stats": {
+        "total": 26366114
+      }
+    },
+    "roads": {
+      "path": "roads.bin",
+      "format": "csr-graph",
+      "bytes": 5883844,
+      "sha256": "ccd47fe09dbc544f9af8c25c1d1201e3de9ff6524d87a528f51df9a0e6372608",
+      "generatedAt": "2026-10-25T15:13:06Z",
+      "sources": [
+        {
+          "name": "OpenStreetMap, Geofabrik Türkiye extract",
+          "url": "https://download.geofabrik.de/europe/turkey.html",
+          "license": "ODbL-1.0",
+          "attribution": "© OpenStreetMap contributors"
+        }
+      ],
+      "notes": "Lengths per class are approximate road kilometres (directed edges / 2).",
+      "stats": {
+        "ways": 90529,
+        "kmByClass": {
+          "motorway": 1627.3,
+          "trunk": 3356.3,
+          "primary": 2891.7,
+          "secondary": 5369.9,
+          "tertiary": 26196.9
+        }
+      },
+      "layout": {
+        "nodeCount": 194810,
+        "edgeCount": 354612,
+        "sections": [
+          {
+            "name": "nodeLonLat",
+            "type": "float32",
+            "byteOffset": 0,
+            "length": 389620
+          },
+          {
+            "name": "edgeOffsets",
+            "type": "uint32",
+            "byteOffset": 1558480,
+            "length": 194811
+          },
+          {
+            "name": "edgeTargets",
+            "type": "uint32",
+            "byteOffset": 2337724,
+            "length": 354612
+          },
+          {
+            "name": "edgeLengthM",
+            "type": "float32",
+            "byteOffset": 3756172,
+            "length": 354612
+          },
+          {
+            "name": "edgeClass",
+            "type": "uint8",
+            "byteOffset": 5174620,
+            "length": 354612
+          },
+          {
+            "name": "edgeFlags",
+            "type": "uint8",
+            "byteOffset": 5529232,
+            "length": 354612
+          }
+        ],
+        "classes": [
+          "motorway",
+          "trunk",
+          "primary",
+          "secondary",
+          "tertiary"
+        ],
+        "flags": {
+          "bridge": 1,
+          "tunnel": 2,
+          "oneway": 4,
+          "link": 8
+        }
+      }
+    },
+    "stations": {
+      "path": "stations.json",
+      "format": "json",
+      "bytes": 16242,
+      "sha256": "237ed8e487503e0f18494e973da65f6a1273ab8cb344b05c5e66d3871eb02038",
+      "generatedAt": "2026-10-25T15:06:03Z",
+      "sources": [
+        {
+          "name": "KOERI EIDA node, FDSN station service (network KO)",
+          "url": "https://doi.org/10.7914/SN/KO",
+          "license": "Open access via EIDA; cite the network DOI",
+          "attribution": "Boğaziçi University Kandilli Observatory and Earthquake Research Institute"
+        },
+        {
+          "name": "EIDA federator, FDSN station service",
+          "url": "https://www.orfeus-eu.org/data/eida/",
+          "license": "Open access via EIDA; cite each network DOI",
+          "attribution": "ORFEUS EIDA and contributing network operators"
+        }
+      ],
+      "stats": {
+        "stations": 81,
+        "accelerometers": 50,
+        "networks": [
+          "HI",
+          "HT",
+          "KO",
+          "TK",
+          "TU"
+        ]
+      }
+    },
+    "vs30": {
+      "path": "vs30.f32",
+      "format": "float32-grid",
+      "bytes": 400000,
+      "sha256": "a5be992c59c4cd7ac4d1b0c73b546dca4dfe8a5817853d1788e87b51051de446",
+      "generatedAt": "2026-10-25T15:02:10Z",
+      "sources": [
+        {
+          "name": "USGS Global Vs30 Mosaic",
+          "url": "https://earthquake.usgs.gov/data/vs30/",
+          "license": "Public domain (U.S. Government work)",
+          "attribution": "U.S. Geological Survey, Global Vs30 (Heath et al., 2020)"
+        }
+      ],
+      "grid": "marmara-1km",
+      "units": "m/s",
+      "stats": {
+        "min": 180.0,
+        "median": 543.6,
+        "max": 900.0
+      }
+    }
+  }
+}

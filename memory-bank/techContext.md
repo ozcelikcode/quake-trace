@@ -20,13 +20,16 @@ Versions are pinned exactly in `package.json`; the lines below were current on n
 | Icons | lucide-react | 1.x | Consistent stroke set |
 | i18n | i18next + react-i18next + i18next-browser-languagedetector | 26 / 17 / 8 | TR + EN catalogs, typed keys |
 | Fonts | @fontsource-variable/ibm-plex-sans, @fontsource/ibm-plex-mono (latin + latin-ext) | 5.x | Self-hosted, full Turkish coverage |
+| Validation | zod | 4.x | Schemas for the manifest and every prepared dataset (later: feeds, URL state) |
+| Data fetching | @tanstack/react-query | 5.x | Caching and status for dataset loads (later: live feed polling) |
 | Unit/integration tests | Vitest + jsdom + @vitest/coverage-v8 | 5.x | Vite-native |
 | E2E | @playwright/test + @axe-core/playwright | 1.64 / 4.14 | Flows, responsive projects, WCAG scans |
 | Lint/format | ESLint 10 (flat) + typescript-eslint (strictTypeChecked) + react-hooks + react-refresh; Prettier 3 + tailwind plugin | | Layer boundaries enforced with `no-restricted-imports` |
 | Edge | Cloudflare Workers static assets + `@cloudflare/vite-plugin` + Wrangler 4 | | Free plan; same Worker in dev (workerd) and production |
-| Data prep | Python 3.13 via uv | uv 0.13 | geopandas, rasterio, pyrosm/osmnx, obspy, numpy (phase 1) |
+| Data prep | Python 3.13 via uv (`uv.lock`) | uv 0.13 | numpy, rasterio (GDAL 3.12 with netCDF), geopandas/shapely/pyogrio, osmium (pyosmium 4), httpx, affine |
+| Pipeline quality | ruff, pyright (strict, root `pyrightconfig.json`), pytest | | Same gates locally and in CI |
 
-Planned for later phases (add a row with the reason when adopted): Comlink (workers), uPlot (waveforms), seisplotjs (miniSEED, FDSN), zod (schemas), lz-string (URL state), jsPDF (reports).
+Planned for later phases (add a row with the reason when adopted): Comlink (workers), uPlot (waveforms), seisplotjs (miniSEED, FDSN), lz-string (URL state), jsPDF (reports), `@deck.gl/layers` (dynamic layers, removed in phase 1 until needed), obspy (validation scripts).
 
 Not adopted:
 
@@ -54,15 +57,20 @@ TypeScript projects: `tsconfig.base.json` holds shared strict options; `tsconfig
 
 npm 11 `allowScripts` in `package.json` approves install scripts for `workerd` and `esbuild` and denies `fsevents`.
 
-Pipeline (developers only, phase 1):
+Pipeline (developers only; run from `pipeline/`):
 
 ```
-cd pipeline && uv sync
-uv run quaketrace-pipeline build --all     # writes ../public/data
-uv run pytest ../tests/pipeline
+uv sync
+uv run quaketrace-pipeline list                    # datasets in build order
+uv run quaketrace-pipeline build --all             # or: build faults districts ...
+uv run pytest                                      # tests/pipeline (testpaths in pyproject)
+uv run ruff check . ../tests/pipeline && uv run ruff format --check . ../tests/pipeline
+uv run pyright -p ../pyrightconfig.json
 ```
 
-The system Python is 3.9; uv manages the 3.13 interpreter for the pipeline.
+The system Python is 3.9; uv manages the 3.13 interpreter for the pipeline. A full build downloads about 1.3 GB into `pipeline/.cache/` (OSM extract 651 MB, Vs30 grid 610 MB) and needs about 4 GB of RAM for the road graph. `cells` needs `OPENCELLID_API_KEY` in `pipeline/.env` (see `.env.example`) and is skipped without it.
+
+Shell note: the context-mode hook blocks shell commands that contain URLs; put one-off download snippets in a scratchpad script instead.
 
 ## Constraints
 
@@ -81,7 +89,7 @@ The system Python is 3.9; uv manages the 3.13 interpreter for the pipeline.
 - Visual checks: Playwright screenshots via script (Playwright MCP needs Google Chrome, which is not installed); `@playwright/test` for automated e2e.
 - MemPalace wing `quake_trace` for recall across sessions.
 - RTK compresses shell output transparently; context-mode for large outputs.
-- pyright (global, 1.1.414) for Python type checking in `pipeline/`.
+- pyright for Python type checking: the pipeline dev dependency for CLI and CI, the global 1.1.414 install for the IDE plugin; both read `pyrightconfig.json`.
 
 ## Dependency policy
 

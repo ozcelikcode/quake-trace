@@ -1,0 +1,50 @@
+[project]
+name = "quaketrace-pipeline"
+version = "0.1.0"
+description = "Offline data preparation for quakeTrace; writes ../public/data"
+license = "MIT"
+requires-python = ">=3.13"
+dependencies = [
+    "affine>=3.0.1",
+    "geopandas>=1.2.0",
+    "httpx>=0.28.1",
+    "numpy>=2.5.4",
+    "osmium>=4.3.2",
+    "pyogrio>=0.13.0",
+    "pyproj>=3.8.0",
+    "rasterio>=1.5.2",
+    "shapely>=2.2.0",
+]
+
+[project.scripts]
+quaketrace-pipeline = "quaketrace_pipeline.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["../tests/pipeline"]
+addopts = "--strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PL", "NPY"]
+ignore = ["PLR2004"]
+# Turkish place names legitimately use the dotless i.
+allowed-confusables = ["ı"]
+
+[tool.ruff.lint.pylint]
+# Builders pass metadata as keyword-only arguments; the count reflects explicit fields.
+max-args = 10
+
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "ruff>=0.17.2",
+]

@@ -17,6 +17,13 @@ export const INITIAL_VIEW_CENTER: [number, number] = [
   (INITIAL_VIEW_BOUNDS[0][1] + INITIAL_VIEW_BOUNDS[1][1]) / 2,
 ];
 
+/** Credits for the prepared datasets drawn on the map (full list: public/data/ATTRIBUTION.md). */
+export const DATA_ATTRIBUTION = [
+  'Faults: EFSM20 (CC BY 4.0)',
+  'Districts: geoBoundaries',
+  'Stations: KOERI, EIDA',
+];
+
 /** Below this map width MapLibre shows compact attribution; it starts collapsed there. */
 export const COMPACT_ATTRIBUTION_MAX_WIDTH = 640;
 

@@ -1,0 +1,15 @@
+{
+  "include": ["pipeline/src", "tests/pipeline"],
+  "venvPath": "pipeline",
+  "venv": ".venv",
+  "pythonVersion": "3.13",
+  "typeCheckingMode": "strict",
+  "executionEnvironments": [
+    { "root": "pipeline/src" },
+    { "root": "tests/pipeline", "extraPaths": ["pipeline/src"] }
+  ],
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false
+}

@@ -1,0 +1,103 @@
+import type { z } from 'zod';
+
+import { decodeCellSites, type CellSites } from './cell-sites';
+import { DataError } from './errors';
+import { decodeGrid, type Grid } from './grid';
+import { manifestSchema, type DatasetEntry, type Manifest } from './manifest';
+import { decodeRoadGraph, type RoadGraph } from './road-graph';
+import {
+  districtStatsSchema,
+  districtsSchema,
+  faultsSchema,
+  infraSchema,
+  stationsSchema,
+} from './schemas';
+
+/** Reads a file from public/data by its manifest path. */
+export type DataFetcher = (path: string) => Promise<ArrayBuffer>;
+
+export const jsonDatasets = {
+  faults: faultsSchema,
+  districts: districtsSchema,
+  districtStats: districtStatsSchema,
+  stations: stationsSchema,
+  infra: infraSchema,
+} as const;
+
+export type JsonDatasetId = keyof typeof jsonDatasets;
+export type JsonDataset<K extends JsonDatasetId> = z.infer<(typeof jsonDatasets)[K]>;
+
+// A mapped type lets TypeScript correlate each id with its parser's return type.
+const parsers: { [K in JsonDatasetId]: (value: unknown) => JsonDataset<K> } = {
+  faults: (value) => jsonDatasets.faults.parse(value),
+  districts: (value) => jsonDatasets.districts.parse(value),
+  districtStats: (value) => jsonDatasets.districtStats.parse(value),
+  stations: (value) => jsonDatasets.stations.parse(value),
+  infra: (value) => jsonDatasets.infra.parse(value),
+};
+export type GridDatasetId = 'population' | 'vs30' | 'bathymetry' | 'districtCells';
+
+const decoder = new TextDecoder();
+
+function parseJson(buffer: ArrayBuffer): unknown {
+  return JSON.parse(decoder.decode(buffer));
+}
+
+/**
+ * Loads prepared datasets listed in the manifest and validates them. The manifest is fetched
+ * once; each dataset is fetched on demand (callers cache results, e.g. with TanStack Query).
+ */
+export class DataRepository {
+  readonly #fetcher: DataFetcher;
+  #manifest: Promise<Manifest> | undefined;
+
+  constructor(fetcher: DataFetcher) {
+    this.#fetcher = fetcher;
+  }
+
+  manifest(): Promise<Manifest> {
+    this.#manifest ??= this.#fetcher('manifest.json').then((buffer) =>
+      manifestSchema.parse(parseJson(buffer)),
+    );
+    return this.#manifest;
+  }
+
+  async entry(id: string): Promise<DatasetEntry | undefined> {
+    return (await this.manifest()).datasets[id];
+  }
+
+  async #require(id: string): Promise<DatasetEntry> {
+    const entry = await this.entry(id);
+    if (!entry) throw new DataError(`dataset ${id} is not in the manifest`);
+    return entry;
+  }
+
+  async json<K extends JsonDatasetId>(id: K): Promise<JsonDataset<K>> {
+    const entry = await this.#require(id);
+    const parse = parsers[id];
+    return parse(parseJson(await this.#fetcher(entry.path)));
+  }
+
+  async grid(id: GridDatasetId): Promise<Grid> {
+    const manifest = await this.manifest();
+    const entry = await this.#require(id);
+    if (entry.format !== 'float32-grid') throw new DataError(`dataset ${id} is not a grid`);
+    const spec = manifest.grids[entry.grid];
+    if (!spec) throw new DataError(`grid ${entry.grid} is not in the manifest`);
+    return decodeGrid(await this.#fetcher(entry.path), spec);
+  }
+
+  async roads(): Promise<RoadGraph> {
+    const entry = await this.#require('roads');
+    if (entry.format !== 'csr-graph') throw new DataError('roads is not a graph');
+    return decodeRoadGraph(await this.#fetcher(entry.path), entry);
+  }
+
+  /** Cell sites are optional: they need an OpenCelliD key at build time. */
+  async cells(): Promise<CellSites | undefined> {
+    const entry = await this.entry('cells');
+    if (!entry) return undefined;
+    if (entry.format !== 'binary-table') throw new DataError('cells is not a binary table');
+    return decodeCellSites(await this.#fetcher(entry.path), entry);
+  }
+}

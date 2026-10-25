@@ -4,7 +4,7 @@ Scientific approach per engine module and how results reach the screen. Each imp
 
 ## Grid
 
-Marmara bounding box about 26.0–31.0° E, 39.8–41.8° N. About 1 km cells on desktop (≈90,000 cells), about 2 km on phones. All grid fields are `Float32Array` in row-major order with metadata from `manifest.json`.
+Marmara bounding box 26.0–31.0° E, 39.8–41.8° N. Engine grid `marmara-1km`: 0.01° cells, 500 × 200 (100,000 cells); phones may downsample by 2. Tsunami grid `marmara-500m`: 0.005°, 1000 × 400. Grids are north-up (row 0 = 41.8° N), row-major, little-endian `Float32Array`, NaN for no data; specs live in `manifest.json` and `src/data/grid.ts` decodes them. Prepared inputs on these grids: population, Vs30, district index (1 km), bathymetry (500 m).
 
 ## Modules
 

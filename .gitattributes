@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Prepared datasets are checksummed in manifest.json: keep their bytes exactly as generated.
+public/data/** -text
+*.f32 binary
+*.bin binary

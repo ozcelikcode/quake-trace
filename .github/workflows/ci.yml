@@ -30,6 +30,23 @@ jobs:
       - run: npm run test
       - run: npm run build
 
+  pipeline:
+    name: Data pipeline
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check . ../tests/pipeline
+      - run: uv run ruff format --check . ../tests/pipeline
+      - run: uv run pyright -p ../pyrightconfig.json
+      - run: uv run pytest
+
   e2e:
     name: End-to-end
     needs: verify

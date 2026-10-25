@@ -9,9 +9,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useUiStore } from '@/state/ui-store';
 
+import { useReferenceData } from '../hooks/use-reference-data';
 import {
   basemapStyleUrl,
   COMPACT_ATTRIBUTION_MAX_WIDTH,
+  DATA_ATTRIBUTION,
   INITIAL_BEARING,
   INITIAL_PITCH,
   INITIAL_VIEW_BOUNDS,
@@ -19,6 +21,7 @@ import {
   MAX_BOUNDS,
   MAX_PITCH,
 } from '../lib/map-config';
+import { applyReferenceLayers } from '../lib/reference-layers';
 import { applyTerrain } from '../lib/terrain';
 
 setWorkerUrl(maplibreWorkerUrl);
@@ -26,9 +29,11 @@ setWorkerUrl(maplibreWorkerUrl);
 export function MapView() {
   const { t } = useTranslation();
   const theme = useUiStore((state) => state.theme);
+  const reference = useReferenceData();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const styleUrlRef = useRef<string | null>(null);
+  const referenceRef = useRef(reference);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -41,7 +46,7 @@ export function MapView() {
       center: INITIAL_VIEW_CENTER,
       maxBounds: MAX_BOUNDS,
       maxPitch: MAX_PITCH,
-      attributionControl: { compact: true },
+      attributionControl: { compact: true, customAttribution: DATA_ATTRIBUTION },
     });
     styleUrlRef.current = styleUrl;
     mapRef.current = map;
@@ -57,9 +62,11 @@ export function MapView() {
     });
 
     map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right');
-    // Every style swap (theme change) drops custom sources, so terrain is re-applied on each load.
+    // Every style swap (theme change) drops custom sources and layers, so they are re-applied.
     map.on('style.load', () => {
-      applyTerrain(map, useUiStore.getState().theme);
+      const currentTheme = useUiStore.getState().theme;
+      applyTerrain(map, currentTheme);
+      applyReferenceLayers(map, referenceRef.current, currentTheme);
     });
     void map.once('load').then(() => {
       map.addControl(new MapLibreOverlay({ interleaved: true, layers: [] }));
@@ -85,6 +92,13 @@ export function MapView() {
     styleUrlRef.current = styleUrl;
     map.setStyle(styleUrl);
   }, [theme]);
+
+  // Data that arrives after the style has loaded is applied here; earlier data on style load.
+  useEffect(() => {
+    referenceRef.current = reference;
+    const map = mapRef.current;
+    if (map?.isStyleLoaded()) applyReferenceLayers(map, reference, useUiStore.getState().theme);
+  }, [reference]);
 
   // MapLibre styles its container as `position: relative`, so positioning lives on a wrapper.
   return (
