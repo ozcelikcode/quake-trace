@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.wrangler/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Pipeline
+pipeline/.venv/
+pipeline/.cache/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS and editors
+.DS_Store
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea/

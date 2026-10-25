@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="tr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Marmara bölgesi için gerçek zamanlı sismoloji ve afet müdahale simülasyonu."
+    />
+    <meta name="theme-color" content="#0f131a" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>quakeTrace</title>
+    <script>
+      // Apply the persisted theme before first paint (key: UI_STORAGE_KEY in src/state/ui-store.ts).
+      try {
+        var stored = JSON.parse(localStorage.getItem('quaketrace-ui') || '{}');
+        document.documentElement.dataset.theme =
+          stored.state && stored.state.theme === 'light' ? 'light' : 'dark';
+      } catch (error) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

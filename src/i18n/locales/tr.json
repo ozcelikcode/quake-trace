@@ -1,0 +1,61 @@
+{
+  "app": {
+    "name": "quakeTrace",
+    "tagline": "Marmara sismik izleme ve afet müdahale ekranı"
+  },
+  "status": {
+    "clock": "Simülasyon saati",
+    "idle": "Senaryo yok",
+    "language": "Dil",
+    "theme": {
+      "toDark": "Koyu temaya geç",
+      "toLight": "Açık temaya geç"
+    },
+    "openLeft": "Senaryo panelini aç",
+    "openRight": "Bilgi panelini aç"
+  },
+  "panels": {
+    "scenario": {
+      "title": "Senaryo",
+      "emptyTitle": "Senaryo seçilmedi",
+      "emptyBody": "Bir senaryo seçildiğinde fay, büyüklük ve derinlik parametreleri burada görünür."
+    },
+    "telemetry": {
+      "title": "Telemetri",
+      "emptyTitle": "İstasyon kaydı yok",
+      "emptyBody": "Sismograf istasyonlarının ivme kayıtları bir senaryo çalıştığında burada akar."
+    },
+    "impact": {
+      "title": "Etki",
+      "emptyTitle": "Etki verisi yok",
+      "emptyBody": "Şiddet, hasar, altyapı ve baz istasyonu durumu senaryo ilerledikçe burada özetlenir."
+    },
+    "events": {
+      "title": "Olaylar",
+      "emptyTitle": "Olay kaydı boş",
+      "emptyBody": "Alarm, eşik aşımı ve dalga varışları zaman damgasıyla burada listelenir."
+    },
+    "info": {
+      "title": "Bilgi"
+    }
+  },
+  "timeline": {
+    "label": "Zaman çizelgesi",
+    "idle": "Zaman çizelgesi bir senaryo çalıştığında etkinleşir.",
+    "play": "Oynat"
+  },
+  "map": {
+    "label": "Marmara bölgesi 3B topografik harita"
+  },
+  "sheet": {
+    "title": "Kontrol paneli",
+    "handle": "Paneli genişlet veya daralt"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "common": {
+    "close": "Kapat"
+  }
+}

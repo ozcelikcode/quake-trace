@@ -1,0 +1,10 @@
+dist/
+coverage/
+playwright-report/
+test-results/
+public/data/
+pipeline/
+package-lock.json
+worker/worker-configuration.d.ts
+memory-bank/
+memory-bank.md

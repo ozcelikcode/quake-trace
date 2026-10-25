@@ -1,0 +1,42 @@
+/* MapLibre control chrome aligned with the design tokens. */
+
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-1);
+}
+
+.maplibregl-ctrl-group:not(:empty) {
+  box-shadow: var(--shadow-float);
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--color-line);
+}
+
+.maplibregl-ctrl-group button:not(:disabled):hover {
+  background: var(--color-surface-3);
+}
+
+[data-theme='dark'] .maplibregl-ctrl-icon {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9);
+}
+
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background: color-mix(in oklch, var(--color-surface-1) 85%, transparent);
+  color: var(--color-fg-muted);
+  font-size: var(--text-micro);
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--color-fg-secondary);
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  border-radius: var(--radius-control);
+}
+
+[data-theme='dark'] .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
+}

@@ -1,0 +1,143 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import './tokens.css';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Tailwind defaults for color, font, type scale, radius and shadow are reset so that
+ * only design tokens are available in class names.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--border-subtle);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--text-primary);
+  --color-fg-secondary: var(--text-secondary);
+  --color-fg-muted: var(--text-muted);
+  --color-signal: var(--signal);
+  --color-signal-contrast: var(--signal-contrast);
+  --color-critical: var(--state-critical);
+  --color-warning: var(--state-warning);
+  --color-ok: var(--state-ok);
+  --color-info: var(--state-info);
+
+  --font-*: initial;
+  --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  --text-*: initial;
+  --text-micro: 11px;
+  --text-micro--line-height: 14px;
+  --text-micro--letter-spacing: 0.04em;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-body: 13px;
+  --text-body--line-height: 18px;
+  --text-title: 15px;
+  --text-title--line-height: 20px;
+  --text-readout: 20px;
+  --text-readout--line-height: 24px;
+  --text-hero: 28px;
+  --text-hero--line-height: 32px;
+
+  --radius-*: initial;
+  --radius-control: 4px;
+  --radius-panel: 6px;
+
+  --shadow-*: initial;
+  --shadow-float: var(--elevation-float);
+}
+
+/* Layout dimensions from the design system (w-panel-left, w-panel-right, w-drawer). */
+@theme {
+  --container-panel-left: 320px;
+  --container-panel-right: 380px;
+  --container-drawer: min(380px, 88vw);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-surface-0 font-sans text-body text-fg antialiased;
+    overflow: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Numbers that change over time: monospace with tabular figures. */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Faint dot grid that fades towards the edges; gives empty areas structure. */
+@utility graticule {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(var(--color-line-strong) 1px, transparent 1px);
+    background-size: 16px 16px;
+    background-position: center;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+  }
+}
+
+/* Ruler texture: minor ticks every 8 px, major ticks every 64 px. */
+@utility ruler {
+  background-image:
+    linear-gradient(to right, var(--color-line-strong) 1px, transparent 1px),
+    linear-gradient(to right, var(--color-line) 1px, transparent 1px);
+  background-size:
+    64px 100%,
+    8px 40%;
+  background-repeat: repeat-x;
+  background-position:
+    0 0,
+    0 100%;
+}
+
+/* Uppercase micro label used for section and readout captions. */
+@utility label-micro {
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+  letter-spacing: var(--text-micro--letter-spacing);
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--color-fg-muted);
+}

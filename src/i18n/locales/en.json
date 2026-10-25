@@ -1,0 +1,61 @@
+{
+  "app": {
+    "name": "quakeTrace",
+    "tagline": "Marmara seismic monitoring and disaster response screen"
+  },
+  "status": {
+    "clock": "Simulation clock",
+    "idle": "No scenario",
+    "language": "Language",
+    "theme": {
+      "toDark": "Switch to dark theme",
+      "toLight": "Switch to light theme"
+    },
+    "openLeft": "Open scenario panel",
+    "openRight": "Open information panel"
+  },
+  "panels": {
+    "scenario": {
+      "title": "Scenario",
+      "emptyTitle": "No scenario selected",
+      "emptyBody": "Fault, magnitude and depth parameters appear here once a scenario is selected."
+    },
+    "telemetry": {
+      "title": "Telemetry",
+      "emptyTitle": "No station records",
+      "emptyBody": "Acceleration records from seismograph stations stream here while a scenario runs."
+    },
+    "impact": {
+      "title": "Impact",
+      "emptyTitle": "No impact data",
+      "emptyBody": "Intensity, damage, infrastructure and cell tower status are summarized here as the scenario unfolds."
+    },
+    "events": {
+      "title": "Events",
+      "emptyTitle": "Event log is empty",
+      "emptyBody": "Alerts, threshold crossings and wave arrivals are listed here with timestamps."
+    },
+    "info": {
+      "title": "Information"
+    }
+  },
+  "timeline": {
+    "label": "Timeline",
+    "idle": "The timeline becomes active when a scenario runs.",
+    "play": "Play"
+  },
+  "map": {
+    "label": "3D topographic map of the Marmara region"
+  },
+  "sheet": {
+    "title": "Control panel",
+    "handle": "Expand or collapse the panel"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English"
+  },
+  "common": {
+    "close": "Close"
+  }
+}
