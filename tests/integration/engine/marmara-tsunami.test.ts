@@ -53,10 +53,11 @@ function coast(result: TsunamiResult, province: string, name: string) {
 
 describe('Marmara tsunami on the prepared bathymetry', () => {
   it.each(['north-marmara', 'izmit-1999'])(
-    '%s runs an hour of propagation in the background budget',
+    '%s runs an hour of propagation (within 10 s off CI)',
     (id) => {
       const result = run(id);
-      expect(result.computeMs).toBeLessThan(10_000);
+      // Wall-clock budget, checked on developer machines only (see marmara-scenarios.test.ts).
+      if (!process.env.CI) expect(result.computeMs).toBeLessThan(10_000);
       expect(result.frameCount).toBe(241);
       expect(result.framesMm.length).toBe(241 * result.wetCells.length);
       // Average slip M0 / (μ·A) of a Mw 7.4 rupture over about 2,000 km² is about 2 m.

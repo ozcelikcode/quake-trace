@@ -75,6 +75,8 @@ Viewports: 1440×900 desktop, 1024×768 tablet, 390×844 phone (iPhone class), 4
 
 ## Environments and accessibility
 
+- Wall-clock budgets (preset under 2 s, tsunami hour under 10 s) are asserted on developer machines and skipped when `CI` is set: shared GitHub runners measured 2.3–2.5 s for the presets (2026-10-26). Every other assertion of those tests runs in CI.
+
 - Vitest runs in Node by default; files that need the DOM declare `// @vitest-environment jsdom` at the top.
 - Every e2e run includes an axe scan (WCAG 2.0–2.2 A/AA tags) in both themes; serious and critical violations fail the test and list their target selectors. The map canvas is excluded. The scan runs with `reducedMotion: 'reduce'` so it never measures colors mid-transition.
 - Playwright runs with 2 workers and a 60 s timeout: headless browsers render the 3D map with software WebGL, and more workers starve the main thread.
