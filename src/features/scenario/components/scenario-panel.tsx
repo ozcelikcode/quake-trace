@@ -9,9 +9,10 @@ import { useUiStore, type ScenarioTab } from '@/state/ui-store';
 import { useRunScenario } from '../hooks/use-run-scenario';
 import { SCENARIO_PRESETS } from '../lib/presets';
 import { PresetCard } from './preset-card';
+import { ScenarioEditor } from './scenario-editor';
 import { ScenarioSummary } from './scenario-summary';
 
-const TABS: readonly ScenarioTab[] = ['presets', 'replay', 'live'];
+const TABS: readonly ScenarioTab[] = ['presets', 'editor', 'replay', 'live'];
 
 function isScenarioTab(value: string): value is ScenarioTab {
   return (TABS as readonly string[]).includes(value);
@@ -23,6 +24,7 @@ export function ScenarioPanel() {
   const status = useScenarioStore((state) => state.status);
   const scenarioId = useScenarioStore((state) => state.scenarioId);
   const result = useScenarioStore((state) => state.result);
+  const error = useScenarioStore((state) => state.error);
   const tab = useUiStore((state) => state.scenarioTab);
   const setTab = useUiStore((state) => state.setScenarioTab);
   const computing = status === 'computing';
@@ -62,6 +64,16 @@ export function ScenarioPanel() {
             ))}
           </ul>
         </TabsContent>
+        <TabsContent value="editor" className="px-3 pt-3">
+          <ScenarioEditor
+            activeId={scenarioId}
+            computing={computing}
+            disabled={!ready || computing}
+            onRun={(draft) => {
+              void run({ kind: 'custom', draft });
+            }}
+          />
+        </TabsContent>
         <TabsContent value="replay" className="space-y-2 px-3 pt-3">
           <ReplayList
             activeId={scenarioId}
@@ -88,7 +100,7 @@ export function ScenarioPanel() {
       <div className="flex flex-col gap-5 px-3">
         {status === 'error' && (
           <p role="alert" className="text-caption text-critical">
-            {t('scenario.error')}
+            {error === 'link' ? t('scenario.linkError') : t('scenario.error')}
           </p>
         )}
         {result && <ScenarioSummary result={result} />}

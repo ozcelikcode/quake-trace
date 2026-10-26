@@ -48,28 +48,31 @@
   --aftershock: rgb(214 112 236);
 }
 
-:root[data-theme='dark'] {
-  color-scheme: dark;
+/* Print always uses the light values: reports go on paper. */
+@media screen {
+  :root[data-theme='dark'] {
+    color-scheme: dark;
 
-  --surface-0: oklch(0.155 0.012 250);
-  --surface-1: oklch(0.19 0.013 250);
-  --surface-2: oklch(0.23 0.014 250);
-  --surface-3: oklch(0.275 0.016 250);
+    --surface-0: oklch(0.155 0.012 250);
+    --surface-1: oklch(0.19 0.013 250);
+    --surface-2: oklch(0.23 0.014 250);
+    --surface-3: oklch(0.275 0.016 250);
 
-  --border-subtle: oklch(0.98 0.01 250 / 0.08);
-  --border-strong: oklch(0.98 0.01 250 / 0.16);
+    --border-subtle: oklch(0.98 0.01 250 / 0.08);
+    --border-strong: oklch(0.98 0.01 250 / 0.16);
 
-  --text-primary: oklch(0.95 0.005 250);
-  --text-secondary: oklch(0.79 0.01 250);
-  --text-muted: oklch(0.64 0.012 250);
+    --text-primary: oklch(0.95 0.005 250);
+    --text-secondary: oklch(0.79 0.01 250);
+    --text-muted: oklch(0.64 0.012 250);
 
-  --signal: oklch(0.74 0.13 250);
-  --signal-contrast: oklch(0.16 0.02 250);
+    --signal: oklch(0.74 0.13 250);
+    --signal-contrast: oklch(0.16 0.02 250);
 
-  --state-critical: oklch(0.68 0.19 25);
-  --state-warning: oklch(0.8 0.14 80);
-  --state-ok: oklch(0.74 0.14 150);
-  --state-info: oklch(0.74 0.09 230);
+    --state-critical: oklch(0.68 0.19 25);
+    --state-warning: oklch(0.8 0.14 80);
+    --state-ok: oklch(0.74 0.14 150);
+    --state-info: oklch(0.74 0.09 230);
 
-  --elevation-float: 0 8px 24px oklch(0 0 0 / 0.45), 0 1px 2px oklch(0 0 0 / 0.3);
+    --elevation-float: 0 8px 24px oklch(0 0 0 / 0.45), 0 1px 2px oklch(0 0 0 / 0.3);
+  }
 }

@@ -15,7 +15,7 @@ Principles:
 
 ## Themes
 
-Dark is the default (command-screen context). Light is fully supported for daylight use, print and reports. Both come from the same tokens; components never branch on theme.
+Dark is the default (command-screen context). Light is fully supported for daylight use, print and reports; the dark overrides sit in `@media screen`, so printing always uses the light values. Both come from the same tokens; components never branch on theme.
 
 ## Color tokens
 
@@ -116,7 +116,8 @@ Rules: every pair used for text meets WCAG 2.2 AA (4.5:1 body, 3:1 large text an
 - Built (phase 7): timeline scale segmented control (Shaking / Tsunami, tsunami disabled with "…" while computing) and per-scale speeds; tsunami summary (status line in a live region while computing, slip, seafloor uplift/subsidence, first arrival and highest coastal wave with district, coastal districts listed as they are reached, button to open the tsunami scale, educational note); legend third shading option Tsunami with the diverging scale.
 - Built (phase 8): Response timeline scale (h:mm:ss clock, hour jumps), aftershock summary (count so far, largest with time, 24-hour M ≥ 5 / M ≥ 6 probabilities as percentages, button to open the response scale, model note), aftershock legend key, largest-aftershock timeline tick in --aftershock. The compact (phone) timeline drops its clock, which the status bar already shows, so the slider keeps its width next to the scale control.
 - Built (phase 9): scenario panel tabs Presets / Historical / Live; replay cards (event name, Mw · depth · UTC time, catalog attribution); live list (catalog status dots with counts, magnitude column, place, UTC time, depth, reporting catalogs; selecting a row reveals "Simulate" with the M ≥ 4 rule); scenario summary rows for catalog event, fault placement and observed-record status; telemetry badge "Observed · KOERI" in the info hue and observed stations' ids in the info hue in the list; live earthquakes on the map as circles in the info hue sized by magnitude and fading over the week, selected one ringed.
-- To build: layer toggle row, event log row, toast for alerts, popover, dialog.
+- Built (phase 10): scenario tab Editor (form with label-micro field headers and the current value right-aligned, native select for the fault, sliders, numeric seed input with a random button, primary "Simulate"); map editor preview (chosen fault in the signal hue over a surface casing, hypocentre ring, crosshair cursor near faults); "Copy link" ghost button in the scenario summary (label changes to Copied, status announced); events panel: export buttons and note, event log rows (mono time, tone dot neutral/info/warning/critical, critical text in primary weight 500, newest first, upcoming count), each row seeks the clock; printable report (light tokens on paper, simulation line in critical, readout grids, districts table, log, methods and limits).
+- To build: layer toggle row, toast for alerts, popover, dialog.
 - MMI colours come from `src/lib/color/mmi.ts` (ShakeMap scale); the same module feeds the raster, legend and swatches.
 - Touch targets grow on coarse pointers (`pointer-coarse:` variants) to at least 44 px.
 - Every interactive component has visible focus, hover, active, disabled and loading states.

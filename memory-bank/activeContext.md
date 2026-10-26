@@ -2,9 +2,17 @@
 
 ## Current focus
 
-Phase 9 (live mode and historical replay) is complete on branch `feat/phase-9-live-replay` (from phase 8). Next is phase 10: scenario editor and URL sharing, event log, PDF/GeoJSON/CSV export.
+Phase 10 (scenario editor, share links, event log, exports) is complete on branch `feat/phase-10-editor-export` (from phase 9). Next is phase 11: polish.
 
-## Recent changes (2026-10-26, phase 9)
+## Recent changes (2026-10-26, phase 10)
+
+- Data: `data/fault-source.ts` (moved from the scenario presets; shared with the map).
+- App: scenario tab Editor (`scenario-editor.tsx`: fault, Mw up to the EFSM20 p95 maximum, hypocentre along the trace, depth in the seismogenic layer, seed; `lib/custom-scenario.ts` with `normalizeDraft`); `state/editor-store.ts`; map preview and click-to-place (`map/lib/editor-layers.ts`, wide transparent hit line over the faults). Share links: `lib/run-request.ts` encodes every run as readable query parameters (zod on decode), `publishRequest` writes it with `history.replaceState`, `SharedScenario` in the app shell runs a link once data loads (`scenario.error` now `'compute' | 'link'`), `ShareLinkButton` copies the URL.
+- Events: `lib/event-log.ts` (milestones from the result and tsunami), `entry-text.ts`, panel with the log revealed by the clock (newest first, click to `playbackStore.reveal`), exports `district-export.ts` (CSV RFC 4180 + BOM, GeoJSON with `simulation: true`), `ScenarioReport` always in the page while a scenario is loaded and shown only in print (`window.print()` / Cmd+P save as PDF). Dark tokens scoped to `@media screen`, so print is light.
+- `roundSignificant` moved to `lib/format.ts`; `lib/download.ts`; cells/routing indexes export `summarizeNetwork` / `responseStats`; replay index exports `HISTORICAL_EVENTS`.
+- Tests: `_helpers/a11y.ts` and `pauseAndJump` / `openEventsPanel` in `_helpers/layout.ts`; `editor-events.spec.ts`.
+
+## Changes (2026-10-26, phase 9)
 
 - Data: `lib/formats/miniseed.ts` (SEED 2.4, Steim1/2, verified against ObsPy), `lib/formats/station-xml.ts`, `data/feeds/` (parsers for USGS, EMSC, AFAD, Kandilli; merge; requests; KOERI observed records in cm/s²). Fixtures in `tests/fixtures/feeds/`.
 - Engine: `RuptureSpec.startKm/endKm` optional (W&C94 extent centred on the hypocentre); `lib/math/polyline.nearestOnPath`.
@@ -54,7 +62,7 @@ Phase 9 (live mode and historical replay) is complete on branch `feat/phase-9-li
 
 ## Next steps
 
-1. Phase 10: scenario editor (fault, extent, hypocentre, magnitude, seed) with URL sharing (lz-string, zod-validated), event log of the simulation, export to PDF/GeoJSON/CSV.
+1. Phase 11: polish (phone tuning, performance, accessibility audit, About/methodology page, README with screenshots, validation results).
 2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.
 

@@ -18,6 +18,8 @@ interface ReferencePalette {
   aftershock: { fill: string; outline: string };
   /** Real earthquakes from the live catalogs, tuned against --state-info; selection in the signal hue. */
   live: { fill: string; outline: string; selected: string };
+  /** Editor preview: the chosen fault and hypocentre in the signal hue over a surface casing. */
+  editor: { line: string; casing: string };
 }
 
 /**
@@ -63,6 +65,7 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
       outline: 'rgba(13, 17, 23, 0.9)',
       selected: 'rgb(240, 244, 250)',
     },
+    editor: { line: 'rgb(138, 180, 248)', casing: 'rgba(13, 17, 23, 0.85)' },
   },
   light: {
     fault: 'rgba(184, 64, 44, 0.9)',
@@ -85,5 +88,6 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
       outline: 'rgba(255, 255, 255, 0.95)',
       selected: 'rgb(22, 30, 46)',
     },
+    editor: { line: 'rgb(37, 99, 200)', casing: 'rgba(255, 255, 255, 0.9)' },
   },
 };

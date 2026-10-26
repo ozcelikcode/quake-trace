@@ -1,26 +1,11 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
+import { expectNoSeriousA11yViolations } from './_helpers/a11y';
 
 test.use({ locale: 'tr-TR' });
 
 const isProject = (name: string) => test.info().project.name === name;
 const isPhone = () => test.info().project.name.startsWith('phone');
-
-async function expectNoSeriousA11yViolations(page: Page) {
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .exclude('[data-testid="map"]')
-    .analyze();
-  const serious = results.violations.filter(
-    (violation) => violation.impact === 'serious' || violation.impact === 'critical',
-  );
-  expect(
-    serious.map(
-      (violation) =>
-        `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`,
-    ),
-  ).toEqual([]);
-}
 
 test('renders the shell and the 3D map without errors', async ({ page }) => {
   const errors: string[] = [];
@@ -113,9 +98,9 @@ test('meets WCAG 2.2 AA in both themes', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'quakeTrace' })).toBeVisible();
-  await expectNoSeriousA11yViolations(page);
+  await expectNoSeriousA11yViolations(page, '[data-testid="map"]');
 
   await page.getByRole('button', { name: 'Açık temaya geç' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await expectNoSeriousA11yViolations(page);
+  await expectNoSeriousA11yViolations(page, '[data-testid="map"]');
 });

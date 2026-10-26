@@ -31,7 +31,7 @@ Versions are pinned exactly in `package.json`; the lines below were current on n
 | Data prep | Python 3.13 via uv (`uv.lock`) | uv 0.13 | numpy, rasterio (GDAL 3.12 with netCDF), geopandas/shapely/pyogrio, osmium (pyosmium 4), httpx, affine |
 | Pipeline quality | ruff, pyright (strict, root `pyrightconfig.json`), pytest | | Same gates locally and in CI |
 
-Planned for later phases (add a row with the reason when adopted): lz-string (URL state), jsPDF (reports), obspy (validation scripts; used once via `uv run --with obspy` to produce the miniSEED test reference).
+Planned for later phases (add a row with the reason when adopted): obspy (validation scripts; used once via `uv run --with obspy` to produce the miniSEED test reference).
 
 Bundle (phase 2): shell chunk about 190 KB gzipped (React, Radix, i18next, zod, TanStack Query); the lazy map chunk about 480 KB gzipped (MapLibre, deck.gl); the simulation worker is a separate chunk.
 
@@ -41,6 +41,7 @@ Not adopted:
 - `vaul`: forced a modal dialog (page `aria-hidden`) for persistent sheets and has had no release since 2024-12.
 - `react-map-gl`: a thin in-house wrapper around MapLibre and `MapLibreOverlay` is enough.
 - `uPlot`: waveforms are drawn by an in-house canvas painter over min/max envelopes (phase 3); last uPlot release 2025-03.
+- `lz-string` and `jsPDF` (phase 10): share links are readable query parameters (`URLSearchParams` + zod); the PDF report is printed by the browser (`window.print()` with a print stylesheet), which keeps Turkish text and the app fonts without embedding.
 - `seisplotjs` (3.2.7, phase 9): its single export pulls d3, leaflet, handlebars, jszip and luxon; miniSEED 2.4 (Steim1/2) and StationXML are read by `src/lib/formats/` instead, checked against ObsPy 1.5.1.
 
 ## Development setup

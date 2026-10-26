@@ -1,6 +1,7 @@
+import { faultSource } from '@/data/fault-source';
 import type { Faults } from '@/data/schemas';
 import { cumulativeLengthsKm, kmAtLongitude } from '@/lib/math/polyline';
-import type { FaultSource, LonLat, Scenario } from '@/types/scenario';
+import type { Scenario } from '@/types/scenario';
 
 /**
  * Preset ruptures on the Main Marmara Fault (EFSM20 source TRCF045, the northern strand of the
@@ -63,26 +64,6 @@ export const SCENARIO_PRESETS: readonly ScenarioPreset[] = [
 
 export class PresetError extends Error {
   override name = 'PresetError';
-}
-
-export function faultSource(faults: Faults, faultId: string): FaultSource {
-  const feature = faults.features.find((f) => f.properties.id === faultId);
-  if (!feature) throw new PresetError(`fault ${faultId} is not in the faults dataset`);
-  const { geometry, properties } = feature;
-  const trace: LonLat[] =
-    geometry.type === 'LineString'
-      ? geometry.coordinates
-      : geometry.coordinates.reduce((longest, part) =>
-          part.length > longest.length ? part : longest,
-        );
-  return {
-    id: properties.id,
-    trace,
-    dipDeg: properties.dipDeg.avg,
-    rakeDeg: properties.rakeDeg.avg,
-    upperDepthKm: properties.upperDepthKm,
-    lowerDepthKm: properties.lowerDepthKm,
-  };
 }
 
 /** Turns a preset into a scenario on the prepared fault geometry. */

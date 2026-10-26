@@ -49,3 +49,16 @@ export interface ScenarioEvent {
   /** Known rupture extent as longitudes along the fault; otherwise sized from the magnitude. */
   extentLon?: readonly [number, number];
 }
+
+/**
+ * A scenario built in the editor: a rupture of magnitude `mw` on one fault, sized from the
+ * magnitude and centred on the hypocentre (`RuptureSpec` without an extent).
+ */
+export interface ScenarioDraft {
+  faultId: string;
+  mw: number;
+  /** Hypocentre along the fault trace, km from its start. */
+  hypocenterKm: number;
+  depthKm: number;
+  seed: number;
+}

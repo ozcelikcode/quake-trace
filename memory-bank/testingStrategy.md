@@ -56,7 +56,8 @@ Map frame logic (`features/map/lib/simulation-frames.ts`, `layer-order.ts`) is u
 3. Timeline scrubbing forward and backward updates map, telemetry and readouts consistently.
 4. Language switch TR ↔ EN changes all visible text; theme switch keeps contrast.
 5. Phone viewport: bottom sheet tabs reach every function.
-6. Shared scenario URL reproduces the same state.
+6. Shared scenario URL reproduces the same state (editor link runs and fills the editor; a broken link shows an error).
+7. Event log reveals milestones, seeks on click; GeoJSON and CSV downloads parse; the report replaces the app in print media.
 
 Viewports: 1440×900 desktop, 1024×768 tablet, 390×844 phone (iPhone class), 412×915 phone (Pixel class).
 
@@ -84,4 +85,4 @@ Viewports: 1440×900 desktop, 1024×768 tablet, 390×844 phone (iPhone class), 4
 
 Tests never call live services. Feed and FDSN responses are recorded once into `tests/fixtures/feeds/` (requests listed in its README) and replayed: unit tests read them from disk; e2e tests answer every catalog and KOERI request with `page.route` and fix the clock (`page.clock.setFixedTime`) so the recorded week stays recent. The miniSEED reader is checked sample by sample against ObsPy's decode of the same file (`ko-slvt-2025-04-23.obspy.json`). Files that need the DOM (StationXML) run under jsdom and resolve fixtures from the repository root, because jsdom replaces `import.meta.url`.
 
-E2E helpers shared by the spec files live in `tests/e2e/_helpers/layout.ts`. Flows that wait for the tsunami worker get a 120 s budget; keyboard steps go through `pauseAndJump`, which blurs focused controls first (a focused radio group would take the arrow keys).
+E2E helpers shared by the spec files live in `tests/e2e/_helpers/` (`layout.ts`: panels, `pauseAndJump`; `a11y.ts`: the axe check). Flows that wait for the tsunami worker get a 120 s budget; keyboard steps go through `pauseAndJump`, which blurs focused controls first (a focused radio group would take the arrow keys).

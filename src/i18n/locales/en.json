@@ -34,7 +34,7 @@
     "events": {
       "title": "Events",
       "emptyTitle": "Event log is empty",
-      "emptyBody": "Alerts, threshold crossings and wave arrivals are listed here with timestamps."
+      "emptyBody": "Rupture, early warning, wave arrivals, facility losses, tsunami and aftershocks are listed here with their time as the scenario runs."
     },
     "info": {
       "title": "Information"
@@ -118,7 +118,9 @@
         "ready": "{{count}} stations (KOERI)",
         "none": "none for this event",
         "error": "unavailable"
-      }
+      },
+      "customFault": "Fault",
+      "seed": "Seed"
     },
     "presets": {
       "north-marmara": {
@@ -141,8 +143,15 @@
     "sources": "Scenario sources",
     "tabs": {
       "presets": "Presets",
+      "editor": "Editor",
       "replay": "Historical",
       "live": "Live"
+    },
+    "linkError": "The scenario in the link could not be read. Choose a preset or build it again in the editor.",
+    "share": {
+      "idle": "Copy link",
+      "copied": "Copied",
+      "failed": "Copy it from the address bar"
     }
   },
   "impact": {
@@ -298,5 +307,85 @@
     "tooSmall": "Simulation needs M {{magnitude}} or larger.",
     "simulate": "Simulate",
     "note": "Real earthquakes of the last 7 days in the Marmara region from AFAD, Kandilli (KOERI), EMSC and USGS, merged when within 30 s and 30 km; values from the national agency first. Refreshed every minute. Not an official warning system."
+  },
+  "editor": {
+    "title": "Scenario editor",
+    "fault": "Fault",
+    "faultOption": "{{id}} · {{type}} · {{length}} km",
+    "faultTypes": {
+      "normal": "normal",
+      "reverse": "reverse",
+      "right-lateral": "right-lateral",
+      "left-lateral": "left-lateral"
+    },
+    "magnitude": "Magnitude",
+    "magnitudeRange": "Mw {{min}} – {{max}} (EFSM20 maximum magnitude, 95th percentile)",
+    "hypocenter": "Hypocentre",
+    "alongTrace": "{{km}} / {{total}} km",
+    "mapHint": "You can also place it by clicking a fault on the map.",
+    "depth": "Focal depth",
+    "seed": "Seed",
+    "randomSeed": "Random seed",
+    "seedHint": "Sets the synthetic records, the early-warning scatter and the aftershocks; the same seed gives the same result.",
+    "run": "Simulate"
+  },
+  "events": {
+    "title": "Event log",
+    "count": "{{count}} / {{total}}",
+    "upcoming_one": "{{count}} more entry ahead",
+    "upcoming_other": "{{count}} more entries ahead",
+    "log": {
+      "origin": "Rupture started · Mw {{mw}}, {{depth}} km deep",
+      "ruptureEnd": "Rupture stopped · {{length}} km",
+      "detection": "First station triggered · {{station}}",
+      "alert": "Early warning alert · estimated M {{magnitude}}, location error {{error}} km",
+      "sArrival": "S wave reached {{province}} · {{district}}, MMI {{mmi}}",
+      "strongest": "Strongest shaking · {{district}} ({{province}}), MMI {{mmi}}",
+      "facilityOut": {
+        "hospital_one": "Hospital likely out of service · {{count}} in total",
+        "hospital_other": "Hospitals likely out of service · {{count}} in total",
+        "fireStation_one": "Fire station likely out of service · {{count}} in total",
+        "fireStation_other": "Fire stations likely out of service · {{count}} in total",
+        "police_one": "Police building likely out of service · {{count}} in total",
+        "police_other": "Police buildings likely out of service · {{count}} in total"
+      },
+      "bridgeClosed_one": "Bridge closed · {{count}} in total",
+      "bridgeClosed_other": "Bridges closing · {{count}} in total",
+      "networkCongested": "Cell sites congesting · {{formatted}} sites",
+      "tsunami": "Tsunami reached the first coast · {{district}}, {{height}} m",
+      "aftershock": "Aftershock · M {{magnitude}}"
+    },
+    "export": {
+      "title": "Export",
+      "report": "Report (PDF)",
+      "geojson": "GeoJSON",
+      "csv": "CSV",
+      "note": "Save the report as PDF from the print dialog. GeoJSON and CSV hold the district results; the files are simulation output.",
+      "disclaimer": "This is a simulation, not an official warning or confirmed damage information."
+    }
+  },
+  "report": {
+    "simulation": "SIMULATION · not an official warning system",
+    "title": "quakeTrace scenario report",
+    "custom": "Editor scenario · fault {{fault}}, seed {{seed}}",
+    "generated": "Generated: {{time}}",
+    "hypocenter": "Hypocentre",
+    "facilitiesOut": {
+      "hospital": "Hospitals likely out of service",
+      "fireStation": "Fire stations likely out of service",
+      "police": "Police buildings likely out of service"
+    },
+    "cutOff": "Districts cut off by road",
+    "aftershockCount": "M ≥ 3 in 72 hours",
+    "aftershockLargest": "Largest aftershock",
+    "aftershockM5": "M ≥ 5 aftershocks",
+    "sections": {
+      "scenario": "Scenario",
+      "districts": "The {{count}} most strongly shaken districts",
+      "methods": "Methods and limits"
+    },
+    "methods": {
+      "shaking": "Finite-fault rupture (Wells and Coppersmith 1994), IASP91 travel times, Akkar-Sandıkkaya-Bommer (2014) median ground motion with the USGS Vs30 site term, Worden et al. (2012) intensity conversion. Fault geometry from EFSM20."
+    }
   }
 }

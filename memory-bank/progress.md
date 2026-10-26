@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **9 (live mode and historical replay) complete** on branch `feat/phase-9-live-replay` (from phase 8, `d95fcc7`). Phase 3–8 branches are pushed to GitHub with upstream. `main` is at phase 2 (`5aec3bf`). Next: phase 10 (scenario editor, URL sharing, event log, export).
+Phase: **10 (scenario editor, share links, event log, exports) complete** on branch `feat/phase-10-editor-export` (from phase 9, `8f949f2`). Phase 3–9 branches are pushed to GitHub with upstream. `main` is at phase 2 (`5aec3bf`). Next: phase 11 (polish).
 
 ## What works
 
@@ -14,12 +14,14 @@ Phase: **9 (live mode and historical replay) complete** on branch `feat/phase-9-
 - Simulation worker (Comlink), scenario and playback stores, four Main Marmara Fault presets.
 - Telemetry (phase 3): synthetic three-component accelerograms (100 Hz) at the 50 accelerometer stations, scaled to the ASB14 median; STA/LTA triggers; focused station with Z/N/E traces, picks, playhead and peak-so-far readouts; record-section station list in trigger order; stations flash on the map when they trigger; clicking a station on the map focuses it. Scenario compute about 0.5–0.9 s per preset in Node.
 - Damage (phase 5): expected structural loss and night fatalities per district (GEM 2025 Türkiye vulnerability, averaged over ground-motion σ), revealed as the S wave arrives; damage summary and per-district line in the impact panel; 1,388 critical facilities assessed and coloured on the map when reached. North Marmara: ≈ 100,000 complete-loss-equivalent buildings, ≈ 6,400 fatalities (İstanbul ≈ 6,000; İBB 2019: 14,145).
+- Editor, sharing and exports (phase 10): scenario editor on any of the 27 EFSM20 faults (Mw 5 to the fault's p95 maximum, hypocentre by slider or by clicking a fault on the map, depth, seed) with a map preview; every run is in the address bar as readable query parameters (`?preset=`, `?replay=`, `?fault=&mw=&hypo=&depth=&seed=`, `?event=…`), validated with zod and run on load, with a copy-link button; event log of the scenario (rupture, detection, alert, S wave per province, strongest shaking, facilities out, bridges, network congestion, tsunami, M ≥ 5 aftershocks) revealed with the clock, each entry seeks there; exports: district CSV and GeoJSON, printable report (PDF via the print dialog, light, three A4 pages for the presets).
 - Live mode and replay (phase 9): live list of the last 7 days from AFAD, Kandilli, EMSC and USGS (merged, refreshed every minute, catalog status shown) with map markers; any event from M 4 can be simulated on the nearest fault. Historical replays of 1999 Kocaeli, 2019 Silivri and 2025 Marmara Ereğlisi with USGS parameters; observed KOERI strong-motion records replace synthetic ones in telemetry where available (2025: 10 stations).
 - Aftershocks (phase 8): 72-hour synthetic M ≥ 3 sequence (Reasenberg–Jones generic California) appearing on the map at their times, sized by magnitude; impact summary with count, largest so far and the model's 24-hour M ≥ 5/6 probabilities; Response timeline scale with hour steps and a largest-aftershock marker. North Marmara: 714 aftershocks by 24 h, largest M 6.8 after 6 h.
 - Tsunami (phase 7): Okada seafloor motion of the rupture propagated for an hour with linear shallow water on the 500 m bathymetry in its own worker (about 3 s); Shaking / Tsunami timeline scales; sea-surface raster in the legend's shading control; impact summary with slip, seafloor motion, first arrival, highest coastal wave and coastal districts as they are reached. North Marmara: first coast after 0.5 min (Adalar), highest 1.8 m (Marmaraereğlisi).
 - Cell network and emergency response (phase 6): about 32,750 synthetic cell sites (no OpenCelliD key), call demand up to 55× the busy hour for those who felt the shaking, site and resident counts by state and calls not carried in the impact panel; network raster (calls not carried per km²) selectable in the legend; sites shown from zoom 11. Fire response times before/after per district (KTY speeds, Hazus bridge closures, debris-slowed streets), hospital access after, response corridors weighted by lost buildings drawn as the S wave reaches each district. North Marmara: median fire response 5.8 → 5.9 min, 2,650 km of streets slowed, no bridge closed. Whole scenario about 0.5 s in Node.
 - Early warning (phase 4): location by grid search on the first four triggers (1–2 km error on the presets), Pd magnitude with modelled saturation (first estimates M 6.2–6.5 for Mw 6.9–7.4), alert at T+6–11 s; status-bar alert chip (live region), EEW summary and per-district warning time / countdown / blind zone in the impact panel, blind-zone boundary and estimated epicentre on the map, detection and alert markers on the timeline.
 - First vertical slice: choose a preset, compute in the worker, play back. MMI raster draped on the terrain appears as the S wave arrives; P and S wavefronts as 3D curtains; rupture front and epicentre; legend and "Simulation" watermark; timeline (play/pause, slider, 0.5×–10×, Space and arrow shortcuts); scenario summary; district arrival table (impact tab).
+- Tooling (phase 10): Vitest 297 tests (3 timing budgets fail on this machine in macOS Low Power Mode, also on the phase 9 commit), Playwright 57 passed / 27 skipped, pipeline 53 tests (unchanged).
 - Tooling (phase 9): Vitest 283 tests, Playwright 48 passed / 20 skipped, pipeline 53 tests.
 - Tooling (phase 8): Vitest 258 tests, Playwright 42 passed / 18 skipped, pipeline 53 tests.
 - Tooling (phase 7): Vitest 243 tests, Playwright 39 passed / 17 skipped, pipeline 53 tests.
@@ -43,7 +45,7 @@ Each phase ends with CI green and a deployable `main`.
 - [x] **7. Tsunami** — Okada source, linear shallow-water solver in a worker, coastal arrivals, tsunami raster, Shaking / Tsunami timeline scales.
 - [x] **8. Aftershocks and multi-scale timeline** — Reasenberg–Jones sequence (instead of ETAS), aftershock layer and summary, Shaking / Tsunami / Response scales.
 - [x] **9. Live mode and historical replay** — four catalogs merged and polled, replays with USGS parameters, observed KOERI records in telemetry.
-- [ ] **10. Scenario editor and URL sharing; event log and PDF/GeoJSON/CSV export.**
+- [x] **10. Scenario editor and URL sharing; event log and PDF/GeoJSON/CSV export.**
 - [ ] **11. Polish** — phone tuning, performance, accessibility audit, About and methodology page, README with screenshots and attribution, scientific validation results published.
 
 ## Known issues and follow-ups
@@ -57,7 +59,8 @@ Each phase ends with CI green and a deployable `main`.
 - Wavefronts are cut where they leave the engine grid (for example north of 41.8° N).
 - Median-only ground motion and records: map and telemetry stay consistent; aleatory variability (ASB14 σ, τ) is not sampled yet (candidate for the scenario editor, phase 10).
 - Damage: GEM data is CC BY-NC-SA 4.0 (non-commercial); time of day fixed at night (residents at home); facility state thresholds are assumptions; underestimates İBB 2019 fatalities by about 2.4× (different magnitude/rupture, median-centred stock assumptions).
-- EEW: no telemetry or processing latency; depth fixed at 10 km; event log entries arrive with phase 10.
+- EEW: no telemetry or processing latency; depth fixed at 10 km.
+- Editor and exports: no rupture-extent control (W&C94 from the magnitude); time of day stays night; the share link does not carry the playback moment; the report has no map image; integration timing budgets (2 s preset, tsunami 5 s) fail under macOS Low Power Mode.
 - Synthetic records are point-source shapes (Boore 2003) with finite-fault arrival times; P shares the S-wave attenuation (simplification). Compute time on phones (2–3× slower than desktop) is not yet measured.
 - Live/replay: observed records only from KOERI (no AFAD TK network), converted with the flat sensitivity (no full response removal); real-time seismogram streaming for live events is not done (records are fetched only when an event is simulated, and KOERI data lag 3–10 min); live events are placed on the nearest mapped fault even when they lie off it; the status-bar mode does not yet say "replay"/"live".
 - Aftershocks: generic California parameters, not fitted to Marmara/NAF sequences; no ETAS spatial clustering (uniform along the rupture with 5 km scatter); aftershocks do not add shaking, damage or tsunami. The status bar still shows the mainshock alert during the response scale.
@@ -67,6 +70,8 @@ Each phase ends with CI green and a deployable `main`.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 
 ## Evolution of decisions
+
+- 2026-10-26: Phase 10: readable query parameters instead of lz-string; PDF through the browser's print dialog instead of jsPDF (Turkish glyphs, no font embedding, no dependency); editor ruptures sized by W&C94 around the hypocentre (no extent control).
 
 - 2026-10-25: Python backend replaced by a browser-only engine plus an edge proxy, after the user required a free, zero-install deployment without Docker.
 - 2026-10-25: Unit tests moved from beside source files to a separate `tests/` tree.

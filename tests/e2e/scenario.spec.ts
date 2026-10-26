@@ -1,7 +1,13 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
-import { isPhone, openImpactPanel, openScenarioPanel, project } from './_helpers/layout';
+import { expectNoSeriousA11yViolations } from './_helpers/a11y';
+import {
+  isPhone,
+  openImpactPanel,
+  openScenarioPanel,
+  pauseAndJump,
+  project,
+} from './_helpers/layout';
 
 test.use({ locale: 'tr-TR' });
 
@@ -13,15 +19,6 @@ async function runNorthMarmara(page: Page) {
   await expect(page.getByTestId('simulation-clock').first()).not.toHaveText('T+ --.-', {
     timeout: 30_000,
   });
-}
-
-/** Pauses playback and moves the clock with the keyboard shortcuts. */
-async function pauseAndJump(page: Page, jumps: number) {
-  await page.evaluate(() => {
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-  });
-  await page.keyboard.press('Space');
-  for (let i = 0; i < jumps; i++) await page.keyboard.press('Shift+ArrowRight');
 }
 
 test('runs a preset scenario and plays it back', async ({ page }) => {
@@ -39,7 +36,7 @@ test('runs a preset scenario and plays it back', async ({ page }) => {
 
   await openImpactPanel(page);
   await expect(page.getByText(/\d+ \/ \d+ ilçeye ulaştı/)).toBeVisible();
-  await expect(page.getByText('Fatih')).toBeVisible();
+  await expect(page.getByText('Fatih', { exact: true })).toBeVisible();
 });
 
 /** Shows the telemetry tab in the current layout. */
@@ -181,17 +178,5 @@ test('stays accessible with a scenario loaded', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await runNorthMarmara(page);
   await pauseAndJump(page, 1);
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-    .exclude('[data-testid="map"] canvas')
-    .analyze();
-  const serious = results.violations.filter(
-    (violation) => violation.impact === 'serious' || violation.impact === 'critical',
-  );
-  expect(
-    serious.map(
-      (violation) =>
-        `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`,
-    ),
-  ).toEqual([]);
+  await expectNoSeriousA11yViolations(page);
 });

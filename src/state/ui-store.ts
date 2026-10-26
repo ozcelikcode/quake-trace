@@ -7,7 +7,7 @@ export type PanelId = 'scenario' | 'telemetry' | 'impact' | 'events';
 /** Quantity drawn as the map raster while a scenario is loaded. */
 export type MapRaster = 'intensity' | 'network' | 'tsunami';
 /** Sources of a scenario in the scenario panel. */
-export type ScenarioTab = 'presets' | 'replay' | 'live';
+export type ScenarioTab = 'presets' | 'editor' | 'replay' | 'live';
 
 /** Panels shown in the right column on desktop and in the right drawer on tablets. */
 export const rightPanelIds = [

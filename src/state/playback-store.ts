@@ -44,6 +44,11 @@ interface PlaybackState {
   pause: () => void;
   toggle: () => void;
   seek: (timeS: number) => void;
+  /**
+   * Pauses at `timeS`, switching to the shortest available scale that contains it (a log entry
+   * hours after the origin opens the response scale).
+   */
+  reveal: (timeS: number) => void;
   setSpeed: (speed: number) => void;
   /** Moves the clock by `elapsedS` of wall time, scaled by the speed; stops at the end. */
   advance: (elapsedS: number) => void;
@@ -117,6 +122,20 @@ export const usePlaybackStore = create<PlaybackState>()((set) => ({
   },
   seek: (timeS) => {
     set((state) => ({ timeS: clamp(timeS, state.durationS) }));
+  },
+  reveal: (timeS) => {
+    set((state) => {
+      const scale = timelineScales.find((candidate) => state.extents[candidate] >= timeS);
+      if (!scale) return state;
+      const durationS = state.extents[scale];
+      return {
+        scale,
+        durationS,
+        timeS: clamp(timeS, durationS),
+        playing: false,
+        speed: scale === state.scale ? state.speed : TIMELINE_SCALES[scale].defaultSpeed,
+      };
+    });
   },
   setSpeed: (speed) => {
     set((state) => (isPlaybackSpeed(speed, state.scale) ? { speed } : state));

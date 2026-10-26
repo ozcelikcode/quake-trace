@@ -11,13 +11,11 @@ import type { Scenario, ScenarioEvent } from '@/types/scenario';
 import { simulationWorker } from '@/workers/simulation-client';
 import { tsunamiWorker } from '@/workers/tsunami-client';
 
+import { customScenario } from '../lib/custom-scenario';
 import { damageInputs } from '../lib/damage-inputs';
 import { scenarioFromEvent } from '../lib/event-scenario';
-import { resolvePreset, SCENARIO_PRESETS, type PresetId } from '../lib/presets';
-
-/** What to simulate: a preset, a historical replay or a live catalog event. */
-export type RunRequest =
-  { kind: 'preset'; id: PresetId } | { kind: 'replay' | 'event'; event: ScenarioEvent };
+import { resolvePreset, SCENARIO_PRESETS } from '../lib/presets';
+import { encodeRunRequest, type RunRequest } from '../lib/run-request';
 
 /** Observed records are requested from the nearest accelerometer stations, up to this many. */
 const OBSERVED_STATIONS = 12;
@@ -78,9 +76,19 @@ async function runTsunami(scenario: Scenario, bathymetry: Grid, districtCells: G
   }
 }
 
+/** Puts the request in the address bar, so the page URL always shares the running scenario. */
+function publishRequest(request: RunRequest) {
+  const { pathname, hash } = window.location;
+  window.history.replaceState(
+    null,
+    '',
+    `${pathname}?${encodeRunRequest(request).toString()}${hash}`,
+  );
+}
+
 /**
- * Runs a preset, a replay or a live event in the simulation worker, starts playback, then
- * computes its tsunami and, for real earthquakes, fetches the observed records.
+ * Runs a preset, an editor draft, a replay or a live event in the simulation worker, starts
+ * playback, then computes its tsunami and, for real earthquakes, fetches the observed records.
  */
 export function useRunScenario() {
   const faults = useJsonDataset('faults').data;
@@ -133,6 +141,9 @@ export function useRunScenario() {
         if (!preset) return;
         scenario = resolvePreset(preset, faults);
         origin = { kind: 'preset' };
+      } else if (request.kind === 'custom') {
+        scenario = customScenario(request.draft, faults);
+        origin = { kind: 'custom', faultId: request.draft.faultId, seed: request.draft.seed };
       } else {
         const placed = scenarioFromEvent(request.event, faults);
         scenario = placed.scenario;
@@ -148,10 +159,11 @@ export function useRunScenario() {
       }
     } catch (error) {
       console.error(error);
-      scenarioStore.fail(error instanceof Error ? error.message : String(error));
+      scenarioStore.fail('compute');
       return;
     }
     scenarioStore.start(scenario.id, origin);
+    publishRequest(request);
     useObservedStore.getState().clear();
     try {
       const result = await simulationWorker().simulate({
@@ -171,7 +183,7 @@ export function useRunScenario() {
       scenarioStore.succeed(result);
       usePlaybackStore.getState().load(result.durationS, result.aftershocks.durationS);
       void runTsunami(scenario, bathymetry, districtCells);
-      if (request.kind !== 'preset') {
+      if (request.kind === 'replay' || request.kind === 'event') {
         void loadObserved(
           scenario.id,
           request.event,
@@ -182,7 +194,7 @@ export function useRunScenario() {
       }
     } catch (error) {
       console.error(error);
-      scenarioStore.fail(error instanceof Error ? error.message : String(error));
+      scenarioStore.fail('compute');
     }
   };
 

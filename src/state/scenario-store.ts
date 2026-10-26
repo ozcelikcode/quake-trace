@@ -3,10 +3,13 @@ import { create } from 'zustand';
 import type { SimulationResult } from '@/types/simulation';
 
 export type ScenarioStatus = 'idle' | 'computing' | 'ready' | 'error';
+/** Why the last request failed: the computation, or a share link that cannot be used. */
+export type ScenarioError = 'compute' | 'link';
 
 /** Where the running scenario comes from, for labels and real-data lookups. */
 export type ScenarioOrigin =
   | { kind: 'preset' }
+  | { kind: 'custom'; faultId: string; seed: number }
   | {
       kind: 'replay' | 'event';
       /** Real origin time, ms since the Unix epoch. */
@@ -26,10 +29,10 @@ interface ScenarioState {
   scenarioId: string | null;
   origin: ScenarioOrigin | null;
   result: SimulationResult | null;
-  error: string | null;
+  error: ScenarioError | null;
   start: (scenarioId: string, origin: ScenarioOrigin) => void;
   succeed: (result: SimulationResult) => void;
-  fail: (message: string) => void;
+  fail: (error: ScenarioError) => void;
 }
 
 export const useScenarioStore = create<ScenarioState>()((set) => ({
@@ -44,7 +47,7 @@ export const useScenarioStore = create<ScenarioState>()((set) => ({
   succeed: (result) => {
     set({ status: 'ready', scenarioId: result.scenarioId, result, error: null });
   },
-  fail: (message) => {
-    set({ status: 'error', error: message });
+  fail: (error) => {
+    set({ status: 'error', error });
   },
 }));

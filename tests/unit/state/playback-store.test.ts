@@ -92,4 +92,18 @@ describe('playback clock', () => {
     store().setScale('response');
     expect(store()).toMatchObject({ scale: 'response', durationS: 259_200, speed: 3600 });
   });
+
+  it('reveals a moment on the shortest scale that contains it, paused', () => {
+    store().load(100, 259_200);
+    store().setExtent('tsunami', 3600);
+    store().reveal(40);
+    expect(store()).toMatchObject({ scale: 'shaking', timeS: 40, playing: false });
+    store().reveal(600);
+    expect(store()).toMatchObject({ scale: 'tsunami', durationS: 3600, timeS: 600, speed: 30 });
+    store().reveal(30_000);
+    expect(store()).toMatchObject({ scale: 'response', timeS: 30_000, speed: 3600 });
+    // Beyond every scale: nothing changes.
+    store().reveal(1e9);
+    expect(store()).toMatchObject({ scale: 'response', timeS: 30_000 });
+  });
 });

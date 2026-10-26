@@ -151,3 +151,31 @@
   text-transform: uppercase;
   color: var(--color-fg-muted);
 }
+
+/*
+ * The scenario report (features/events) is portalled into the body only while printing: on
+ * paper it replaces the app shell, which is laid out for a fixed-height screen.
+ */
+[data-print-report] {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  body:has([data-print-report]) {
+    height: auto;
+    overflow: visible;
+    background: none;
+
+    > #root {
+      display: none;
+    }
+
+    > [data-print-report] {
+      display: block;
+    }
+  }
+}

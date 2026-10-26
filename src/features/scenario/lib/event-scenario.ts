@@ -1,8 +1,9 @@
+import { faultSource } from '@/data/fault-source';
 import type { Faults } from '@/data/schemas';
 import { cumulativeLengthsKm, kmAtLongitude, nearestOnPath } from '@/lib/math/polyline';
 import type { Scenario, ScenarioEvent } from '@/types/scenario';
 
-import { faultSource, PresetError } from './presets';
+import { PresetError } from './presets';
 
 /** Same seed as the presets, so a replay always reproduces. */
 const EVENT_SEED = 1;

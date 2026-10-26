@@ -7,7 +7,10 @@ import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&ur
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { faultSource } from '@/data/fault-source';
 import { useGridDataset, useRoadGraph } from '@/data/use-dataset';
+import { nearestOnPath } from '@/lib/math/polyline';
+import { useEditorStore } from '@/state/editor-store';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
 import { resolveFocusedStation, useTelemetryStore } from '@/state/telemetry-store';
@@ -27,8 +30,9 @@ import {
   MAX_BOUNDS,
   MAX_PITCH,
 } from '../lib/map-config';
+import { applyEditorLayers, FAULT_HIT_LAYER } from '../lib/editor-layers';
 import { applyLiveLayer, LIVE_LAYER } from '../lib/live-layers';
-import { applyReferenceLayers, STATION_LAYER } from '../lib/reference-layers';
+import { applyReferenceLayers, STATION_LAYER, type ReferenceData } from '../lib/reference-layers';
 import { SimulationRenderer } from '../lib/simulation-renderer';
 import { applyTerrain } from '../lib/terrain';
 import { MapLegend } from './map-legend';
@@ -42,6 +46,12 @@ function applyLiveState(map: MapLibreMap): void {
   const { events, selectedId } = useLiveStore.getState();
   const { theme, scenarioTab } = useUiStore.getState();
   applyLiveLayer(map, events, selectedId, theme, scenarioTab === 'live');
+}
+
+function applyEditorState(map: MapLibreMap, reference: ReferenceData): void {
+  const { theme, scenarioTab } = useUiStore.getState();
+  const { draft } = useEditorStore.getState();
+  applyEditorLayers(map, draft, reference.faults, theme, scenarioTab === 'editor');
 }
 
 function focusedStationIndex(): number {
@@ -109,6 +119,7 @@ export function MapView() {
       applyTerrain(map, currentTheme);
       applyReferenceLayers(map, referenceRef.current, currentTheme);
       applyLiveState(map);
+      applyEditorState(map, referenceRef.current);
       rendererRef.current?.attach();
       rendererRef.current?.render(currentTime());
     });
@@ -120,6 +131,21 @@ export function MapView() {
       map.getCanvas().style.cursor = 'pointer';
     });
     map.on('mouseleave', LIVE_LAYER, () => {
+      map.getCanvas().style.cursor = '';
+    });
+    // While the editor is open, a click near a fault moves the hypocentre there.
+    map.on('click', FAULT_HIT_LAYER, (event) => {
+      const id: unknown = event.features?.[0]?.properties.id;
+      const faults = referenceRef.current.faults;
+      if (typeof id !== 'string' || !faults) return;
+      const { trace } = faultSource(faults, id);
+      const { lng, lat } = event.lngLat;
+      useEditorStore.getState().pick(id, Math.round(nearestOnPath(trace, lng, lat).km));
+    });
+    map.on('mousemove', FAULT_HIT_LAYER, () => {
+      map.getCanvas().style.cursor = 'crosshair';
+    });
+    map.on('mouseleave', FAULT_HIT_LAYER, () => {
       map.getCanvas().style.cursor = '';
     });
     map.on('click', STATION_LAYER, (event) => {
@@ -175,6 +201,7 @@ export function MapView() {
     const map = mapRef.current;
     if (!map || !styleReadyRef.current) return;
     applyReferenceLayers(map, reference, useUiStore.getState().theme);
+    applyEditorState(map, reference);
     rendererRef.current?.resetFacilityStates();
     rendererRef.current?.render(currentTime());
   }, [reference]);
@@ -191,18 +218,27 @@ export function MapView() {
     renderer.render(currentTime());
   }, [renderer, theme]);
 
-  // Live catalog events follow the live store and show while the live list is open.
+  // Live catalog events and the editor preview follow their stores and show while their tab is
+  // open.
   useEffect(() => {
     const refresh = () => {
       const map = mapRef.current;
       if (map && styleReadyRef.current) applyLiveState(map);
     };
+    const refreshEditor = () => {
+      const map = mapRef.current;
+      if (map && styleReadyRef.current) applyEditorState(map, referenceRef.current);
+    };
     const unsubscribeLive = useLiveStore.subscribe(refresh);
+    const unsubscribeEditor = useEditorStore.subscribe(refreshEditor);
     const unsubscribeUi = useUiStore.subscribe((state, previous) => {
-      if (state.scenarioTab !== previous.scenarioTab) refresh();
+      if (state.scenarioTab === previous.scenarioTab) return;
+      refresh();
+      refreshEditor();
     });
     return () => {
       unsubscribeLive();
+      unsubscribeEditor();
       unsubscribeUi();
     };
   }, []);

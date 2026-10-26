@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ScenarioReport } from '@/features/events';
+import { SharedScenario } from '@/features/scenario';
 import { usePlaybackLoop, usePlaybackShortcuts } from '@/features/timeline';
 
 import { DesktopLayout } from './desktop-layout';
@@ -20,6 +22,8 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <SharedScenario />
+        <ScenarioReport />
         {layout === 'desktop' && <DesktopLayout />}
         {layout === 'tablet' && <TabletLayout />}
         {layout === 'phone' && <PhoneLayout />}

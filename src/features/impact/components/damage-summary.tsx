@@ -1,9 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import { formatNumber, formatPercent } from '@/lib/format';
+import { formatNumber, formatPercent, roundSignificant } from '@/lib/format';
 import type { DistrictDamage } from '@/types/damage';
-
-import { roundSignificant } from '../lib/round-significant';
 
 interface DamageSummaryProps {
   /** Damage of the districts the S wave has reached. */

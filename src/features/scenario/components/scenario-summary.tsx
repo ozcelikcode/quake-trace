@@ -5,6 +5,8 @@ import { useObservedStore } from '@/state/observed-store';
 import { useScenarioStore } from '@/state/scenario-store';
 import type { SimulationResult } from '@/types/simulation';
 
+import { ShareLinkButton } from './share-link-button';
+
 export function ScenarioSummary({ result }: { result: SimulationResult }) {
   const { t, i18n } = useTranslation();
   const number = (value: number, digits = 0) => formatNumber(value, i18n.language, digits);
@@ -28,8 +30,15 @@ export function ScenarioSummary({ result }: { result: SimulationResult }) {
     [t('scenario.summary.ruptureDuration'), `${number(rupture.ruptureDurationS, 1)} s`],
     [t('scenario.summary.computeTime'), `${number(result.computeMs)} ms`],
   ];
-  const sourceRows: [string, string][] =
-    origin && origin.kind !== 'preset'
+  const customRows: [string, string][] =
+    origin?.kind === 'custom'
+      ? [
+          [t('scenario.summary.customFault'), origin.faultId],
+          [t('scenario.summary.seed'), String(origin.seed)],
+        ]
+      : [];
+  const eventRows: [string, string][] =
+    origin && (origin.kind === 'replay' || origin.kind === 'event')
       ? [
           [
             t('scenario.summary.origin'),
@@ -51,12 +60,16 @@ export function ScenarioSummary({ result }: { result: SimulationResult }) {
           ],
         ]
       : [];
+  const sourceRows = [...customRows, ...eventRows];
 
   return (
     <section aria-labelledby="scenario-summary-title" className="space-y-2">
-      <h3 id="scenario-summary-title" className="label-micro">
-        {t('scenario.summary.title')}
-      </h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 id="scenario-summary-title" className="label-micro">
+          {t('scenario.summary.title')}
+        </h3>
+        <ShareLinkButton />
+      </div>
       <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-line bg-line">
         {rows.map(([label, value]) => (
           <div key={label} className="bg-surface-1 px-3 py-2">

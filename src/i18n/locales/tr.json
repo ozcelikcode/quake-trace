@@ -34,7 +34,7 @@
     "events": {
       "title": "Olaylar",
       "emptyTitle": "Olay kaydı boş",
-      "emptyBody": "Alarm, eşik aşımı ve dalga varışları zaman damgasıyla burada listelenir."
+      "emptyBody": "Kırılma, erken uyarı, dalga varışları, tesis kayıpları, tsunami ve artçılar senaryo ilerledikçe zaman damgasıyla burada listelenir."
     },
     "info": {
       "title": "Bilgi"
@@ -118,7 +118,9 @@
         "ready": "{{count}} istasyon (KOERI)",
         "none": "bu olay için yok",
         "error": "erişilemiyor"
-      }
+      },
+      "customFault": "Fay",
+      "seed": "Seed"
     },
     "presets": {
       "north-marmara": {
@@ -141,8 +143,15 @@
     "sources": "Senaryo kaynakları",
     "tabs": {
       "presets": "Hazır",
+      "editor": "Editör",
       "replay": "Tarihsel",
       "live": "Canlı"
+    },
+    "linkError": "Bağlantıdaki senaryo okunamadı. Hazır bir senaryo seçin ya da editörde yeniden oluşturun.",
+    "share": {
+      "idle": "Bağlantıyı kopyala",
+      "copied": "Kopyalandı",
+      "failed": "Adres çubuğundan kopyalayın"
     }
   },
   "impact": {
@@ -298,5 +307,85 @@
     "tooSmall": "Simülasyon için M {{magnitude}} ve üstü gerekir.",
     "simulate": "Simüle et",
     "note": "AFAD, Kandilli (KOERI), EMSC ve USGS’ten son 7 günün Marmara bölgesi depremleri; 30 s ve 30 km içindeki kayıtlar birleştirilir, değerler önce ulusal kurumdan alınır. Dakikada bir yenilenir. Resmî uyarı sistemi değildir."
+  },
+  "editor": {
+    "title": "Senaryo editörü",
+    "fault": "Fay",
+    "faultOption": "{{id}} · {{type}} · {{length}} km",
+    "faultTypes": {
+      "normal": "normal",
+      "reverse": "ters",
+      "right-lateral": "sağ yanal",
+      "left-lateral": "sol yanal"
+    },
+    "magnitude": "Büyüklük",
+    "magnitudeRange": "Mw {{min}} – {{max}} (EFSM20 en büyük magnitüd, %95)",
+    "hypocenter": "Hiposantr",
+    "alongTrace": "{{km}} / {{total}} km",
+    "mapHint": "Haritada bir faya tıklayarak da yerleştirebilirsiniz.",
+    "depth": "Odak derinliği",
+    "seed": "Seed",
+    "randomSeed": "Rastgele seed",
+    "seedHint": "Sentetik kayıtları, erken uyarı saçılımını ve artçıları belirler; aynı seed aynı sonucu verir.",
+    "run": "Simüle et"
+  },
+  "events": {
+    "title": "Olay günlüğü",
+    "count": "{{count}} / {{total}}",
+    "upcoming_one": "{{count}} kayıt daha ileride",
+    "upcoming_other": "{{count}} kayıt daha ileride",
+    "log": {
+      "origin": "Kırılma başladı · Mw {{mw}}, {{depth}} km derinlik",
+      "ruptureEnd": "Kırılma durdu · {{length}} km",
+      "detection": "İlk istasyon tetiklendi · {{station}}",
+      "alert": "Erken uyarı alarmı · tahmini M {{magnitude}}, konum hatası {{error}} km",
+      "sArrival": "S dalgası {{province}} iline ulaştı · {{district}}, MMI {{mmi}}",
+      "strongest": "En güçlü sarsıntı · {{district}} ({{province}}), MMI {{mmi}}",
+      "facilityOut": {
+        "hospital_one": "Hastane olası hizmet dışı · toplam {{count}}",
+        "hospital_other": "Hastaneler olası hizmet dışı · toplam {{count}}",
+        "fireStation_one": "İtfaiye istasyonu olası hizmet dışı · toplam {{count}}",
+        "fireStation_other": "İtfaiye istasyonları olası hizmet dışı · toplam {{count}}",
+        "police_one": "Emniyet binası olası hizmet dışı · toplam {{count}}",
+        "police_other": "Emniyet binaları olası hizmet dışı · toplam {{count}}"
+      },
+      "bridgeClosed_one": "Köprü kapandı · toplam {{count}}",
+      "bridgeClosed_other": "Köprüler kapanıyor · toplam {{count}}",
+      "networkCongested": "Baz istasyonları tıkanmaya başladı · {{formatted}} istasyon",
+      "tsunami": "Tsunami ilk kıyıya ulaştı · {{district}}, {{height}} m",
+      "aftershock": "Artçı deprem · M {{magnitude}}"
+    },
+    "export": {
+      "title": "Dışa aktar",
+      "report": "Rapor (PDF)",
+      "geojson": "GeoJSON",
+      "csv": "CSV",
+      "note": "Rapor yazdırma penceresinde PDF olarak kaydedilir. GeoJSON ve CSV ilçe sonuçlarını içerir; dosyalar simülasyon çıktısıdır.",
+      "disclaimer": "Bu bir simülasyondur, resmi uyarı ya da kesin hasar bilgisi değildir."
+    }
+  },
+  "report": {
+    "simulation": "SİMÜLASYON · resmi uyarı sistemi değildir",
+    "title": "quakeTrace senaryo raporu",
+    "custom": "Editör senaryosu · fay {{fault}}, seed {{seed}}",
+    "generated": "Oluşturulma: {{time}}",
+    "hypocenter": "Hiposantr",
+    "facilitiesOut": {
+      "hospital": "Olası hizmet dışı hastane",
+      "fireStation": "Olası hizmet dışı itfaiye",
+      "police": "Olası hizmet dışı emniyet"
+    },
+    "cutOff": "Karayoluyla ulaşılamayan ilçe",
+    "aftershockCount": "72 saatte M ≥ 3",
+    "aftershockLargest": "En büyük artçı",
+    "aftershockM5": "M ≥ 5 artçı",
+    "sections": {
+      "scenario": "Senaryo",
+      "districts": "En güçlü sarsılan {{count}} ilçe",
+      "methods": "Yöntem ve sınırlar"
+    },
+    "methods": {
+      "shaking": "Sonlu fay kırılması (Wells ve Coppersmith 1994), IASP91 seyahat süreleri, Akkar-Sandıkkaya-Bommer (2014) yer hareketi medyanı ve USGS Vs30 zemin terimi, Worden vd. (2012) şiddet dönüşümü. Fay geometrisi EFSM20."
+    }
   }
 }
