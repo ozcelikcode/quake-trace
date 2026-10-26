@@ -2,13 +2,18 @@ import { useTranslation } from 'react-i18next';
 
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { MMI_ANCHORS, mmiRoman } from '@/lib/color/mmi';
-import { formatCompact } from '@/lib/format';
+import { formatCompact, formatNumber } from '@/lib/format';
 import { useScenarioStore } from '@/state/scenario-store';
+import { useTsunamiStore } from '@/state/tsunami-store';
 import { useUiStore, type MapRaster } from '@/state/ui-store';
 import { IMPAIRMENTS } from '@/types/routing';
 
-import { LOAD_ANCHORS } from '../lib/layer-palette';
-import { BLOCKED_DENSITY_MAX, BLOCKED_DENSITY_MIN } from '../lib/simulation-frames';
+import { LOAD_ANCHORS, TSUNAMI_NEG, TSUNAMI_POS } from '../lib/layer-palette';
+import {
+  BLOCKED_DENSITY_MAX,
+  BLOCKED_DENSITY_MIN,
+  TSUNAMI_SCALE_M,
+} from '../lib/simulation-frames';
 
 const gradient = (anchors: readonly (readonly [number, number, number])[]) =>
   `linear-gradient(to right, ${anchors
@@ -21,72 +26,90 @@ const MMI_TICKS = [2, 4, 6, 8, 10];
 const LOAD_TICKS = [BLOCKED_DENSITY_MIN, 100, 1000, BLOCKED_DENSITY_MAX];
 const BRIDGE_CLOSED = IMPAIRMENTS.indexOf('bridgeClosed');
 
+const TSUNAMI_GRADIENT = `linear-gradient(to right, rgb(${TSUNAMI_NEG.join(' ')}), transparent, rgb(${TSUNAMI_POS.join(' ')}))`;
+const TSUNAMI_TICKS = [-TSUNAMI_SCALE_M, 0, TSUNAMI_SCALE_M];
+const RASTERS: readonly MapRaster[] = ['intensity', 'network', 'tsunami'];
+
 function isMapRaster(value: string): value is MapRaster {
-  return value === 'intensity' || value === 'network';
+  return (RASTERS as readonly string[]).includes(value);
 }
 
-/** Raster scale (intensity or blocked calls) and keys, shown while a scenario is loaded. */
+/** One scale: gradient bar and tick labels spread evenly underneath. */
+function Scale({ gradient: background, ticks }: { gradient: string; ticks: string[] }) {
+  return (
+    <div>
+      <div className="h-2 rounded-full" style={{ backgroundImage: background }} />
+      <div className="mt-1 flex justify-between num text-micro text-fg-muted">
+        {ticks.map((tick) => (
+          <span key={tick}>{tick}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Raster scale (intensity, blocked calls or sea surface) and keys, while a scenario is loaded. */
 export function MapLegend() {
   const { t, i18n } = useTranslation();
   const result = useScenarioStore((state) => state.result);
+  const tsunamiReady = useTsunamiStore((state) => state.result !== null);
   const raster = useUiStore((state) => state.mapRaster);
   const setRaster = useUiStore((state) => state.setMapRaster);
   if (!result) return null;
-  const showNetwork = raster === 'network' && result.network !== null;
+  const available: Record<MapRaster, boolean> = {
+    intensity: true,
+    network: result.network !== null,
+    tsunami: tsunamiReady,
+  };
+  const shown = available[raster] ? raster : 'intensity';
+  const labels: Record<MapRaster, string> = {
+    intensity: t('map.legend.rasterIntensity'),
+    network: t('map.legend.rasterNetwork'),
+    tsunami: t('map.legend.rasterTsunami'),
+  };
+  const scales: Record<MapRaster, { title: string; gradient: string; ticks: string[] }> = {
+    intensity: {
+      title: t('map.legend.intensity'),
+      gradient: MMI_GRADIENT,
+      ticks: MMI_TICKS.map(mmiRoman),
+    },
+    // Ticks 10, 100, 1,000, 10,000 sit evenly on the logarithmic scale.
+    network: {
+      title: t('map.legend.network'),
+      gradient: LOAD_GRADIENT,
+      ticks: LOAD_TICKS.map((density) => formatCompact(density, i18n.language)),
+    },
+    tsunami: {
+      title: t('map.legend.tsunami'),
+      gradient: TSUNAMI_GRADIENT,
+      ticks: TSUNAMI_TICKS.map(
+        (value) => `${value > 0 ? '+' : ''}${formatNumber(value, i18n.language, 1)}`,
+      ),
+    },
+  };
+  const scale = scales[shown];
 
   return (
-    <div className="pointer-events-none absolute bottom-16 left-3 z-10 w-60 space-y-2 rounded-panel border border-line bg-surface-1/90 p-3 shadow-float backdrop-blur-sm max-sm:top-14 max-sm:bottom-auto max-sm:w-48 max-sm:p-2">
-      {result.network && (
+    <div className="pointer-events-none absolute bottom-16 left-3 z-10 w-60 space-y-2 rounded-panel border border-line bg-surface-1/90 p-3 shadow-float backdrop-blur-sm max-sm:top-14 max-sm:bottom-auto max-sm:w-52 max-sm:p-2">
+      {available.network && (
         <ToggleGroup
           type="single"
-          value={raster}
+          value={shown}
           onValueChange={(value) => {
             if (isMapRaster(value)) setRaster(value);
           }}
           aria-label={t('map.legend.raster')}
           className="pointer-events-auto w-full"
         >
-          <ToggleGroupItem value="intensity" className="flex-1">
-            {t('map.legend.rasterIntensity')}
-          </ToggleGroupItem>
-          <ToggleGroupItem value="network" className="flex-1">
-            {t('map.legend.rasterNetwork')}
-          </ToggleGroupItem>
+          {RASTERS.filter((option) => available[option]).map((option) => (
+            <ToggleGroupItem key={option} value={option} className="flex-1 px-1">
+              {labels[option]}
+            </ToggleGroupItem>
+          ))}
         </ToggleGroup>
       )}
-      <p className="label-micro">
-        {showNetwork ? t('map.legend.network') : t('map.legend.intensity')}
-      </p>
-      <div>
-        <div
-          className="h-2 rounded-full"
-          style={{ backgroundImage: showNetwork ? LOAD_GRADIENT : MMI_GRADIENT }}
-        />
-        {showNetwork ? (
-          <div className="relative mt-1 h-4 num text-micro text-fg-muted">
-            {LOAD_TICKS.map((density) => {
-              const position =
-                Math.log(density / BLOCKED_DENSITY_MIN) /
-                Math.log(BLOCKED_DENSITY_MAX / BLOCKED_DENSITY_MIN);
-              return (
-                <span
-                  key={density}
-                  className="absolute -translate-x-1/2 first:translate-x-0 last:-translate-x-full"
-                  style={{ left: `${String(position * 100)}%` }}
-                >
-                  {formatCompact(density, i18n.language)}
-                </span>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-1 flex justify-between num text-micro text-fg-muted">
-            {MMI_TICKS.map((mmi) => (
-              <span key={mmi}>{mmiRoman(mmi)}</span>
-            ))}
-          </div>
-        )}
-      </div>
+      <p className="label-micro">{scale.title}</p>
+      <Scale gradient={scale.gradient} ticks={scale.ticks} />
       <ul className="space-y-1 text-caption text-fg-secondary max-sm:hidden">
         <li className="flex items-center gap-2">
           <span aria-hidden className="h-0.5 w-5 rounded-full bg-wave-p" />

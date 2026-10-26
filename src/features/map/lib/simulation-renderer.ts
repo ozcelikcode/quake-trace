@@ -9,9 +9,10 @@ import type { MapRaster, Theme } from '@/state/ui-store';
 import type { GridSpec } from '@/types/grid';
 import type { RoadGraph } from '@/types/roads';
 import type { SimulationResult, StationRecord } from '@/types/simulation';
+import type { TsunamiResult } from '@/types/tsunami';
 
 import { overlayAnchorLayerId } from './layer-order';
-import { LOAD_ANCHORS, REFERENCE_PALETTE } from './layer-palette';
+import { LOAD_ANCHORS, REFERENCE_PALETTE, TSUNAMI_NEG, TSUNAMI_POS } from './layer-palette';
 import { FACILITY_STATUS_CODES, REFERENCE_SOURCES } from './reference-layers';
 import { TERRAIN_EXAGGERATION } from './map-config';
 import {
@@ -29,6 +30,9 @@ import {
   mmiLookupTable,
   paintIntensity,
   paintNetwork,
+  paintTsunami,
+  tsunamiCellIndex,
+  tsunamiLookupTable,
   rupturedPath,
   wavefrontCurtain,
   type CurtainBuffers,
@@ -101,6 +105,8 @@ export class SimulationRenderer {
   readonly #overlay: MapLibreOverlay;
   readonly #lookup = mmiLookupTable();
   readonly #loadLookup = loadLookupTable(LOAD_ANCHORS);
+  readonly #tsunamiLookup = tsunamiLookupTable(TSUNAMI_NEG, TSUNAMI_POS);
+  #tsunami: { result: TsunamiResult; cellIndex: Int32Array } | null = null;
   #raster: MapRaster = 'intensity';
   #roads: RoadGraph | undefined;
   #result: SimulationResult | null = null;
@@ -143,6 +149,13 @@ export class SimulationRenderer {
     this.#lastTimeS = Number.NaN;
   }
 
+  /** The tsunami of the current scenario, drawn when the tsunami raster is chosen. */
+  setTsunami(result: TsunamiResult | null): void {
+    const matches = result && result.scenarioId === this.#result?.scenarioId;
+    this.#tsunami = matches ? { result, cellIndex: tsunamiCellIndex(result) } : null;
+    this.#lastTimeS = Number.NaN;
+  }
+
   /** The road graph the routing result indexes; corridors need it for their geometry. */
   setRoads(graph: RoadGraph | undefined): void {
     if (graph === this.#roads) return;
@@ -159,6 +172,7 @@ export class SimulationRenderer {
 
   setResult(result: SimulationResult | null): void {
     this.#result = result;
+    if (this.#tsunami?.result.scenarioId !== result?.scenarioId) this.#tsunami = null;
     this.#blindZone = null;
     this.resetFacilityStates();
     this.#lastTimeS = Number.NaN;
@@ -271,7 +285,17 @@ export class SimulationRenderer {
     this.#lastTimeS = timeS;
 
     if (this.#pixels && this.#rowMap && this.#image) {
-      if (this.#raster === 'network' && result.network) {
+      const tsunami = this.#tsunami;
+      if (this.#raster === 'tsunami' && tsunami) {
+        paintTsunami(
+          this.#pixels,
+          this.#rowMap,
+          tsunami.result,
+          tsunami.cellIndex,
+          this.#tsunamiLookup,
+          timeS,
+        );
+      } else if (this.#raster === 'network' && result.network) {
         paintNetwork(
           this.#pixels,
           result.grid,

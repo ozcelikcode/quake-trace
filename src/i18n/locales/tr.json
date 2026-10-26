@@ -48,7 +48,14 @@
     "seek": "Simülasyon zamanı",
     "speed": "Oynatma hızı",
     "detection": "İlk algılama",
-    "alert": "Erken uyarı alarmı"
+    "alert": "Erken uyarı alarmı",
+    "scale": "Zaman ölçeği",
+    "scales": {
+      "shaking": "Sarsıntı",
+      "tsunami": "Tsunami"
+    },
+    "tsunamiArrival": "Tsunami ilk kıyıya ulaşır",
+    "tsunamiComputing": "Tsunami hesaplanıyor"
   },
   "map": {
     "label": "Marmara bölgesi 3B topografik harita",
@@ -68,7 +75,9 @@
       "corridors": "Müdahale güzergâhları (kalınlık: kullanım)",
       "debris": "Molozla yavaşlayan sokak",
       "bridgeClosed": "Kapalı köprü",
-      "sites": "Baz istasyonu: normal / tıkalı / devre dışı"
+      "sites": "Baz istasyonu: normal / tıkalı / devre dışı",
+      "rasterTsunami": "Tsunami",
+      "tsunami": "Deniz yüzeyi (m)"
     }
   },
   "sheet": {
@@ -217,5 +226,21 @@
     "rowCutOff": "karayolu bağlantısı kesik",
     "note": "OpenStreetMap ana yollarında yasal hız sınırlarıyla, hizmetteki itfaiyelerden ve hastanelere en kısa güzergâhlar. Köprüler Hazus kırılganlığıyla kapanır; dar kent içi sokaklar beklenen bina hasarıyla yavaşlar (varsayım).",
     "rowUnchanged": "itfaiye {{value}} dk"
+  },
+  "tsunami": {
+    "title": "Tsunami (simülasyon, eğitim amaçlı)",
+    "computing": "Dalga Marmara Denizi üzerinde hesaplanıyor…",
+    "error": "Tsunami hesaplanamadı.",
+    "slip": "Ortalama kayma",
+    "seafloor": "Deniz tabanı yükselme / çökme",
+    "firstArrival": "İlk kıyı varışı",
+    "highest": "En yüksek kıyı dalgası",
+    "reached": "{{count}} / {{total}} kıyı ilçesine ulaştı",
+    "row": "{{arrival}} dk · {{height}} m",
+    "metres": "{{value}} m",
+    "minutesAt": "{{value}} dk, {{district}}",
+    "metresAt": "{{value}} m, {{district}}",
+    "openScale": "Tsunami zaman ölçeğini göster",
+    "note": "Kırılmanın Okada (1985) deniz tabanı hareketi, EMODnet batimetrisinde (500 m) doğrusal sığ su dalgaları. Karaya tırmanma ve heyelan kaynakları yok; yükseklikler kıyıya yakın açık deniz tahminidir."
   }
 }

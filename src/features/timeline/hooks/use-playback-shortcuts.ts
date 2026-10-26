@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
 
-import { usePlaybackStore } from '@/state/playback-store';
+import { TIMELINE_SCALES, usePlaybackStore } from '@/state/playback-store';
 
 /** Controls that handle these keys themselves keep them. */
 const INTERACTIVE =
   'button, a, input, textarea, select, [role="slider"], [role="tab"], [role="radio"], [contenteditable="true"]';
 
-const STEP_S = 1;
-const JUMP_S = 10;
-
-/** Space plays or pauses; ←/→ step one second, with Shift ten seconds (designSystem.md). */
+/**
+ * Space plays or pauses; ←/→ step and Shift+←/→ jump by the active scale's steps (one and ten
+ * seconds while shaking, designSystem.md).
+ */
 export function usePlaybackShortcuts(): void {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -18,7 +18,8 @@ export function usePlaybackShortcuts(): void {
       const playback = usePlaybackStore.getState();
       if (playback.durationS === 0) return;
 
-      const step = event.shiftKey ? JUMP_S : STEP_S;
+      const { stepS, jumpS } = TIMELINE_SCALES[playback.scale];
+      const step = event.shiftKey ? jumpS : stepS;
       if (event.key === ' ') playback.toggle();
       else if (event.key === 'ArrowRight') playback.seek(playback.timeS + step);
       else if (event.key === 'ArrowLeft') playback.seek(playback.timeS - step);

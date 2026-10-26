@@ -66,7 +66,7 @@ Physical quantities:
 | `--wave-p` | P wave (cool cyan-blue) |
 | `--wave-s` | S wave (amber to red) |
 | `--mmi-1` … `--mmi-10` | USGS ShakeMap intensity scale, kept close to the standard for recognizability |
-| `--tsunami-pos` / `--tsunami-neg` | Diverging sea-surface scale |
+| `--tsunami-pos` / `--tsunami-neg` | Diverging sea-surface scale (coral red / blue), identical in both themes; mirrored as `TSUNAMI_POS` / `TSUNAMI_NEG` in `layer-palette.ts` |
 | `--load-0` … `--load-4` | Sequential scale for the network raster (indigo → magenta → coral → amber), identical in both themes; mirrored as `LOAD_ANCHORS` in `layer-palette.ts` |
 
 Rules: every pair used for text meets WCAG 2.2 AA (4.5:1 body, 3:1 large text and UI). Data palettes are checked for color-vision deficiency; state is never carried by color alone (icon, label or pattern accompanies it).
@@ -112,7 +112,8 @@ Rules: every pair used for text meets WCAG 2.2 AA (4.5:1 body, 3:1 large text an
 - Built (phase 4): status-bar alert chip (warning text when detected, critical fill with one short emphasis on alert, magnitude only on phones, live region), EEW summary readouts, district warning column (countdown `S − 12 s`, lead time `+2,2 s`, blind zone in `critical` text), timeline event ticks, map legend entries for blind zone and estimated epicentre. Phone status bar keeps the brand mark only.
 - Built (phase 5): damage summary readouts (rounded to 2 significant figures with ≈), facility state summary (ok / warning / critical dots with labels), district damage line, map facility points hidden until reached, then in state colours; legend entry.
 - Built (phase 6): network summary (site states with dots, people on congested sites, calls not carried, synthetic-site note), emergency response summary (median fire response before/after, slowed street km, closed bridges, largest delay, cut-off districts in critical text), district row response text, map legend segmented control Intensity / Network with the load scale (compact ticks), corridor / debris / bridge / site keys. Phone: the legend sits at the top of the map, below the watermark, with scale and control only (keys hidden), so the bottom sheet never covers the control. Percentages use `formatPercent` (`%4,0` in Turkish, `4.0%` in English).
-- To build: timeline scale presets, layer toggle row, event log row, toast for alerts, popover, dialog.
+- Built (phase 7): timeline scale segmented control (Shaking / Tsunami, tsunami disabled with "…" while computing) and per-scale speeds; tsunami summary (status line in a live region while computing, slip, seafloor uplift/subsidence, first arrival and highest coastal wave with district, coastal districts listed as they are reached, button to open the tsunami scale, educational note); legend third shading option Tsunami with the diverging scale.
+- To build: layer toggle row, event log row, toast for alerts, popover, dialog.
 - MMI colours come from `src/lib/color/mmi.ts` (ShakeMap scale); the same module feeds the raster, legend and swatches.
 - Touch targets grow on coarse pointers (`pointer-coarse:` variants) to at least 44 px.
 - Every interactive component has visible focus, hover, active, disabled and loading states.

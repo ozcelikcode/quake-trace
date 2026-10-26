@@ -5,7 +5,7 @@ export type Theme = 'dark' | 'light';
 export type DrawerSide = 'left' | 'right';
 export type PanelId = 'scenario' | 'telemetry' | 'impact' | 'events';
 /** Quantity drawn as the map raster while a scenario is loaded. */
-export type MapRaster = 'intensity' | 'network';
+export type MapRaster = 'intensity' | 'network' | 'tsunami';
 
 /** Panels shown in the right column on desktop and in the right drawer on tablets. */
 export const rightPanelIds = [

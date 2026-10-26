@@ -32,6 +32,8 @@
   --color-load-2: var(--load-2);
   --color-load-3: var(--load-3);
   --color-load-4: var(--load-4);
+  --color-tsunami-pos: var(--tsunami-pos);
+  --color-tsunami-neg: var(--tsunami-neg);
 
   --font-*: initial;
   --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;

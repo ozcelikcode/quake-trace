@@ -11,6 +11,7 @@ import { useGridDataset, useRoadGraph } from '@/data/use-dataset';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
 import { resolveFocusedStation, useTelemetryStore } from '@/state/telemetry-store';
+import { useTsunamiStore } from '@/state/tsunami-store';
 import { useUiStore } from '@/state/ui-store';
 
 import { useReferenceData } from '../hooks/use-reference-data';
@@ -175,6 +176,18 @@ export function MapView() {
     renderer.render(currentTime());
   }, [renderer, mapRaster]);
 
+  // The tsunami scale shows the sea surface; leaving it returns to the intensity.
+  useEffect(
+    () =>
+      usePlaybackStore.subscribe((state, previous) => {
+        if (state.scale === previous.scale) return;
+        const ui = useUiStore.getState();
+        if (state.scale === 'tsunami') ui.setMapRaster('tsunami');
+        else if (ui.mapRaster === 'tsunami') ui.setMapRaster('intensity');
+      }),
+    [],
+  );
+
   // Frames are drawn outside React: the clock changes up to 60 times a second.
   useEffect(() => {
     if (!renderer) return;
@@ -187,6 +200,12 @@ export function MapView() {
       renderer.setFocusedStation(focusedStationIndex());
       renderer.render(currentTime());
     });
+    renderer.setTsunami(useTsunamiStore.getState().result);
+    const unsubscribeTsunami = useTsunamiStore.subscribe((state, previous) => {
+      if (state.result === previous.result) return;
+      renderer.setTsunami(state.result);
+      renderer.render(currentTime());
+    });
     const unsubscribeFocus = useTelemetryStore.subscribe((state, previous) => {
       if (state.focusedStationId === previous.focusedStationId) return;
       renderer.setFocusedStation(focusedStationIndex());
@@ -197,6 +216,7 @@ export function MapView() {
     });
     return () => {
       unsubscribeResult();
+      unsubscribeTsunami();
       unsubscribeFocus();
       unsubscribeClock();
     };

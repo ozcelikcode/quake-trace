@@ -6,8 +6,15 @@ import { Slider } from '@/components/ui/slider';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/cn';
 import { formatClock } from '@/lib/format';
-import { isPlaybackSpeed, PLAYBACK_SPEEDS, usePlaybackStore } from '@/state/playback-store';
+import {
+  isPlaybackSpeed,
+  isTimelineScale,
+  TIMELINE_SCALES,
+  timelineScales,
+  usePlaybackStore,
+} from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
+import { useTsunamiStore } from '@/state/tsunami-store';
 
 interface TimelineBarProps {
   compact?: boolean;
@@ -23,24 +30,43 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
   const toggle = usePlaybackStore((state) => state.toggle);
   const seek = usePlaybackStore((state) => state.seek);
   const setSpeed = usePlaybackStore((state) => state.setSpeed);
+  const scale = usePlaybackStore((state) => state.scale);
+  const extents = usePlaybackStore((state) => state.extents);
+  const setScale = usePlaybackStore((state) => state.setScale);
+  const tsunamiStatus = useTsunamiStore((state) => state.status);
+  const firstCoastS = useTsunamiStore((state) =>
+    state.result?.coast.reduce((min, c) => Math.min(min, c.arrivalS), Number.POSITIVE_INFINITY),
+  );
   const loaded = durationS > 0;
   const warning = useScenarioStore((state) => state.result?.earlyWarning);
-  const markers = warning
-    ? [
-        {
-          key: 'detection',
-          label: t('timeline.detection'),
-          timeS: warning.firstTriggerS,
-          className: 'bg-wave-p',
-        },
-        {
-          key: 'alert',
-          label: t('timeline.alert'),
-          timeS: warning.alertS,
-          className: 'bg-critical',
-        },
-      ]
-    : [];
+  const markers = [
+    ...(warning
+      ? [
+          {
+            key: 'detection',
+            label: t('timeline.detection'),
+            timeS: warning.firstTriggerS,
+            className: 'bg-wave-p',
+          },
+          {
+            key: 'alert',
+            label: t('timeline.alert'),
+            timeS: warning.alertS,
+            className: 'bg-critical',
+          },
+        ]
+      : []),
+    ...(firstCoastS !== undefined && Number.isFinite(firstCoastS)
+      ? [
+          {
+            key: 'tsunami',
+            label: t('timeline.tsunamiArrival'),
+            timeS: firstCoastS,
+            className: 'bg-tsunami-pos',
+          },
+        ]
+      : []),
+  ].filter((marker) => marker.timeS <= durationS);
 
   return (
     <section
@@ -97,6 +123,30 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
           <span className="hidden w-16 shrink-0 text-right num text-caption text-fg-muted sm:inline">
             {formatClock(durationS)}
           </span>
+          <ToggleGroup
+            type="single"
+            value={scale}
+            aria-label={t('timeline.scale')}
+            onValueChange={(value) => {
+              if (isTimelineScale(value)) setScale(value);
+            }}
+          >
+            {timelineScales.map((option) => (
+              <ToggleGroupItem
+                key={option}
+                value={option}
+                disabled={extents[option] <= 0}
+                title={
+                  option === 'tsunami' && tsunamiStatus === 'computing'
+                    ? t('timeline.tsunamiComputing')
+                    : undefined
+                }
+              >
+                {t(`timeline.scales.${option}`)}
+                {option === 'tsunami' && tsunamiStatus === 'computing' && '…'}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
           {!compact && (
             <ToggleGroup
               type="single"
@@ -104,10 +154,10 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
               aria-label={t('timeline.speed')}
               onValueChange={(value) => {
                 const next = Number(value);
-                if (isPlaybackSpeed(next)) setSpeed(next);
+                if (isPlaybackSpeed(next, scale)) setSpeed(next);
               }}
             >
-              {PLAYBACK_SPEEDS.map((option) => (
+              {TIMELINE_SCALES[scale].speeds.map((option) => (
                 <ToggleGroupItem key={option} value={String(option)} className="num">
                   {option}×
                 </ToggleGroupItem>

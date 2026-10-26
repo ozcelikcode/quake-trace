@@ -2,9 +2,15 @@
 
 ## Current focus
 
-Phase 6 (cell network load, emergency routing and corridors, network heatmap) is complete on branch `feat/phase-6-network-routing` (from phase 5). Next is phase 7: tsunami.
+Phase 7 (tsunami) is complete on branch `feat/phase-7-tsunami` (from phase 6). Next is phase 8: aftershocks (ETAS) and the response timeline scale.
 
-## Recent changes (2026-10-26, phase 6)
+## Recent changes (2026-10-26, phase 7)
+
+- Git: the working copy was found on `main` again at the start; phase 7 was branched from phase 6 (nothing lost).
+- Engine: `tsunami` — `okada.ts` (Okada 1985 uz, GeoClaw port, Table 2 tests), `source.ts` (rectangles from the ruptured trace, D = M0/μA, seafloor uplift), `shallow-water.ts` (linear C-grid, forward-backward, open edges), `tsunami.ts` (one hour, 15 s frames on the 1 km grid, coastal summaries). `types/tsunami.ts`.
+- App: `workers/tsunami.worker.ts` + client, `state/tsunami-store.ts`, playback store with `TIMELINE_SCALES` (Shaking / Tsunami), timeline scale control and tsunami marker, map tsunami raster and legend option, feature `tsunami` (impact summary), `--tsunami` tokens.
+
+## Changes (2026-10-26, phase 6)
 
 - Git: phase 3–5 branches pushed with upstream after the user signed in with `gh` (`gh auth setup-git`).
 - Engine: `grid` (DEGURBA settlement classes, point index), `network` (synthetic sites at ITU-R M.2135 spacing, raster service areas, DOCOMO/Bagrow call demand, host-building loss), `routing` (Dijkstra, KTY speeds, Hazus HWB28 bridges, debris slowdown, district response times, corridors). `districtDamage` also returns the per-cell loss ratio; `SimulationResult.network` and `.routing`; facility kinds and thresholds moved to `types/damage.ts`; `RoadGraph` type moved to `types/roads.ts`.
@@ -36,7 +42,7 @@ Phase 6 (cell network load, emergency routing and corridors, network heatmap) is
 
 ## Next steps
 
-1. Phase 7: tsunami (Okada 1985 source, linear shallow water on the 500 m bathymetry, coastal arrivals), in its own worker.
+1. Phase 8: ETAS aftershocks over 72 h and the Response timeline scale (extends `TIMELINE_SCALES`).
 2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.
 

@@ -48,7 +48,14 @@
     "seek": "Simulation time",
     "speed": "Playback speed",
     "detection": "First detection",
-    "alert": "Early-warning alert"
+    "alert": "Early-warning alert",
+    "scale": "Timeline scale",
+    "scales": {
+      "shaking": "Shaking",
+      "tsunami": "Tsunami"
+    },
+    "tsunamiArrival": "Tsunami reaches the first coast",
+    "tsunamiComputing": "Tsunami is being computed"
   },
   "map": {
     "label": "3D topographic map of the Marmara region",
@@ -68,7 +75,9 @@
       "corridors": "Response routes (width: use)",
       "debris": "Street slowed by debris",
       "bridgeClosed": "Closed bridge",
-      "sites": "Cell site: normal / congested / down"
+      "sites": "Cell site: normal / congested / down",
+      "rasterTsunami": "Tsunami",
+      "tsunami": "Sea surface (m)"
     }
   },
   "sheet": {
@@ -217,5 +226,21 @@
     "rowCutOff": "cut off by road",
     "note": "Shortest routes on OpenStreetMap major roads at legal speed limits, from fire stations and to hospitals still in service. Bridges close from Hazus fragility; narrow urban streets slow with expected building loss (assumption).",
     "rowUnchanged": "fire {{value}} min"
+  },
+  "tsunami": {
+    "title": "Tsunami (simulation, educational)",
+    "computing": "Computing the wave over the Marmara Sea…",
+    "error": "The tsunami could not be computed.",
+    "slip": "Average slip",
+    "seafloor": "Seafloor uplift / subsidence",
+    "firstArrival": "First coastal arrival",
+    "highest": "Highest coastal wave",
+    "reached": "{{count}} of {{total}} coastal districts reached",
+    "row": "{{arrival}} min · {{height}} m",
+    "metres": "{{value}} m",
+    "minutesAt": "{{value}} min, {{district}}",
+    "metresAt": "{{value}} m, {{district}}",
+    "openScale": "Show the tsunami timeline",
+    "note": "Okada (1985) seafloor motion of the rupture, linear shallow-water waves on EMODnet bathymetry (500 m). No run-up, no landslide sources; heights are offshore estimates near the coast."
   }
 }

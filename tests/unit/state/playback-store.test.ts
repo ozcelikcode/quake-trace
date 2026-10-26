@@ -6,7 +6,14 @@ const store = () => usePlaybackStore.getState();
 
 describe('playback clock', () => {
   beforeEach(() => {
-    usePlaybackStore.setState({ timeS: 0, durationS: 0, playing: false, speed: 1 });
+    usePlaybackStore.setState({
+      timeS: 0,
+      durationS: 0,
+      scale: 'shaking',
+      extents: { shaking: 0, tsunami: 0 },
+      playing: false,
+      speed: 1,
+    });
   });
 
   it('starts playing from the origin when a scenario loads', () => {
@@ -52,8 +59,34 @@ describe('playback clock', () => {
     expect(store().playing).toBe(false);
   });
 
-  it('accepts only the offered speeds', () => {
+  it('accepts only the offered speeds of each scale', () => {
     expect(isPlaybackSpeed(5)).toBe(true);
     expect(isPlaybackSpeed(3)).toBe(false);
+    expect(isPlaybackSpeed(60, 'tsunami')).toBe(true);
+    expect(isPlaybackSpeed(0.5, 'tsunami')).toBe(false);
+  });
+
+  it('switches to the tsunami scale only once it is available', () => {
+    store().load(100);
+    store().seek(50);
+    store().setScale('tsunami');
+    expect(store().scale).toBe('shaking');
+    store().setExtent('tsunami', 3600);
+    store().setScale('tsunami');
+    expect(store()).toMatchObject({ scale: 'tsunami', durationS: 3600, timeS: 50, speed: 30 });
+    store().seek(2000);
+    store().setScale('shaking');
+    expect(store()).toMatchObject({ scale: 'shaking', durationS: 100, timeS: 100, speed: 1 });
+  });
+
+  it('falls back to the shaking when the active scale is withdrawn, and resets on load', () => {
+    store().load(100);
+    store().setExtent('tsunami', 3600);
+    store().setScale('tsunami');
+    store().setExtent('tsunami', 0);
+    expect(store()).toMatchObject({ scale: 'shaking', durationS: 100 });
+    store().setExtent('tsunami', 3600);
+    store().load(80);
+    expect(store().extents).toEqual({ shaking: 80, tsunami: 0 });
   });
 });

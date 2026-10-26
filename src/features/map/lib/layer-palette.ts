@@ -20,6 +20,10 @@ interface ReferencePalette {
  * The load scale (--load-0 … --load-4 in src/styles/tokens.css), identical in both themes, as
  * RGB anchors for the network raster.
  */
+/** The diverging sea-surface scale (--tsunami-neg, --tsunami-pos), identical in both themes. */
+export const TSUNAMI_NEG: readonly [number, number, number] = [64, 148, 255];
+export const TSUNAMI_POS: readonly [number, number, number] = [255, 92, 76];
+
 export const LOAD_ANCHORS: readonly (readonly [number, number, number])[] = [
   [72, 52, 150],
   [136, 62, 176],

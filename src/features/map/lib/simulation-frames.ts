@@ -3,6 +3,7 @@ import { mmiColor } from '@/lib/color/mmi';
 import { isolineSegments } from '@/lib/math/isolines';
 import type { GridSpec } from '@/types/grid';
 import type { NetworkResult } from '@/types/network';
+import type { TsunamiResult } from '@/types/tsunami';
 
 /**
  * Per-frame geometry and pixels of a scenario, as pure functions of the simulation result and
@@ -145,6 +146,76 @@ export function paintNetwork(
       const fade = Math.min(1, (timeS - arrival) / SHAKING_FADE_S);
       const alpha = Math.round((color >>> 24) * fade);
       pixels[pixelRow + c] = ((alpha << 24) | (color & 0xffffff)) >>> 0;
+    }
+  }
+}
+
+/** Sea-surface elevation at which the tsunami colours saturate, m. */
+export const TSUNAMI_SCALE_M = 0.5;
+/** Elevation at which a cell becomes fully opaque; calmer water fades out, m. */
+const TSUNAMI_OPAQUE_M = 0.25;
+
+/**
+ * Sea surface → packed RGBA on the diverging tsunami scale: index 0–255 spans −0.5 m to +0.5 m,
+ * hue by sign, opacity rising with |η| so calm water stays clear.
+ */
+export function tsunamiLookupTable(
+  negative: readonly [number, number, number],
+  positive: readonly [number, number, number],
+  maxAlpha = 0.9,
+): Uint32Array {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    const eta = ((i - 127.5) / 127.5) * TSUNAMI_SCALE_M;
+    const [r, g, b] = eta < 0 ? negative : positive;
+    const alpha = Math.round(Math.min(1, Math.abs(eta) / TSUNAMI_OPAQUE_M) * maxAlpha * 255);
+    table[i] = ((alpha << 24) | (b << 16) | (g << 8) | r) >>> 0;
+  }
+  return table;
+}
+
+export function tsunamiIndex(etaM: number): number {
+  const k = Math.round(127.5 + (etaM / TSUNAMI_SCALE_M) * 127.5);
+  return Math.min(255, Math.max(0, k));
+}
+
+/** Index of each grid cell in the tsunami's sea-cell list, -1 on land. */
+export function tsunamiCellIndex(result: TsunamiResult): Int32Array {
+  const index = new Int32Array(result.grid.nx * result.grid.ny).fill(-1);
+  result.wetCells.forEach((cell, k) => {
+    index[cell] = k;
+  });
+  return index;
+}
+
+/** Paints the sea surface at `timeS`, interpolated linearly between the stored frames. */
+export function paintTsunami(
+  pixels: Uint32Array,
+  rowMap: Int32Array,
+  result: TsunamiResult,
+  cellIndex: Int32Array,
+  lookup: Uint32Array,
+  timeS: number,
+): void {
+  const { nx, ny } = result.grid;
+  const wetCount = result.wetCells.length;
+  const position = Math.min(result.frameCount - 1, Math.max(0, timeS / result.frameIntervalS));
+  const before = Math.floor(position);
+  const after = Math.min(result.frameCount - 1, before + 1);
+  const weight = position - before;
+  const frames = result.framesMm;
+  for (let r = 0; r < ny; r++) {
+    const gridRow = (rowMap[r] ?? 0) * nx;
+    const pixelRow = r * nx;
+    for (let c = 0; c < nx; c++) {
+      const k = cellIndex[gridRow + c] ?? -1;
+      if (k < 0) {
+        pixels[pixelRow + c] = 0;
+        continue;
+      }
+      const a = frames[before * wetCount + k] ?? 0;
+      const b = frames[after * wetCount + k] ?? 0;
+      pixels[pixelRow + c] = lookup[tsunamiIndex((a + weight * (b - a)) / 1000)] ?? 0;
     }
   }
 }

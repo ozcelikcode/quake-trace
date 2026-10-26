@@ -39,6 +39,10 @@
   --load-2: rgb(200 74 160);
   --load-3: rgb(242 116 110);
   --load-4: rgb(255 196 112);
+
+  /* Diverging sea-surface scale, mirrored in features/map/lib/layer-palette.ts. */
+  --tsunami-pos: rgb(255 92 76);
+  --tsunami-neg: rgb(64 148 255);
 }
 
 :root[data-theme='dark'] {

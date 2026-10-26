@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { LOAD_ANCHORS } from '@/features/map/lib/layer-palette';
+import { LOAD_ANCHORS, TSUNAMI_NEG, TSUNAMI_POS } from '@/features/map/lib/layer-palette';
 import {
   BLOCKED_DENSITY_MAX,
   BLOCKED_DENSITY_MIN,
@@ -10,12 +10,18 @@ import {
   mmiLookupTable,
   paintIntensity,
   paintNetwork,
+  paintTsunami,
+  TSUNAMI_SCALE_M,
+  tsunamiCellIndex,
+  tsunamiIndex,
+  tsunamiLookupTable,
   rupturedPath,
   SHAKING_FADE_S,
   wavefrontCurtain,
 } from '@/features/map/lib/simulation-frames';
 import type { GridSpec } from '@/types/grid';
 import type { NetworkResult } from '@/types/network';
+import type { TsunamiResult } from '@/types/tsunami';
 
 const spec: GridSpec = { west: 26, north: 41.8, dLon: 0.01, dLat: 0.01, nx: 4, ny: 200 };
 
@@ -117,5 +123,40 @@ describe('network raster', () => {
     expect(pixels[0]).toBe(table[255]);
     expect(pixels[1]).toBe(0);
     expect(pixels[2]).toBe(0);
+  });
+});
+
+describe('tsunami raster', () => {
+  it('maps the sea surface onto the diverging scale, calm water clear', () => {
+    const table = tsunamiLookupTable(TSUNAMI_NEG, TSUNAMI_POS);
+    expect(tsunamiIndex(0)).toBe(128);
+    expect(tsunamiIndex(-TSUNAMI_SCALE_M)).toBe(0);
+    expect(tsunamiIndex(5)).toBe(255);
+    expect((table[128] ?? 0) >>> 24).toBeLessThan(10);
+    expect((table[255] ?? 0) & 0xff).toBe(TSUNAMI_POS[0]);
+    expect((table[0] ?? 0) & 0xff).toBe(TSUNAMI_NEG[0]);
+  });
+
+  it('interpolates between frames on the sea cells', () => {
+    const grid: GridSpec = { west: 0, north: 0.01, dLon: 0.01, dLat: 0.01, nx: 2, ny: 1 };
+    const result: TsunamiResult = {
+      scenarioId: 'test',
+      durationS: 10,
+      frameIntervalS: 10,
+      frameCount: 2,
+      grid,
+      wetCells: Int32Array.from([1]),
+      framesMm: Int16Array.from([0, 400]),
+      maxEtaM: Float32Array.from([0.4]),
+      arrivalS: Float32Array.from([0]),
+      coast: [],
+      source: { slipM: 1, maxUpliftM: 0, minUpliftM: 0 },
+      computeMs: 0,
+    };
+    const table = tsunamiLookupTable(TSUNAMI_NEG, TSUNAMI_POS);
+    const pixels = new Uint32Array(2);
+    paintTsunami(pixels, Int32Array.from([0]), result, tsunamiCellIndex(result), table, 5);
+    expect(pixels[0]).toBe(0);
+    expect(pixels[1]).toBe(table[tsunamiIndex(0.2)]);
   });
 });

@@ -157,6 +157,30 @@ test('shows network load and emergency response, and switches the map shading', 
   await expect(page.getByText('Şiddet (MMI)')).toBeVisible();
 });
 
+test('computes the tsunami in the background and opens its timeline scale', async ({ page }) => {
+  test.skip(project() === 'phone-ios', 'covered by the other phone profile');
+  await runNorthMarmara(page);
+  const scale = page.getByRole('radiogroup', { name: 'Zaman ölçeği' });
+  const tsunami = scale.getByRole('radio', { name: 'Tsunami' });
+  // The hour of wave propagation takes a few seconds in its own worker.
+  await expect(tsunami).toBeEnabled({ timeout: 45_000 });
+  await tsunami.click();
+  await expect(tsunami).toHaveAttribute('aria-checked', 'true');
+  // The compact phone timeline has no speed control.
+  if (!isPhone()) {
+    await expect(page.getByRole('radio', { name: '30×' })).toHaveAttribute('aria-checked', 'true');
+  }
+  await page.keyboard.press('Space');
+  for (let i = 0; i < 5; i++) await page.keyboard.press('Shift+ArrowRight');
+
+  await openImpactPanel(page);
+  const summary = page.getByTestId('tsunami-summary');
+  await expect(summary.getByText(/\d+ \/ \d+ kıyı ilçesine ulaştı/)).toBeVisible();
+  await expect(summary.getByText(/^\d+,\d dk · \d+,\d m$/).first()).toBeVisible();
+  if (project() === 'tablet') await page.keyboard.press('Escape');
+  await expect(page.getByText('Deniz yüzeyi (m)')).toBeVisible();
+});
+
 test('stays accessible with a scenario loaded', async ({ page }) => {
   test.skip(project() !== 'desktop', 'desktop layout');
   await page.emulateMedia({ reducedMotion: 'reduce' });
