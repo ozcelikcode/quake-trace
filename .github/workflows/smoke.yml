@@ -1,0 +1,37 @@
+name: Production smoke test
+
+# Run by hand after `npm run deploy`: checks the page, the prepared data and every proxy route
+# of the deployed Worker from outside the developer's network.
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Deployed URL
+        default: https://quake-trace.ozcelikcode.workers.dev
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      BASE: ${{ inputs.base_url }}
+    steps:
+      - name: Page and prepared data
+        run: |
+          curl -fsS "$BASE/" | grep -q '<div id="root">'
+          curl -fsS "$BASE/data/manifest.json" | grep -q '"datasets"'
+          curl -fsS -o /dev/null "$BASE/data/faults.geojson"
+      - name: Proxy routes
+        run: |
+          curl -fsS "$BASE/api/kandilli/lst0.asp" -o kandilli.html
+          wc -c kandilli.html
+          curl -fsS "$BASE/api/koeri/station/1/query?net=KO&sta=SLVT&cha=HN?&level=station&format=text" | grep -q 'SLVT'
+          day=$(date -u +%Y-%m-%d)
+          curl -fsS "$BASE/api/afad/event/filter?start=${day}T00:00:00&end=${day}T23:59:59&minlat=39.8&maxlat=41.8&minlon=26&maxlon=31" | head -c 200
+      - name: Unknown routes are refused
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/nope")
+          echo "status $code"
+          test "$code" -ge 400
