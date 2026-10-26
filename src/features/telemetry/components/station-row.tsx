@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format';
+import type { ObservedComponents } from '@/state/observed-store';
 import type { StationRecords } from '@/types/simulation';
 
 import { useCanvasFrame } from '../hooks/use-canvas-frame';
@@ -18,6 +19,7 @@ interface StationRowProps {
   triggered: boolean;
   focused: boolean;
   onFocus: (id: string) => void;
+  observed?: ObservedComponents | undefined;
 }
 
 /** A station in the record section: trigger state, vertical trace and its peak so far. */
@@ -28,13 +30,18 @@ export function StationRow({
   triggered,
   focused,
   onFocus,
+  observed,
 }: StationRowProps) {
   const { t, i18n } = useTranslation();
   const station = records.stations[index];
   const envelope = useMemo(
     () =>
-      buildEnvelope(componentSamples(records, index, 'Z'), records.sampleRateHz, ENVELOPE_BIN_S),
-    [records, index],
+      buildEnvelope(
+        componentSamples(records, index, 'Z', observed),
+        records.sampleRateHz,
+        ENVELOPE_BIN_S,
+      ),
+    [records, index, observed],
   );
   const peakRef = useRef<HTMLSpanElement>(null);
   const canvasRef = useCanvasFrame(({ ctx, width, height, pixelRatio, timeS, style }) => {
@@ -43,7 +50,9 @@ export function StationRow({
     const view = { width, height, durationS, timeS, scale: recordPeak(envelope) };
     paintBaseline(ctx, view, token('--border-subtle'), pixelRatio);
     paintEnvelope(ctx, envelope, view, token(triggered ? '--text-secondary' : '--text-muted'));
-    paintMarker(ctx, view, station.triggerS, token('--wave-p'), pixelRatio);
+    // The trigger is picked on the synthetic record; an observed trace shows the model arrivals.
+    if (!observed) paintMarker(ctx, view, station.triggerS, token('--wave-p'), pixelRatio);
+    else paintMarker(ctx, view, station.pArrivalS, token('--wave-p'), pixelRatio);
     paintMarker(ctx, view, station.sArrivalS, token('--wave-s'), pixelRatio);
     if (peakRef.current)
       peakRef.current.textContent = formatPeak(peakUntil(envelope, timeS), i18n.language);
@@ -72,7 +81,14 @@ export function StationRow({
           )}
         />
         <span className="min-w-0">
-          <span className="block truncate num text-caption text-fg">{station.id}</span>
+          {/* Observed records are marked by the id in the info hue, as in the focus badge. */}
+          <span
+            title={observed ? t('telemetry.observed') : undefined}
+            className={cn('block truncate num text-caption', observed ? 'text-info' : 'text-fg')}
+          >
+            {station.id}
+            {observed && <span className="sr-only">, {t('telemetry.observed')}</span>}
+          </span>
           <span className="block num text-micro text-fg-muted">
             {formatNumber(station.epicentralKm, i18n.language)} km
             <span className="sr-only">

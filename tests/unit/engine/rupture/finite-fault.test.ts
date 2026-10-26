@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildRupture } from '@/engine/rupture/finite-fault';
-import { magnitudeFromRuptureArea } from '@/engine/rupture/scaling';
+import { buildRupture, ruptureExtentKm } from '@/engine/rupture/finite-fault';
+import { magnitudeFromRuptureArea, medianRuptureAreaKm2 } from '@/engine/rupture/scaling';
 import { haversineKm } from '@/lib/math/geo';
 import type { FaultSource, RuptureSpec } from '@/types/scenario';
 
@@ -32,6 +32,23 @@ describe('finite-fault rupture', () => {
     expect(rupture.areaKm2).toBeCloseTo(1080, 6);
     expect(rupture.mw).toBeCloseTo(magnitudeFromRuptureArea(1080, 180), 10);
     expect(buildRupture(spec({ mw: 7.1 }), options).mw).toBe(7.1);
+  });
+
+  it('sizes a rupture without an extent from the W&C94 median area, centred and kept on the trace', () => {
+    // Mw 6.2 strike slip: A = 10^(−3.42 + 0.9 · 6.2) km² over an 18 km wide vertical fault.
+    const lengthKm = medianRuptureAreaKm2(6.2, 180) / 18;
+    const centred = ruptureExtentKm({ fault, hypocenterKm: 40, hypocenterDepthKm: 10, mw: 6.2 });
+    expect(centred.endKm - centred.startKm).toBeCloseTo(lengthKm, 9);
+    expect((centred.startKm + centred.endKm) / 2).toBeCloseTo(40, 9);
+    const atEnd = ruptureExtentKm({ fault, hypocenterKm: 1, hypocenterDepthKm: 10, mw: 6.2 });
+    expect(atEnd.startKm).toBe(0);
+    // A magnitude too large for the trace ruptures all of it.
+    const whole = ruptureExtentKm({ fault, hypocenterKm: 40, hypocenterDepthKm: 10, mw: 8 });
+    expect(whole.startKm).toBe(0);
+    expect(whole.endKm).toBeCloseTo(84.3, 0);
+    expect(() => ruptureExtentKm({ fault, hypocenterKm: 40, hypocenterDepthKm: 10 })).toThrow(
+      RangeError,
+    );
   });
 
   it('starts at the hypocentre and spreads at the rupture velocity', () => {

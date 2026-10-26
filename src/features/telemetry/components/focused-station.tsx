@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { formatNumber } from '@/lib/format';
+import { cn } from '@/lib/cn';
+import type { ObservedComponents } from '@/state/observed-store';
 import { usePlaybackStore } from '@/state/playback-store';
 import { RECORD_COMPONENTS, type StationRecords } from '@/types/simulation';
 
@@ -15,24 +17,26 @@ interface FocusedStationProps {
   records: StationRecords;
   index: number;
   durationS: number;
+  observed?: ObservedComponents | undefined;
 }
 
 /** Three-component record of one station on the scenario's time axis, with its site readouts. */
-export function FocusedStation({ records, index, durationS }: FocusedStationProps) {
+export function FocusedStation({ records, index, durationS, observed }: FocusedStationProps) {
   const { t, i18n } = useTranslation();
   const station = records.stations[index];
   const envelopes = useMemo(
     () =>
       RECORD_COMPONENTS.map((component) =>
         buildEnvelope(
-          componentSamples(records, index, component),
+          componentSamples(records, index, component, observed),
           records.sampleRateHz,
           ENVELOPE_BIN_S,
         ),
       ),
-    [records, index],
+    [records, index, observed],
   );
-  const triggerS = station?.triggerS ?? null;
+  // The STA/LTA pick belongs to the synthetic record; it is not shown over an observed one.
+  const triggerS = observed ? null : (station?.triggerS ?? null);
   const triggered = usePlaybackStore((state) => triggerS !== null && state.timeS >= triggerS);
   if (!station) return null;
 
@@ -44,7 +48,11 @@ export function FocusedStation({ records, index, durationS }: FocusedStationProp
     [t('telemetry.vs30'), `${number(station.vs30)} m/s`],
     [
       t('telemetry.trigger'),
-      triggered && triggerS !== null ? `T+${number(triggerS, 1)} s` : t('telemetry.pending'),
+      observed
+        ? '—'
+        : triggered && triggerS !== null
+          ? `T+${number(triggerS, 1)} s`
+          : t('telemetry.pending'),
     ],
   ];
 
@@ -62,10 +70,13 @@ export function FocusedStation({ records, index, durationS }: FocusedStationProp
           <p className="text-micro text-fg-muted">{t('telemetry.instrument')}</p>
         </div>
         <span
-          title={t('telemetry.method')}
-          className="shrink-0 rounded-control border border-line px-1.5 py-0.5 text-micro text-fg-secondary"
+          title={observed ? t('telemetry.observedMethod') : t('telemetry.method')}
+          className={cn(
+            'shrink-0 rounded-control border px-1.5 py-0.5 text-micro',
+            observed ? 'border-info/40 text-info' : 'border-line text-fg-secondary',
+          )}
         >
-          {t('telemetry.synthetic')}
+          {observed ? t('telemetry.observed') : t('telemetry.synthetic')}
         </span>
       </header>
 

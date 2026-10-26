@@ -46,6 +46,10 @@ One global clock `t` in seconds from origin (`state/playback-store.ts`). Built: 
 | Tsunami **(built)** | Sea surface from the frames, interpolated linearly in time, on a diverging scale (±0.5 m, --tsunami-neg / --tsunami-pos), opacity rising to 25 cm; same image source as intensity, chosen automatically with the tsunami timeline scale. Coastal arrivals are listed in the impact panel (no map labels yet). |
 | Aftershocks **(built)** | MapLibre circles revealed at their time (`TimedReveal`), radius exponential in magnitude (2 px at M 3 to 16 px at M 7.5), larger on top, in the --aftershock hue. |
 
+## Real earthquakes as scenarios (phase 9)
+
+`features/scenario/lib/event-scenario.ts`: the hypocentre goes to the point of the nearest EFSM20 trace (distance reported; 1.4 km for 2025, 9.7 km for 2019), at the catalog depth clamped to the seismogenic layer, with the catalog magnitude. The rupture spans a known extent (1999: the İzmit preset's 30.90–29.35° E) or the W&C94 median area for the magnitude divided by the fault width, centred on the hypocentre and kept on the trace (`engine/rupture/finite-fault.ts`, `ruptureExtentKm`). Live events are offered from M 4.0. Observed records replace synthetic ones in telemetry per station (components the station lacks stay flat); their STA/LTA pick is not shown.
+
 ## Presets
 
 Built (`src/features/scenario/lib/presets.ts`), all on the Main Marmara Fault (EFSM20 `TRCF045`, one 520 km source digitized east to west, dip 74°, rake −157°, 0.5–18 km), extents given as longitudes along the trace:
@@ -57,7 +61,7 @@ Built (`src/features/scenario/lib/presets.ts`), all on the Main Marmara Fault (E
 | Princes' Islands segment | 29.25° → 28.85° E | 29.05° E, 10 km | about Mw 6.8 |
 | İzmit (1999-like) | 30.90° → 29.35° E | 29.90° E, 15 km | about Mw 7.4 (1999: Mw 7.6) |
 
-Segment names follow the literature (Le Pichon et al., 2001; Armijo et al., 2002); limits are approximate and say so in the UI. Planned historical replays (phase 9): 1912 Mürefte Mw 7.3, 1999 Gölcük Mw 7.6 (1999-08-17 03:02), 2019 Silivri Mw 5.8 (2019-09-26), 2025 Silivri Mw 6.2 (2025-04-23); verify each event's parameters against the AFAD and KOERI catalogs before encoding it.
+Segment names follow the literature (Le Pichon et al., 2001; Armijo et al., 2002); limits are approximate and say so in the UI. Historical replays (built, phase 9; USGS ComCat parameters in `features/replay/lib/historical-events.ts`): 1999 Kocaeli Mw 7.6, 2019 Silivri Mw 5.7, 2025 Marmara Ereğlisi – Silivri Mw 6.2. 1912 Mürefte is not included: it predates instrumental Mw in the catalogs used.
 
 ## Known model limits
 

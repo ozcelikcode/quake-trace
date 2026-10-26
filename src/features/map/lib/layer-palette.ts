@@ -16,6 +16,8 @@ interface ReferencePalette {
   bridgeClosed: string;
   /** Aftershocks (--aftershock) over an outline in the surface hue. */
   aftershock: { fill: string; outline: string };
+  /** Real earthquakes from the live catalogs, tuned against --state-info; selection in the signal hue. */
+  live: { fill: string; outline: string; selected: string };
 }
 
 /**
@@ -56,6 +58,11 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
     debris: 'rgb(232, 190, 90)',
     bridgeClosed: 'rgb(235, 87, 70)',
     aftershock: { fill: 'rgb(214, 112, 236)', outline: 'rgba(13, 17, 23, 0.85)' },
+    live: {
+      fill: 'rgb(104, 190, 230)',
+      outline: 'rgba(13, 17, 23, 0.9)',
+      selected: 'rgb(240, 244, 250)',
+    },
   },
   light: {
     fault: 'rgba(184, 64, 44, 0.9)',
@@ -73,5 +80,10 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
     debris: 'rgb(190, 130, 20)',
     bridgeClosed: 'rgb(200, 50, 40)',
     aftershock: { fill: 'rgb(214, 112, 236)', outline: 'rgba(255, 255, 255, 0.9)' },
+    live: {
+      fill: 'rgb(20, 120, 180)',
+      outline: 'rgba(255, 255, 255, 0.95)',
+      selected: 'rgb(22, 30, 46)',
+    },
   },
 };

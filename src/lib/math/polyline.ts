@@ -1,6 +1,6 @@
 import type { LonLat } from '@/types/scenario';
 
-import { bearingDeg, haversineKm } from './geo';
+import { bearingDeg, EARTH_RADIUS_KM, haversineKm } from './geo';
 
 /** Distance along a lon/lat polyline. Segments are short (a few km), so linear interpolation suffices. */
 
@@ -81,4 +81,35 @@ export function kmAtLongitude(
     }
   }
   return undefined;
+}
+
+/**
+ * The point of `path` nearest to (lon, lat): its distance along the path and from the point, km.
+ * Segments are treated as straight in a local equirectangular frame around the point.
+ */
+export function nearestOnPath(
+  path: readonly LonLat[],
+  lon: number,
+  lat: number,
+): { km: number; distanceKm: number } {
+  const cumulative = cumulativeLengthsKm(path);
+  const kmPerLat = (EARTH_RADIUS_KM * Math.PI) / 180;
+  const kmPerLon = kmPerLat * Math.cos((lat * Math.PI) / 180);
+  let best = { km: 0, distanceKm: Number.POSITIVE_INFINITY };
+  for (let i = 1; i < path.length; i++) {
+    const [ax, ay] = path[i - 1] ?? [lon, lat];
+    const [bx, by] = path[i] ?? [lon, lat];
+    const x1 = (ax - lon) * kmPerLon;
+    const y1 = (ay - lat) * kmPerLat;
+    const dx = (bx - ax) * kmPerLon;
+    const dy = (by - ay) * kmPerLat;
+    const length2 = dx * dx + dy * dy;
+    const t = length2 > 0 ? Math.min(1, Math.max(0, -(x1 * dx + y1 * dy) / length2)) : 0;
+    const distanceKm = Math.hypot(x1 + t * dx, y1 + t * dy);
+    if (distanceKm < best.distanceKm) {
+      const start = cumulative[i - 1] ?? 0;
+      best = { km: start + t * ((cumulative[i] ?? start) - start), distanceKm };
+    }
+  }
+  return best;
 }

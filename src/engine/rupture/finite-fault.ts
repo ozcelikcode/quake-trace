@@ -2,7 +2,7 @@ import { destination } from '@/lib/math/geo';
 import { cumulativeLengthsKm, pointAtKm, slicePath } from '@/lib/math/polyline';
 import type { LonLat, RuptureSpec } from '@/types/scenario';
 
-import { magnitudeFromRuptureArea } from './scaling';
+import { magnitudeFromRuptureArea, medianRuptureAreaKm2 } from './scaling';
 
 /**
  * Kinematic finite-fault rupture: a planar fault below the ruptured part of the trace,
@@ -47,10 +47,29 @@ const DEFAULT_STEP_KM = 4;
 const DEFAULT_ROWS = 3;
 const RAD = Math.PI / 180;
 
+/**
+ * The ruptured part of the trace: as given, or the median W&C94 area for the magnitude divided
+ * by the fault width, centred on the hypocentre and shifted to stay on the trace.
+ */
+export function ruptureExtentKm(spec: RuptureSpec): { startKm: number; endKm: number } {
+  if (spec.startKm !== undefined && spec.endKm !== undefined) {
+    return {
+      startKm: Math.min(spec.startKm, spec.endKm),
+      endKm: Math.max(spec.startKm, spec.endKm),
+    };
+  }
+  const { fault } = spec;
+  if (spec.mw === undefined) throw new RangeError('a rupture without an extent needs a magnitude');
+  const traceKm = cumulativeLengthsKm(fault.trace).at(-1) ?? 0;
+  const widthKm = (fault.lowerDepthKm - fault.upperDepthKm) / Math.sin(fault.dipDeg * RAD);
+  const lengthKm = Math.min(traceKm, medianRuptureAreaKm2(spec.mw, fault.rakeDeg) / widthKm);
+  const startKm = Math.min(Math.max(0, spec.hypocenterKm - lengthKm / 2), traceKm - lengthKm);
+  return { startKm, endKm: startKm + lengthKm };
+}
+
 export function buildRupture(spec: RuptureSpec, options: RuptureOptions): Rupture {
   const { fault } = spec;
-  const startKm = Math.min(spec.startKm, spec.endKm);
-  const endKm = Math.max(spec.startKm, spec.endKm);
+  const { startKm, endKm } = ruptureExtentKm(spec);
   const lengthKm = endKm - startKm;
   if (lengthKm <= 0) throw new RangeError('rupture length must be positive');
   if (spec.hypocenterKm < startKm || spec.hypocenterKm > endKm) {

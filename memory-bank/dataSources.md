@@ -43,7 +43,14 @@ Probed on 2026-10-25 (phase 0 spike).
 | EIDA federator (ORFEUS) | Station metadata and waveforms | Direct | `https://federator.orfeus-eu.org/fdsnws/…`, CORS reflects origin. Only 5 KO and 1 TK stations in the box, so KOERI direct is the main source |
 | GEOFON | Station metadata | Direct | No GE stations inside the Marmara box |
 
-AFAD strong-motion network (TK) is mostly absent from EIDA; its own services are to be evaluated in phase 9.
+AFAD strong-motion network (TK) is mostly absent from EIDA; observed records come from KOERI only.
+
+Used in phase 9 (2026-10-26):
+
+- Live catalogs: USGS FDSN event (GeoJSON) and EMSC FDSN event (`format=json`) directly; AFAD apiv2 `event/filter` and Kandilli `lst0.asp` through the proxy. AFAD dates carry no zone and are UTC (they match EMSC for the same event); Kandilli lists Türkiye local time (UTC+3 all year since 2016) in Windows-1254 with ASCII upper-case places, magnitude Mw > ML > MD. All validated with zod; region 26–31° E, 39.8–41.8° N, last 7 days, polled every 60 s while the live tab is open. AFAD's archive query for 2019/2025 returned nothing, so historical parameters come from USGS.
+- Historical replays (USGS ComCat): usp0009d4z 1999-08-17 00:01:39.13 UTC Mw 7.6 (mwc) 40.748 N 29.864 E 17 km; us70005lkl 2019-09-26 10:59:25.648 UTC Mw 5.7 (mww) 40.904 N 28.150 E 8 km; us7000pufs 2025-04-23 09:49:11.631 UTC Mw 6.2 (mww) 40.834 N 28.190 E 12.7 km.
+- Observed records: KOERI EIDA `dataselect` (HN?, miniSEED Steim2) and `station` (level=channel, InstrumentSensitivity in counts per m/s²) for the 12 nearest accelerometer stations within 150 km. 2025: 10 stations; 2019: none for SLVT; 1999: none. Counts → cm/s² after removing the 10 s pre-event mean (flat-response approximation).
+- Fixtures of every response are in `tests/fixtures/feeds/` with their requests in its README.
 
 ## Handling rules
 

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import type { ObservedComponents } from '@/state/observed-store';
 import type { StationRecords } from '@/types/simulation';
 
 import { StationRow } from './station-row';
@@ -13,6 +14,8 @@ interface StationListProps {
   focusedIndex: number;
   durationS: number;
   onFocus: (id: string) => void;
+  /** Observed records by station id, when real records were fetched. */
+  observed?: Record<string, ObservedComponents> | undefined;
 }
 
 /**
@@ -26,6 +29,7 @@ export function StationList({
   focusedIndex,
   durationS,
   onFocus,
+  observed,
 }: StationListProps) {
   const { t } = useTranslation();
 
@@ -58,6 +62,7 @@ export function StationList({
             triggered={position < triggeredCount}
             focused={index === focusedIndex}
             onFocus={onFocus}
+            observed={observed?.[records.stations[index]?.id ?? '']}
           />
         ))}
       </ul>

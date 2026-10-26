@@ -29,6 +29,10 @@ describe('station records', () => {
   it('views one component without copying', () => {
     expect([...componentSamples(records, 1, 'N')]).toEqual([12, 13]);
     expect(componentSamples(records, 2, 'E').buffer).toBe(records.accelCmS2.buffer);
+    // An observed record replaces the synthetic one; a missing component stays flat.
+    const observed = { N: Float32Array.from([7, 8]) };
+    expect([...componentSamples(records, 1, 'N', observed)]).toEqual([7, 8]);
+    expect([...componentSamples(records, 1, 'Z', observed)]).toEqual([0, 0]);
   });
 
   it('orders stations by trigger, untriggered last, and counts the triggered prefix', () => {

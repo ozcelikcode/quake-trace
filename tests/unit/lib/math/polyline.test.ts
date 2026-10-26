@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { haversineKm } from '@/lib/math/geo';
-import { cumulativeLengthsKm, kmAtLongitude, pointAtKm, slicePath } from '@/lib/math/polyline';
+import {
+  cumulativeLengthsKm,
+  kmAtLongitude,
+  nearestOnPath,
+  pointAtKm,
+  slicePath,
+} from '@/lib/math/polyline';
 import type { LonLat } from '@/types/scenario';
 
 // Westward path along 40.8° N, like the Main Marmara Fault trace.
@@ -33,5 +39,26 @@ describe('polylines', () => {
   it('finds where the path crosses a longitude', () => {
     expect(kmAtLongitude(path, cumulative, 28.6)).toBeCloseTo(segment * 1.5, 6);
     expect(kmAtLongitude(path, cumulative, 27)).toBeUndefined();
+  });
+});
+
+describe('nearest point on a path', () => {
+  const path: [number, number][] = [
+    [28, 40.8],
+    [29, 40.8],
+    [29, 41],
+  ];
+
+  it('projects onto the nearest segment', () => {
+    const near = nearestOnPath(path, 28.5, 40.9);
+    // 0.1° of latitude north of the first segment's midpoint.
+    expect(near.distanceKm).toBeCloseTo(11.12, 1);
+    expect(near.km).toBeCloseTo(haversineKm(28, 40.8, 28.5, 40.8), 0);
+    const second = nearestOnPath(path, 29.2, 40.9);
+    expect(second.km).toBeGreaterThan(haversineKm(28, 40.8, 29, 40.8));
+  });
+
+  it('clamps to the ends', () => {
+    expect(nearestOnPath(path, 27.5, 40.8).km).toBe(0);
   });
 });

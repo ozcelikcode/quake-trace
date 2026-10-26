@@ -1,12 +1,24 @@
 import { useTranslation } from 'react-i18next';
 
 import { formatNumber } from '@/lib/format';
+import { useObservedStore } from '@/state/observed-store';
+import { useScenarioStore } from '@/state/scenario-store';
 import type { SimulationResult } from '@/types/simulation';
 
 export function ScenarioSummary({ result }: { result: SimulationResult }) {
   const { t, i18n } = useTranslation();
   const number = (value: number, digits = 0) => formatNumber(value, i18n.language, digits);
   const { rupture } = result;
+  const origin = useScenarioStore((state) => state.origin);
+  const observedStatus = useObservedStore((state) =>
+    state.scenarioId === result.scenarioId ? state.status : 'idle',
+  );
+  const observedCount = useObservedStore((state) => Object.keys(state.records).length);
+  const time = new Intl.DateTimeFormat(i18n.language, {
+    dateStyle: 'medium',
+    timeStyle: 'medium',
+    timeZone: 'UTC',
+  });
 
   const rows: [string, string][] = [
     [t('scenario.summary.magnitude'), `Mw ${number(rupture.mw, 1)}`],
@@ -16,6 +28,29 @@ export function ScenarioSummary({ result }: { result: SimulationResult }) {
     [t('scenario.summary.ruptureDuration'), `${number(rupture.ruptureDurationS, 1)} s`],
     [t('scenario.summary.computeTime'), `${number(result.computeMs)} ms`],
   ];
+  const sourceRows: [string, string][] =
+    origin && origin.kind !== 'preset'
+      ? [
+          [
+            t('scenario.summary.origin'),
+            `${t('scenario.summary.originValue', {
+              magnitude: number(origin.magnitude, 1),
+              time: time.format(origin.originMs),
+            })} · ${origin.catalog}`,
+          ],
+          [
+            t('scenario.summary.fault'),
+            t('scenario.summary.faultValue', {
+              fault: origin.faultId,
+              distance: number(origin.faultDistanceKm, 1),
+            }),
+          ],
+          [
+            t('scenario.summary.observed'),
+            t(`scenario.summary.observedStatus.${observedStatus}`, { count: observedCount }),
+          ],
+        ]
+      : [];
 
   return (
     <section aria-labelledby="scenario-summary-title" className="space-y-2">
@@ -30,6 +65,16 @@ export function ScenarioSummary({ result }: { result: SimulationResult }) {
           </div>
         ))}
       </dl>
+      {sourceRows.length > 0 && (
+        <dl className="space-y-1 text-caption" data-testid="scenario-origin">
+          {sourceRows.map(([label, value]) => (
+            <div key={label} className="grid grid-cols-[7rem_minmax(0,1fr)] gap-2">
+              <dt className="text-fg-muted">{label}</dt>
+              <dd className="text-fg">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </section>
   );
 }

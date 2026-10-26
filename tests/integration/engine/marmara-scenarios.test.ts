@@ -14,7 +14,9 @@ import type {
   Vulnerability,
 } from '@/data/schemas';
 import { simulate } from '@/engine/sim/simulate';
+import { HISTORICAL_EVENTS } from '@/features/replay/lib/historical-events';
 import { damageInputs } from '@/features/scenario/lib/damage-inputs';
+import { scenarioFromEvent } from '@/features/scenario/lib/event-scenario';
 import { resolvePreset, SCENARIO_PRESETS } from '@/features/scenario/lib/presets';
 import type { RoadGraph } from '@/types/roads';
 import type { SimulationResult } from '@/types/simulation';
@@ -198,6 +200,30 @@ describe('Marmara scenario presets on the prepared data', () => {
     const site = network.cellSite[Math.floor(fatihCell) * 500 + Math.floor((28.95 - 26) / 0.01)];
     expect(network.sitePeakDemand[site ?? -1]).toBe(55);
   });
+
+  it.each(HISTORICAL_EVENTS.map((event) => event.id))(
+    '%s is placed on the Main Marmara Fault with its catalog magnitude',
+    (id) => {
+      const event = HISTORICAL_EVENTS.find((candidate) => candidate.id === id);
+      if (!event) throw new Error(id);
+      const placed = scenarioFromEvent(event, faults);
+      // USGS epicentres lie within about 10 km of the EFSM20 trace (2019: 9.7 km, north of the
+      // mapped trace; teleseismic locations carry errors of that size).
+      expect(placed.faultId).toBe('TRCF045');
+      expect(placed.faultDistanceKm).toBeLessThan(12);
+      const result = simulate({
+        scenario: placed.scenario,
+        grid: vs30.spec,
+        vs30: vs30.values,
+        districtCells: districtCells.values,
+      });
+      expect(result.rupture.mw).toBe(event.magnitude);
+      expect(result.computeMs).toBeLessThan(2000);
+      // 1999 keeps the preset extent; the moderate events are sized from their magnitude.
+      if (id === 'replay-kocaeli-1999') expect(result.rupture.lengthKm).toBeGreaterThan(120);
+      else expect(result.rupture.lengthKm).toBeLessThan(30);
+    },
+  );
 
   it('follows the North Marmara mainshock with a three-day aftershock sequence', () => {
     const { aftershocks, rupture } = run('north-marmara');

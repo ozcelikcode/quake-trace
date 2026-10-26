@@ -1,14 +1,65 @@
 import { useCellSites, useGridDataset, useJsonDataset, useRoadGraph } from '@/data/use-dataset';
+import { fetchObservedRecords } from '@/data/feeds/waveforms';
 import type { Grid } from '@/data/grid';
+import type { Stations } from '@/data/schemas';
+import { haversineKm } from '@/lib/math/geo';
+import { useObservedStore, type ObservedComponents } from '@/state/observed-store';
 import { usePlaybackStore } from '@/state/playback-store';
-import { useScenarioStore } from '@/state/scenario-store';
+import { useScenarioStore, type ScenarioOrigin } from '@/state/scenario-store';
 import { useTsunamiStore } from '@/state/tsunami-store';
-import type { Scenario } from '@/types/scenario';
+import type { Scenario, ScenarioEvent } from '@/types/scenario';
 import { simulationWorker } from '@/workers/simulation-client';
 import { tsunamiWorker } from '@/workers/tsunami-client';
 
 import { damageInputs } from '../lib/damage-inputs';
+import { scenarioFromEvent } from '../lib/event-scenario';
 import { resolvePreset, SCENARIO_PRESETS, type PresetId } from '../lib/presets';
+
+/** What to simulate: a preset, a historical replay or a live catalog event. */
+export type RunRequest =
+  { kind: 'preset'; id: PresetId } | { kind: 'replay' | 'event'; event: ScenarioEvent };
+
+/** Observed records are requested from the nearest accelerometer stations, up to this many. */
+const OBSERVED_STATIONS = 12;
+const OBSERVED_RADIUS_KM = 150;
+
+/** Fetches real records of the nearest stations; telemetry shows them over the synthetic ones. */
+async function loadObserved(
+  scenarioId: string,
+  event: ScenarioEvent,
+  stations: Stations,
+  durationS: number,
+  sampleRateHz: number,
+) {
+  const observed = useObservedStore.getState();
+  observed.start(scenarioId);
+  const nearest = stations.stations
+    .filter((station) => station.accelerometer)
+    .map((station) => ({
+      id: station.id,
+      distanceKm: haversineKm(event.lon, event.lat, station.lon, station.lat),
+    }))
+    .filter((station) => station.distanceKm <= OBSERVED_RADIUS_KM)
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, OBSERVED_STATIONS);
+  try {
+    const records =
+      nearest.length === 0
+        ? []
+        : await fetchObservedRecords({
+            stationIds: nearest.map((station) => station.id),
+            originMs: event.originMs,
+            durationS,
+            sampleRateHz,
+          });
+    const byStation: Record<string, ObservedComponents> = {};
+    for (const record of records) byStation[record.stationId] = record.components;
+    useObservedStore.getState().succeed(scenarioId, byStation);
+  } catch (error) {
+    console.error(error);
+    useObservedStore.getState().fail(scenarioId);
+  }
+}
 
 /**
  * Propagates the scenario's tsunami in its own worker and opens the tsunami timeline scale when
@@ -27,7 +78,10 @@ async function runTsunami(scenario: Scenario, bathymetry: Grid, districtCells: G
   }
 }
 
-/** Runs a preset in the simulation worker, starts playback, then computes its tsunami. */
+/**
+ * Runs a preset, a replay or a live event in the simulation worker, starts playback, then
+ * computes its tsunami and, for real earthquakes, fetches the observed records.
+ */
 export function useRunScenario() {
   const faults = useJsonDataset('faults').data;
   const vs30 = useGridDataset('vs30').data;
@@ -54,10 +108,8 @@ export function useRunScenario() {
     bathymetry,
   );
 
-  const run = async (presetId: PresetId) => {
-    const preset = SCENARIO_PRESETS.find((candidate) => candidate.id === presetId);
+  const run = async (request: RunRequest) => {
     if (
-      !preset ||
       !faults ||
       !vs30 ||
       !districtCells ||
@@ -73,8 +125,34 @@ export function useRunScenario() {
       return;
     }
     const scenarioStore = useScenarioStore.getState();
-    scenarioStore.start(presetId);
-    const scenario = resolvePreset(preset, faults);
+    let scenario: Scenario;
+    let origin: ScenarioOrigin;
+    try {
+      if (request.kind === 'preset') {
+        const preset = SCENARIO_PRESETS.find((candidate) => candidate.id === request.id);
+        if (!preset) return;
+        scenario = resolvePreset(preset, faults);
+        origin = { kind: 'preset' };
+      } else {
+        const placed = scenarioFromEvent(request.event, faults);
+        scenario = placed.scenario;
+        origin = {
+          kind: request.kind,
+          originMs: request.event.originMs,
+          magnitude: request.event.magnitude,
+          place: request.event.place,
+          catalog: request.event.catalog,
+          faultId: placed.faultId,
+          faultDistanceKm: placed.faultDistanceKm,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+      scenarioStore.fail(error instanceof Error ? error.message : String(error));
+      return;
+    }
+    scenarioStore.start(scenario.id, origin);
+    useObservedStore.getState().clear();
     try {
       const result = await simulationWorker().simulate({
         scenario,
@@ -93,6 +171,15 @@ export function useRunScenario() {
       scenarioStore.succeed(result);
       usePlaybackStore.getState().load(result.durationS, result.aftershocks.durationS);
       void runTsunami(scenario, bathymetry, districtCells);
+      if (request.kind !== 'preset') {
+        void loadObserved(
+          scenario.id,
+          request.event,
+          stations,
+          result.durationS,
+          result.records.sampleRateHz,
+        );
+      }
     } catch (error) {
       console.error(error);
       scenarioStore.fail(error instanceof Error ? error.message : String(error));

@@ -106,7 +106,19 @@
       "width": "Kırılma genişliği",
       "depth": "Odak derinliği",
       "ruptureDuration": "Kırılma süresi",
-      "computeTime": "Hesap süresi"
+      "computeTime": "Hesap süresi",
+      "origin": "Katalog olayı",
+      "originValue": "M {{magnitude}} · {{time}} UTC",
+      "fault": "Yerleştirildiği fay",
+      "faultValue": "{{fault}}, {{distance}} km uzakta",
+      "observed": "Gerçek kayıtlar",
+      "observedStatus": {
+        "idle": "—",
+        "loading": "yükleniyor…",
+        "ready": "{{count}} istasyon (KOERI)",
+        "none": "bu olay için yok",
+        "error": "erişilemiyor"
+      }
     },
     "presets": {
       "north-marmara": {
@@ -125,6 +137,12 @@
         "name": "İzmit (1999 benzeri)",
         "description": "17 Ağustos 1999 kırılmasının uzanımı ve odağı."
       }
+    },
+    "sources": "Senaryo kaynakları",
+    "tabs": {
+      "presets": "Hazır",
+      "replay": "Tarihsel",
+      "live": "Canlı"
     }
   },
   "impact": {
@@ -168,7 +186,9 @@
     },
     "stateTriggered": "tetiklendi",
     "stateWaiting": "bekliyor",
-    "scaleNote": "Her iz kendi tepe değerine ölçeklidir."
+    "scaleNote": "Her iz kendi tepe değerine ölçeklidir.",
+    "observed": "Gerçek kayıt · KOERI",
+    "observedMethod": "KOERI EIDA düğümünden ivme kaydı; sayımlar olay öncesi ortalama çıkarılıp alet hassasiyetiyle cm/s²’ye çevrildi."
   },
   "eew": {
     "title": "Erken uyarı (simülasyon)",
@@ -255,5 +275,28 @@
     "forecastM6": "Önümüzdeki 24 sa M ≥ 6",
     "openScale": "72 saatlik müdahale zaman ölçeğini göster",
     "note": "Reasenberg ve Jones (1989) genel Kaliforniya modelinden sentetik dizi (değiştirilmiş Omori sönümü, Gutenberg–Richter büyüklükleri); konumlar kırılma boyunca dağıtıldı. Olasılıklar aynı modelden gelir, resmî tahmin değildir."
+  },
+  "replay": {
+    "events": {
+      "replay-kocaeli-1999": "1999 Kocaeli (İzmit) depremi",
+      "replay-silivri-2019": "2019 Silivri depremi",
+      "replay-marmara-2025": "2025 Marmara Ereğlisi – Silivri depremi"
+    },
+    "source": "Parametreler: {{catalog}}",
+    "note": "Tekrarlar katalog büyüklüğünü ve odağını en yakın haritalı fay üzerinde kullanır. KOERI düğümünde olayın kuvvetli yer hareketi kaydı varsa telemetri sentetik yerine onu gösterir."
+  },
+  "live": {
+    "feeds": "Kataloglar",
+    "status": {
+      "pending": "yükleniyor",
+      "error": "erişilemiyor",
+      "success": "güncel"
+    },
+    "loading": "Kataloglar okunuyor…",
+    "empty": "Son 7 günde bölgede deprem yok.",
+    "simulateHint": "Bu depremi en yakın fay üzerinde simüle et.",
+    "tooSmall": "Simülasyon için M {{magnitude}} ve üstü gerekir.",
+    "simulate": "Simüle et",
+    "note": "AFAD, Kandilli (KOERI), EMSC ve USGS’ten son 7 günün Marmara bölgesi depremleri; 30 s ve 30 km içindeki kayıtlar birleştirilir, değerler önce ulusal kurumdan alınır. Dakikada bir yenilenir. Resmî uyarı sistemi değildir."
   }
 }

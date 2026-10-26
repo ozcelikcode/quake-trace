@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { useObservedStore } from '@/state/observed-store';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
 import { resolveFocusedStation, useTelemetryStore } from '@/state/telemetry-store';
@@ -25,10 +26,26 @@ export function TelemetryPanel() {
       />
     );
   }
-  return <TelemetryView records={result.records} durationS={result.durationS} />;
+  return (
+    <TelemetryView
+      records={result.records}
+      durationS={result.durationS}
+      scenarioId={result.scenarioId}
+    />
+  );
 }
 
-function TelemetryView({ records, durationS }: { records: StationRecords; durationS: number }) {
+interface TelemetryViewProps {
+  records: StationRecords;
+  durationS: number;
+  scenarioId: string;
+}
+
+function TelemetryView({ records, durationS, scenarioId }: TelemetryViewProps) {
+  // Observed records belong to the scenario they were fetched for.
+  const observed = useObservedStore((state) =>
+    state.scenarioId === scenarioId ? state.records : undefined,
+  );
   const order = useMemo(() => triggerOrder(records), [records]);
   const focusedId = useTelemetryStore((state) => state.focusedStationId);
   const focusStation = useTelemetryStore((state) => state.focusStation);
@@ -38,8 +55,14 @@ function TelemetryView({ records, durationS }: { records: StationRecords; durati
 
   return (
     <div className="flex flex-col">
-      <FocusedStation records={records} index={focusedIndex} durationS={durationS} />
+      <FocusedStation
+        records={records}
+        index={focusedIndex}
+        durationS={durationS}
+        observed={observed?.[records.stations[focusedIndex]?.id ?? '']}
+      />
       <StationList
+        observed={observed}
         records={records}
         order={order}
         triggeredCount={triggered}

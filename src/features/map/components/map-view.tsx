@@ -11,6 +11,7 @@ import { useGridDataset, useRoadGraph } from '@/data/use-dataset';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
 import { resolveFocusedStation, useTelemetryStore } from '@/state/telemetry-store';
+import { useLiveStore } from '@/state/live-store';
 import { useTsunamiStore } from '@/state/tsunami-store';
 import { useUiStore } from '@/state/ui-store';
 
@@ -26,6 +27,7 @@ import {
   MAX_BOUNDS,
   MAX_PITCH,
 } from '../lib/map-config';
+import { applyLiveLayer, LIVE_LAYER } from '../lib/live-layers';
 import { applyReferenceLayers, STATION_LAYER } from '../lib/reference-layers';
 import { SimulationRenderer } from '../lib/simulation-renderer';
 import { applyTerrain } from '../lib/terrain';
@@ -35,6 +37,12 @@ import { SimulationWatermark } from './simulation-watermark';
 setWorkerUrl(maplibreWorkerUrl);
 
 const currentTime = () => usePlaybackStore.getState().timeS;
+
+function applyLiveState(map: MapLibreMap): void {
+  const { events, selectedId } = useLiveStore.getState();
+  const { theme, scenarioTab } = useUiStore.getState();
+  applyLiveLayer(map, events, selectedId, theme, scenarioTab === 'live');
+}
 
 function focusedStationIndex(): number {
   const records = useScenarioStore.getState().result?.records;
@@ -58,6 +66,11 @@ export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const styleUrlRef = useRef<string | null>(null);
+  /**
+   * Whether the current style has loaded and accepts sources. `isStyleLoaded()` also waits for
+   * every tile, which with 3D terrain is false most of the time.
+   */
+  const styleReadyRef = useRef(false);
   const referenceRef = useRef(reference);
   const rendererRef = useRef<SimulationRenderer | null>(null);
   const [renderer, setRenderer] = useState<SimulationRenderer | null>(null);
@@ -91,11 +104,23 @@ export function MapView() {
     map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right');
     // Every style swap (theme change) drops custom sources and layers, so they are re-applied.
     map.on('style.load', () => {
+      styleReadyRef.current = true;
       const currentTheme = useUiStore.getState().theme;
       applyTerrain(map, currentTheme);
       applyReferenceLayers(map, referenceRef.current, currentTheme);
+      applyLiveState(map);
       rendererRef.current?.attach();
       rendererRef.current?.render(currentTime());
+    });
+    map.on('click', LIVE_LAYER, (event) => {
+      const id: unknown = event.features?.[0]?.properties.id;
+      if (typeof id === 'string') useLiveStore.getState().select(id);
+    });
+    map.on('mousemove', LIVE_LAYER, () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+    map.on('mouseleave', LIVE_LAYER, () => {
+      map.getCanvas().style.cursor = '';
     });
     map.on('click', STATION_LAYER, (event) => {
       const id: unknown = event.features?.[0]?.properties.id;
@@ -131,6 +156,7 @@ export function MapView() {
       map.remove();
       mapRef.current = null;
       styleUrlRef.current = null;
+      styleReadyRef.current = false;
     };
   }, []);
 
@@ -139,6 +165,7 @@ export function MapView() {
     const styleUrl = basemapStyleUrl(theme);
     if (!map || styleUrlRef.current === styleUrl) return;
     styleUrlRef.current = styleUrl;
+    styleReadyRef.current = false;
     map.setStyle(styleUrl);
   }, [theme]);
 
@@ -146,7 +173,7 @@ export function MapView() {
   useEffect(() => {
     referenceRef.current = reference;
     const map = mapRef.current;
-    if (!map?.isStyleLoaded()) return;
+    if (!map || !styleReadyRef.current) return;
     applyReferenceLayers(map, reference, useUiStore.getState().theme);
     rendererRef.current?.resetFacilityStates();
     rendererRef.current?.render(currentTime());
@@ -163,6 +190,22 @@ export function MapView() {
     renderer.setTheme(theme);
     renderer.render(currentTime());
   }, [renderer, theme]);
+
+  // Live catalog events follow the live store and show while the live list is open.
+  useEffect(() => {
+    const refresh = () => {
+      const map = mapRef.current;
+      if (map && styleReadyRef.current) applyLiveState(map);
+    };
+    const unsubscribeLive = useLiveStore.subscribe(refresh);
+    const unsubscribeUi = useUiStore.subscribe((state, previous) => {
+      if (state.scenarioTab !== previous.scenarioTab) refresh();
+    });
+    return () => {
+      unsubscribeLive();
+      unsubscribeUi();
+    };
+  }, []);
 
   useEffect(() => {
     if (!renderer) return;

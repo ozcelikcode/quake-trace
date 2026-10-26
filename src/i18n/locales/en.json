@@ -106,7 +106,19 @@
       "width": "Rupture width",
       "depth": "Focal depth",
       "ruptureDuration": "Rupture duration",
-      "computeTime": "Compute time"
+      "computeTime": "Compute time",
+      "origin": "Catalog event",
+      "originValue": "M {{magnitude}} · {{time}} UTC",
+      "fault": "Placed on fault",
+      "faultValue": "{{fault}}, {{distance}} km away",
+      "observed": "Observed records",
+      "observedStatus": {
+        "idle": "—",
+        "loading": "loading…",
+        "ready": "{{count}} stations (KOERI)",
+        "none": "none for this event",
+        "error": "unavailable"
+      }
     },
     "presets": {
       "north-marmara": {
@@ -125,6 +137,12 @@
         "name": "İzmit (1999-like)",
         "description": "Extent and focus of the 17 August 1999 rupture."
       }
+    },
+    "sources": "Scenario sources",
+    "tabs": {
+      "presets": "Presets",
+      "replay": "Historical",
+      "live": "Live"
     }
   },
   "impact": {
@@ -168,7 +186,9 @@
     },
     "stateTriggered": "triggered",
     "stateWaiting": "waiting",
-    "scaleNote": "Each trace is scaled to its own peak."
+    "scaleNote": "Each trace is scaled to its own peak.",
+    "observed": "Observed · KOERI",
+    "observedMethod": "Acceleration record from the KOERI EIDA node; counts converted to cm/s² with the instrument sensitivity after removing the pre-event mean."
   },
   "eew": {
     "title": "Early warning (simulated)",
@@ -255,5 +275,28 @@
     "forecastM6": "M ≥ 6 in the next 24 h",
     "openScale": "Show the 72-hour response timeline",
     "note": "A synthetic sequence from the Reasenberg & Jones (1989) generic California model (modified Omori decay, Gutenberg–Richter magnitudes); locations scattered along the rupture. Probabilities come from the same model, not an official forecast."
+  },
+  "replay": {
+    "events": {
+      "replay-kocaeli-1999": "1999 Kocaeli (İzmit) earthquake",
+      "replay-silivri-2019": "2019 Silivri earthquake",
+      "replay-marmara-2025": "2025 Marmara Ereğlisi – Silivri earthquake"
+    },
+    "source": "Parameters: {{catalog}}",
+    "note": "Replays use the catalog magnitude and hypocentre on the nearest mapped fault. Where the KOERI node holds strong-motion records for the event, telemetry shows them instead of synthetic ones."
+  },
+  "live": {
+    "feeds": "Catalogs",
+    "status": {
+      "pending": "loading",
+      "error": "unavailable",
+      "success": "updated"
+    },
+    "loading": "Reading the catalogs…",
+    "empty": "No earthquakes in the region in the last 7 days.",
+    "simulateHint": "Simulate this earthquake on the nearest fault.",
+    "tooSmall": "Simulation needs M {{magnitude}} or larger.",
+    "simulate": "Simulate",
+    "note": "Real earthquakes of the last 7 days in the Marmara region from AFAD, Kandilli (KOERI), EMSC and USGS, merged when within 30 s and 30 km; values from the national agency first. Refreshed every minute. Not an official warning system."
   }
 }

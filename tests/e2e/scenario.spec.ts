@@ -1,35 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
+import { isPhone, openImpactPanel, openScenarioPanel, project } from './_helpers/layout';
+
 test.use({ locale: 'tr-TR' });
-
-const project = () => test.info().project.name;
-const isPhone = () => project().startsWith('phone');
-
-/** Shows the scenario panel in the current layout. */
-async function openScenarioPanel(page: Page) {
-  if (isPhone()) {
-    await page
-      .getByRole('region', { name: 'Kontrol paneli' })
-      .getByRole('tab', { name: 'Senaryo' })
-      .click();
-  } else if (project() === 'tablet') {
-    await page.getByRole('button', { name: 'Senaryo panelini aç' }).click();
-  }
-}
-
-/** Shows the impact tab in the current layout. */
-async function openImpactPanel(page: Page) {
-  if (isPhone()) {
-    await page
-      .getByRole('region', { name: 'Kontrol paneli' })
-      .getByRole('tab', { name: 'Etki' })
-      .click();
-    return;
-  }
-  if (project() === 'tablet') await page.getByRole('button', { name: 'Bilgi panelini aç' }).click();
-  await page.getByRole('tab', { name: 'Etki' }).click();
-}
 
 /** Starts the North Marmara preset and waits until playback has begun. */
 async function runNorthMarmara(page: Page) {
@@ -159,6 +133,8 @@ test('shows network load and emergency response, and switches the map shading', 
 
 test('computes the tsunami in the background and opens its timeline scale', async ({ page }) => {
   test.skip(project() === 'phone-ios', 'covered by the other phone profile');
+  // Waiting for the tsunami worker next to software WebGL can exceed the shared 60 s budget.
+  test.setTimeout(120_000);
   await runNorthMarmara(page);
   const scale = page.getByRole('radiogroup', { name: 'Zaman ölçeği' });
   const tsunami = scale.getByRole('radio', { name: 'Tsunami' });
@@ -170,8 +146,8 @@ test('computes the tsunami in the background and opens its timeline scale', asyn
   if (!isPhone()) {
     await expect(page.getByRole('radio', { name: '30×' })).toHaveAttribute('aria-checked', 'true');
   }
-  await page.keyboard.press('Space');
-  for (let i = 0; i < 5; i++) await page.keyboard.press('Shift+ArrowRight');
+  // Pause (with focus off the scale control) and jump five minutes at a minute per step.
+  await pauseAndJump(page, 5);
 
   await openImpactPanel(page);
   const summary = page.getByTestId('tsunami-summary');
@@ -189,9 +165,8 @@ test('plays the aftershock sequence on the 72-hour response scale', async ({ pag
     .getByRole('radio', { name: 'Müdahale' });
   await response.click();
   await expect(response).toHaveAttribute('aria-checked', 'true');
-  await page.keyboard.press('Space');
-  // Shift+→ jumps an hour on this scale.
-  for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowRight');
+  // Pause and jump six hours: Shift+→ moves an hour on this scale.
+  await pauseAndJump(page, 6);
   await expect(page.getByTestId('simulation-clock').first()).toContainText(/T\+ \d:\d{2}:\d{2}/);
 
   await openImpactPanel(page);

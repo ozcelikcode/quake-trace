@@ -1,12 +1,22 @@
+import type { ObservedComponents } from '@/state/observed-store';
 import type { RecordComponent, StationRecords } from '@/types/simulation';
 import { RECORD_COMPONENTS } from '@/types/simulation';
 
-/** One component of one station's record, viewed without copying. */
+/**
+ * One component of one station's record, viewed without copying: the observed record when one
+ * was fetched for this station, otherwise the synthetic one.
+ */
 export function componentSamples(
   records: StationRecords,
   station: number,
   component: RecordComponent,
+  observed?: ObservedComponents,
 ): Float32Array {
+  if (observed) {
+    // A component the station did not deliver stays flat rather than mixing in synthetic data.
+    const real = observed[component];
+    return real?.length === records.samples ? real : new Float32Array(records.samples);
+  }
   const offset =
     (station * RECORD_COMPONENTS.length + RECORD_COMPONENTS.indexOf(component)) * records.samples;
   return records.accelCmS2.subarray(offset, offset + records.samples);

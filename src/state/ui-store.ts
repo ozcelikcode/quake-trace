@@ -6,6 +6,8 @@ export type DrawerSide = 'left' | 'right';
 export type PanelId = 'scenario' | 'telemetry' | 'impact' | 'events';
 /** Quantity drawn as the map raster while a scenario is loaded. */
 export type MapRaster = 'intensity' | 'network' | 'tsunami';
+/** Sources of a scenario in the scenario panel. */
+export type ScenarioTab = 'presets' | 'replay' | 'live';
 
 /** Panels shown in the right column on desktop and in the right drawer on tablets. */
 export const rightPanelIds = [
@@ -35,11 +37,13 @@ interface UiState {
   rightPanel: RightPanelId;
   phonePanel: PanelId;
   mapRaster: MapRaster;
+  scenarioTab: ScenarioTab;
   toggleTheme: () => void;
   setOpenDrawer: (side: DrawerSide | null) => void;
   setRightPanel: (panel: RightPanelId) => void;
   setPhonePanel: (panel: PanelId) => void;
   setMapRaster: (raster: MapRaster) => void;
+  setScenarioTab: (tab: ScenarioTab) => void;
 }
 
 export const useUiStore = create<UiState>()(
@@ -50,6 +54,7 @@ export const useUiStore = create<UiState>()(
       rightPanel: 'telemetry',
       phonePanel: 'scenario',
       mapRaster: 'intensity',
+      scenarioTab: 'presets',
       toggleTheme: () => {
         set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' }));
       },
@@ -64,6 +69,9 @@ export const useUiStore = create<UiState>()(
       },
       setMapRaster: (mapRaster) => {
         set({ mapRaster });
+      },
+      setScenarioTab: (scenarioTab) => {
+        set({ scenarioTab });
       },
     }),
     {

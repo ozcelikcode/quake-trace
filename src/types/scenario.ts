@@ -14,8 +14,12 @@ export interface FaultSource {
 /** The part of a fault that ruptures in a scenario, measured along its trace. */
 export interface RuptureSpec {
   fault: FaultSource;
-  startKm: number;
-  endKm: number;
+  /**
+   * Ruptured part of the trace, km from its start. When omitted, the Wells and Coppersmith
+   * (1994) median area for `mw` is centred on the hypocentre (`mw` is then required).
+   */
+  startKm?: number;
+  endKm?: number;
   hypocenterKm: number;
   hypocenterDepthKm: number;
   /** Moment magnitude; derived from the rupture area (Wells and Coppersmith, 1994) when omitted. */
@@ -27,4 +31,21 @@ export interface Scenario {
   rupture: RuptureSpec;
   /** Seed for every random draw (synthetic records), so a scenario always reproduces. */
   seed: number;
+}
+
+/** A real earthquake turned into a scenario (historical replay or live event). */
+export interface ScenarioEvent {
+  /** Stable key, also the scenario id. */
+  id: string;
+  /** Origin time, ms since the Unix epoch. */
+  originMs: number;
+  lon: number;
+  lat: number;
+  depthKm: number;
+  magnitude: number;
+  place: string;
+  /** Catalog and event id the parameters come from, for attribution. */
+  catalog: string;
+  /** Known rupture extent as longitudes along the fault; otherwise sized from the magnitude. */
+  extentLon?: readonly [number, number];
 }
