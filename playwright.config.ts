@@ -7,9 +7,11 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   // Headless browsers render the 3D map with software WebGL; more workers starve the main
-  // thread and make page evaluation (axe) time out.
-  workers: 2,
-  timeout: 60_000,
+  // thread and make page evaluation (axe) time out. CI runners (no GPU, shared vCPUs) render
+  // more slowly still, so they run one worker with longer budgets.
+  workers: isCi ? 1 : 2,
+  timeout: isCi ? 120_000 : 60_000,
+  expect: { timeout: isCi ? 15_000 : 5_000 },
   forbidOnly: isCi,
   retries: isCi ? 2 : 0,
   reporter: isCi
