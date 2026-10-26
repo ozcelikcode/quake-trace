@@ -25,11 +25,17 @@ jobs:
           curl -fsS -o /dev/null "$BASE/data/faults.geojson"
       - name: Proxy routes
         run: |
-          curl -fsS "$BASE/api/kandilli/lst0.asp" -o kandilli.html
-          wc -c kandilli.html
-          curl -fsS "$BASE/api/koeri/station/1/query?net=KO&sta=SLVT&cha=HN?&level=station&format=text" | grep -q 'SLVT'
           day=$(date -u +%Y-%m-%d)
-          curl -fsS "$BASE/api/afad/event/filter?start=${day}T00:00:00&end=${day}T23:59:59&minlat=39.8&maxlat=41.8&minlon=26&maxlon=31" | head -c 200
+          failed=0
+          check() {
+            code=$(curl -s -o body -w '%{http_code} %{time_total}s' --max-time 40 "$BASE$1")
+            echo "$code $(wc -c < body) bytes  $1"
+            case "$code" in 200*) ;; *) failed=1 ;; esac
+          }
+          check "/api/kandilli/lst0.asp"
+          check "/api/koeri/station/1/query?net=KO&sta=SLVT&cha=HN?&level=station&format=text"
+          check "/api/afad/event/filter?start=${day}T00:00:00&end=${day}T23:59:59&minlat=39.8&maxlat=41.8&minlon=26&maxlon=31"
+          exit $failed
       - name: Unknown routes are refused
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/nope")
