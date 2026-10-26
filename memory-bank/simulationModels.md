@@ -59,7 +59,7 @@ One global clock `t` in seconds from origin (`state/playback-store.ts`). Built: 
 
 ## Real earthquakes as scenarios (phase 9)
 
-`features/scenario/lib/event-scenario.ts`: the hypocentre goes to the point of the nearest EFSM20 trace (distance reported; 1.4 km for 2025, 9.7 km for 2019), at the catalog depth clamped to the seismogenic layer, with the catalog magnitude. The rupture spans a known extent (1999: the İzmit preset's 30.90–29.35° E) or the W&C94 median area for the magnitude divided by the fault width, centred on the hypocentre and kept on the trace (`engine/rupture/finite-fault.ts`, `ruptureExtentKm`). Live events are offered from M 4.0. Observed records replace synthetic ones in telemetry per station (components the station lacks stay flat); their STA/LTA pick is not shown.
+`features/scenario/lib/event-scenario.ts`: within 15 km of a trace the hypocentre goes to the point of the nearest EFSM20 trace (distance reported; 1.4 km for 2025, 9.7 km for 2019); farther away the rupture stays at the epicentre on a straight 120 km trace with the nearest fault's local strike, dip, rake and depths (an assumption for off-fault seismicity), at the catalog depth clamped to the seismogenic layer, with the catalog magnitude. The rupture spans a known extent (1999: the İzmit preset's 30.90–29.35° E) or the W&C94 median area for the magnitude divided by the fault width, centred on the hypocentre and kept on the trace (`engine/rupture/finite-fault.ts`, `ruptureExtentKm`). Live events are offered from M 4.0. Observed records replace synthetic ones in telemetry per station (components the station lacks stay flat); their STA/LTA pick is not shown.
 
 ## Presets
 

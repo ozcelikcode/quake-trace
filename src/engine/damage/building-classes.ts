@@ -13,13 +13,13 @@ import type { BuildingPeriods, BuildingStoreys } from '@/types/damage';
  * Periods and storeys are only known as separate counts, so classes assume they are
  * independent within a district.
  */
-export const PERIOD_CODES: Record<keyof BuildingPeriods, string> = {
+const PERIOD_CODES: Record<keyof BuildingPeriods, string> = {
   before1980: 'CDL+ERL',
   from1980To2000: 'CDM+ERL',
   after2000: 'CDM+ERM',
 };
 
-export const STOREY_HEIGHTS: Record<keyof BuildingStoreys, number> = {
+const STOREY_HEIGHTS: Record<keyof BuildingStoreys, number> = {
   low: 3,
   mid: 6,
   high: 10,

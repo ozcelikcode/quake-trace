@@ -54,19 +54,19 @@ Each phase ends with CI green and a deployable `main`.
 
 - Playwright MCP cannot launch: it expects Google Chrome, which is not installed. The user chose to leave it (2026-10-25); visual checks use Playwright screenshots via script.
 - `npm audit`: 4 advisories in `undici` pulled in by `wrangler`/`miniflare` (local dev tooling only, not shipped). Revisit when Wrangler updates its dependency.
-- Dark basemap: water and land contrast is low; with the intensity raster the map now reads well, revisit in phase 11.
+- Dark basemap: water and land contrast is low; with the intensity raster the map reads well.
 - MapLibre has no API to start compact attribution collapsed; on narrow maps the `maplibregl-compact-show` class is removed after load (`map-view.tsx`).
-- Building counts outside İstanbul are estimates (see `dataSources.md`); the UI must show this when damage results are displayed (phase 5).
+- Building counts outside İstanbul are estimates (see `dataSources.md`); the impact panel marks those districts "(estimated stock)".
 - Wavefronts are cut where they leave the engine grid (for example north of 41.8° N).
-- Median-only ground motion and records: map and telemetry stay consistent; aleatory variability (ASB14 σ, τ) is not sampled yet (candidate for the scenario editor, phase 10).
+- Median-only ground motion and records: map and telemetry stay consistent; aleatory variability (ASB14 σ, τ) is not sampled, so no uncertainty bands are shown.
 - Damage: GEM data is CC BY-NC-SA 4.0 (non-commercial); time of day fixed at night (residents at home); facility state thresholds are assumptions; underestimates İBB 2019 fatalities by about 2.4× (different magnitude/rupture, median-centred stock assumptions).
 - EEW: no telemetry or processing latency; depth fixed at 10 km.
-- Editor and exports: no rupture-extent control (W&C94 from the magnitude); time of day stays night; the share link does not carry the playback moment; the report has no map image; integration timing budgets (2 s preset, tsunami 5 s) fail under macOS Low Power Mode.
+- Editor and exports: no rupture-extent control (W&C94 from the magnitude); time of day stays night; the share link does not carry the playback moment; the report has no map image. The 2 s preset budget in the integration tests can fail on slow machines (macOS Low Power Mode); CI runners have not run it yet.
 - Synthetic records are point-source shapes (Boore 2003) with finite-fault arrival times; P shares the S-wave attenuation (simplification). Compute time on phones (2–3× slower than desktop) is not yet measured.
-- Live/replay: observed records only from KOERI (no AFAD TK network), converted with the flat sensitivity (no full response removal); real-time seismogram streaming for live events is not done (records are fetched only when an event is simulated, and KOERI data lag 3–10 min); live events are placed on the nearest mapped fault even when they lie off it; the status-bar mode does not yet say "replay"/"live".
-- Aftershocks: generic California parameters, not fitted to Marmara/NAF sequences; no ETAS spatial clustering (uniform along the rupture with 5 km scatter); aftershocks do not add shaking, damage or tsunami. The status bar still shows the mainshock alert during the response scale.
+- Live/replay: observed records only from KOERI (no AFAD TK network), converted with the flat sensitivity (no full response removal); real-time seismogram streaming for live events is not done (records are fetched only when an event is simulated, and KOERI data lag 3–10 min); events more than 15 km from every mapped fault rupture at their epicentre with the nearest fault's geometry (an assumption). Observed waveforms come from the 24 nearest stations that operated at the origin time (2019: 6 stations with data, 2025: 22).
+- Aftershocks: generic California parameters, not fitted to Marmara/NAF sequences; no ETAS spatial clustering (uniform along the rupture with 5 km scatter); aftershocks do not add shaking, damage or tsunami.
 - Tsunami: linear and non-dispersive, no run-up (depth floored at 10 m), no landslide sources, instantaneous uplift; heights are near-coast offshore values. Coastal arrivals are not labelled on the map yet. The 15 MB of frames stay in memory per scenario.
-- Network: power cuts and battery autonomy are not modelled, so no site goes down in the presets (DOCOMO lost most sites to power cuts in 2011); demand ignores time of day; the surge decays over hours, beyond the current scenario timeline (multi-scale timeline in phase 8).
+- Network: power cuts and battery autonomy are not modelled, so no site goes down in the presets (DOCOMO lost most sites to power cuts in 2011); demand ignores time of day; the surge decays over hours (visible on the response scale).
 - Routing: debris slowdown is an assumption; OSM bridge types unknown (Hazus HWB28 for all); no traffic, no ferries (Adalar shows as cut off by road); the road graph is copied to the worker on each run.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 

@@ -17,9 +17,13 @@ import { scenarioFromEvent } from '../lib/event-scenario';
 import { resolvePreset, SCENARIO_PRESETS } from '../lib/presets';
 import { encodeRunRequest, type RunRequest } from '../lib/run-request';
 
-/** Observed records are requested from the nearest accelerometer stations, up to this many. */
-const OBSERVED_STATIONS = 12;
-const OBSERVED_RADIUS_KM = 150;
+/**
+ * Observed records are looked for at the accelerometer stations within this distance; waveforms
+ * come from the nearest ones that were operating at the origin time (`fetchObservedRecords`).
+ * The 2019 Mw 5.7 Silivri earthquake still reached 1.9 cm/s² at KO.GPA, 188 km away
+ * (tests/fixtures/validation).
+ */
+const OBSERVED_RADIUS_KM = 200;
 
 /** Fetches real records of the nearest stations; telemetry shows them over the synthetic ones. */
 async function loadObserved(
@@ -38,8 +42,7 @@ async function loadObserved(
       distanceKm: haversineKm(event.lon, event.lat, station.lon, station.lat),
     }))
     .filter((station) => station.distanceKm <= OBSERVED_RADIUS_KM)
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, OBSERVED_STATIONS);
+    .sort((a, b) => a.distanceKm - b.distanceKm);
   try {
     const records =
       nearest.length === 0
@@ -155,6 +158,7 @@ export function useRunScenario() {
           catalog: request.event.catalog,
           faultId: placed.faultId,
           faultDistanceKm: placed.faultDistanceKm,
+          placement: placed.placement,
         };
       }
     } catch (error) {

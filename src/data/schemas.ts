@@ -121,7 +121,7 @@ export const vulnerabilitySchema = z.object({
     .min(1),
 });
 
-export const infraKinds = [
+const infraKinds = [
   'hospital',
   'fireStation',
   'police',

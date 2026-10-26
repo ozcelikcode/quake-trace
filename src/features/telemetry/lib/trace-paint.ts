@@ -14,7 +14,7 @@ export interface TraceView {
   scale: number;
 }
 
-export function timeToX(view: TraceView, timeS: number): number {
+function timeToX(view: TraceView, timeS: number): number {
   return (timeS / view.durationS) * view.width;
 }
 

@@ -18,9 +18,11 @@ export type ScenarioOrigin =
       place: string;
       /** Catalog and event id the parameters come from. */
       catalog: string;
-      /** Fault the rupture was placed on and its distance from the epicentre. */
+      /** Nearest mapped fault and its distance from the epicentre. */
       faultId: string;
       faultDistanceKm: number;
+      /** On that fault, or at the epicentre with its geometry (far from every fault). */
+      placement: 'fault' | 'epicentre';
     };
 
 interface ScenarioState {

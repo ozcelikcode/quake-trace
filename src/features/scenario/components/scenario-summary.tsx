@@ -49,10 +49,12 @@ export function ScenarioSummary({ result }: { result: SimulationResult }) {
           ],
           [
             t('scenario.summary.fault'),
-            t('scenario.summary.faultValue', {
-              fault: origin.faultId,
-              distance: number(origin.faultDistanceKm, 1),
-            }),
+            t(
+              origin.placement === 'fault'
+                ? 'scenario.summary.faultValue'
+                : 'scenario.summary.epicentreValue',
+              { fault: origin.faultId, distance: number(origin.faultDistanceKm, 1) },
+            ),
           ],
           [
             t('scenario.summary.observed'),

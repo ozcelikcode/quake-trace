@@ -116,7 +116,7 @@
       "computeTime": "Hesap süresi",
       "origin": "Katalog olayı",
       "originValue": "M {{magnitude}} · {{time}} UTC",
-      "fault": "Yerleştirildiği fay",
+      "fault": "Kırılma yeri",
       "faultValue": "{{fault}}, {{distance}} km uzakta",
       "observed": "Gerçek kayıtlar",
       "observedStatus": {
@@ -127,7 +127,8 @@
         "error": "erişilemiyor"
       },
       "customFault": "Fay",
-      "seed": "Seed"
+      "seed": "Seed",
+      "epicentreValue": "Merkez üssünde, {{fault}} doğrultusunda (fay {{distance}} km uzakta)"
     },
     "presets": {
       "north-marmara": {
@@ -299,7 +300,7 @@
       "replay-marmara-2025": "2025 Marmara Ereğlisi – Silivri depremi"
     },
     "source": "Parametreler: {{catalog}}",
-    "note": "Tekrarlar katalog büyüklüğünü ve odağını en yakın haritalı fay üzerinde kullanır. KOERI düğümünde olayın kuvvetli yer hareketi kaydı varsa telemetri sentetik yerine onu gösterir."
+    "note": "Tekrarlar katalog büyüklüğünü ve odağını kullanır: odak bir faya 15 km'den yakınsa kırılma o faya, değilse merkez üssüne en yakın fayın doğrultusunda yerleşir. KOERI düğümünde olayın kuvvetli yer hareketi kaydı varsa telemetri sentetik yerine onu gösterir."
   },
   "live": {
     "feeds": "Kataloglar",
@@ -310,7 +311,7 @@
     },
     "loading": "Kataloglar okunuyor…",
     "empty": "Son 7 günde bölgede deprem yok.",
-    "simulateHint": "Bu depremi en yakın fay üzerinde simüle et.",
+    "simulateHint": "Bu depremi katalog büyüklüğü ve odağıyla simüle et.",
     "tooSmall": "Simülasyon için M {{magnitude}} ve üstü gerekir.",
     "simulate": "Simüle et",
     "note": "AFAD, Kandilli (KOERI), EMSC ve USGS’ten son 7 günün Marmara bölgesi depremleri; 30 s ve 30 km içindeki kayıtlar birleştirilir, değerler önce ulusal kurumdan alınır. Dakikada bir yenilenir. Resmî uyarı sistemi değildir."

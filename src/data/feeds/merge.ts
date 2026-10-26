@@ -2,8 +2,8 @@ import { haversineKm } from '@/lib/math/geo';
 import { FEED_SOURCES, type FeedEvent, type LiveEvent } from '@/types/live';
 
 /** Reports within these limits describe the same earthquake (memory-bank plan: ±30 s, ±30 km). */
-export const SAME_EVENT_S = 30;
-export const SAME_EVENT_KM = 30;
+const SAME_EVENT_S = 30;
+const SAME_EVENT_KM = 30;
 
 export interface Region {
   west: number;

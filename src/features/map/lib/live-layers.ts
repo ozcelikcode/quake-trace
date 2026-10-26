@@ -16,7 +16,7 @@ import { REFERENCE_PALETTE } from './layer-palette';
  * only while the live list is open.
  */
 
-export const LIVE_SOURCE = 'quaketrace-live';
+const LIVE_SOURCE = 'quaketrace-live';
 export const LIVE_LAYER = 'quaketrace-live';
 const HOUR_MS = 3_600_000;
 const WINDOW_H = 7 * 24;

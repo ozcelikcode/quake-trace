@@ -15,7 +15,7 @@ import type { RuptureArrivals } from './arrivals';
 import type { PolygonDistance } from './polygon-distance';
 
 /** Strong-motion sampling rate (the HN channels of the KO network record at 100 Hz). */
-export const RECORD_SAMPLE_RATE_HZ = 100;
+const RECORD_SAMPLE_RATE_HZ = 100;
 /** Noise synthesized before the origin, so the LTA window is already full at t = 0. */
 const PRE_EVENT_S = LTA_S;
 /** P velocity of a Poisson solid relative to Vs30, for the near-surface incidence angle. */

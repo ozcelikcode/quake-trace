@@ -19,7 +19,7 @@ import type { GridSpec } from '@/types/grid';
  */
 
 export const GRAVITY = 9.81;
-export const MIN_DEPTH_M = 10;
+const MIN_DEPTH_M = 10;
 const CFL = 0.9;
 const RAD = Math.PI / 180;
 

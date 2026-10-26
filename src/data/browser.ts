@@ -3,7 +3,7 @@ import { DataRepository, type DataFetcher } from './repository';
 
 const DATA_BASE_URL = `${import.meta.env.BASE_URL}data/`;
 
-export const fetchData: DataFetcher = async (path) => {
+const fetchData: DataFetcher = async (path) => {
   const response = await fetch(`${DATA_BASE_URL}${path}`);
   if (!response.ok) {
     throw new DataError(`failed to load ${path}: HTTP ${String(response.status)}`);

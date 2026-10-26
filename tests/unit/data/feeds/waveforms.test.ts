@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { fetchObservedRecords, observedUrls } from '@/data/feeds/waveforms';
+import { dataselectUrl, fetchObservedRecords, stationUrl } from '@/data/feeds/waveforms';
 
 // jsdom replaces import.meta.url with an http URL, so fixtures are resolved from the root.
 const fixture = (name: string) => resolve('tests/fixtures/feeds', name);
@@ -15,11 +15,42 @@ const request = { stationIds: ['KO.SLVT'], originMs: ORIGIN_MS, durationS: 100, 
 
 describe('observed strong-motion records', () => {
   it('asks the KOERI node for the accelerometer channels around the origin', () => {
-    const urls = observedUrls({ ...request, stationIds: ['KO.SLVT', 'KO.GEML'] });
-    expect(urls.dataselect).toBe(
+    const candidates = { ...request, stationIds: ['KO.SLVT', 'KO.GEML'] };
+    expect(dataselectUrl(candidates, candidates.stationIds)).toBe(
       '/api/koeri/dataselect/1/query?net=KO&sta=SLVT,GEML&cha=HN?&start=2025-04-23T09:49:01&end=2025-04-23T09:50:51',
     );
-    expect(urls.station).toContain('level=channel');
+    expect(stationUrl(candidates)).toContain('level=channel');
+  });
+
+  it('requests waveforms only from stations operating at the origin time', async () => {
+    const mseed = await readFile(fixture('ko-slvt-2025-04-23.mseed'));
+    const xml = await readFile(fixture('ko-slvt-station.xml'), 'utf8');
+    const urls: string[] = [];
+    const records = await fetchObservedRecords(
+      // GEML is not in the metadata, so only SLVT's waveforms are requested.
+      { ...request, stationIds: ['KO.GEML', 'KO.SLVT'] },
+      (url) => {
+        urls.push(url);
+        return Promise.resolve(new Response(url.includes('dataselect') ? mseed : xml));
+      },
+    );
+    expect(urls[1]).toContain('sta=SLVT&');
+    expect(records.map((record) => record.stationId)).toEqual(['KO.SLVT']);
+  });
+
+  it('asks for no waveforms when no candidate operated at the origin time', async () => {
+    const xml = await readFile(fixture('ko-slvt-station.xml'), 'utf8');
+    const urls: string[] = [];
+    const records = await fetchObservedRecords(
+      // SLVT's accelerometer channels start on 2016-04-28.
+      { ...request, originMs: Date.UTC(1999, 7, 17) },
+      (url) => {
+        urls.push(url);
+        return Promise.resolve(new Response(xml));
+      },
+    );
+    expect(records).toEqual([]);
+    expect(urls).toHaveLength(1);
   });
 
   it('converts the 2025 Silivri record of SLVT to cm/s² from the origin', async () => {

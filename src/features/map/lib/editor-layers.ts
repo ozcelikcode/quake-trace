@@ -20,7 +20,7 @@ import { REFERENCE_SOURCES } from './reference-layers';
  * click near one picks it (the fault lines themselves are 1–3.5 px).
  */
 
-export const EDITOR_SOURCE = 'quaketrace-editor';
+const EDITOR_SOURCE = 'quaketrace-editor';
 export const FAULT_HIT_LAYER = 'quaketrace-fault-hit';
 const LAYERS = {
   casing: 'quaketrace-editor-casing',
@@ -28,7 +28,7 @@ const LAYERS = {
   hypocenter: 'quaketrace-editor-hypocenter',
 } as const;
 
-export function draftToGeoJson(draft: ScenarioDraft, faults: Faults): GeoJSON.FeatureCollection {
+function draftToGeoJson(draft: ScenarioDraft, faults: Faults): GeoJSON.FeatureCollection {
   const { trace } = faultSource(faults, draft.faultId);
   const { point } = pointAtKm(trace, cumulativeLengthsKm(trace), draft.hypocenterKm);
   return {

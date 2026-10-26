@@ -27,9 +27,9 @@ import { locateByGridSearch } from './locate';
  * 4. Alert: when the last of the four stations has 3 s of P wave. Telemetry and processing
  *    latency are not modelled.
  */
-export const EEW_STATIONS = 4;
-export const EEW_DEPTH_KM = 10;
-export const PD_WINDOW_S = 3;
+const EEW_STATIONS = 4;
+const EEW_DEPTH_KM = 10;
+const PD_WINDOW_S = 3;
 const PD_SCATTER_LOG10 = 0.305;
 const SEARCH = { stepDeg: 0.01, marginDeg: 0.5 };
 const MAX_DISTANCE_KM = 400;

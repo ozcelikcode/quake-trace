@@ -9,8 +9,8 @@ import { parseAfad, parseEmsc, parseKandilli, parseUsgs } from './parsers';
  */
 
 /** The application region (simulationModels.md, "Grid"). */
-export const LIVE_REGION: Region = { west: 26, east: 31, south: 39.8, north: 41.8 };
-export const LIVE_WINDOW_DAYS = 7;
+const LIVE_REGION: Region = { west: 26, east: 31, south: 39.8, north: 41.8 };
+const LIVE_WINDOW_DAYS = 7;
 const DAY_MS = 86_400_000;
 
 export type Fetcher = (url: string) => Promise<Response>;

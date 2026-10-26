@@ -19,7 +19,7 @@ export interface ObservedRecord {
 }
 
 /** Seconds of data before the origin used for the pre-event mean. */
-export const PRE_EVENT_S = 10;
+const PRE_EVENT_S = 10;
 const M_TO_CM = 100;
 const COMPONENT_OF: Record<string, RecordComponent> = {
   Z: 'Z',
@@ -30,28 +30,45 @@ const COMPONENT_OF: Record<string, RecordComponent> = {
 };
 
 export interface ObservedRequest {
-  /** Station ids NET.STA. */
+  /** Candidate station ids NET.STA, nearest first. */
   stationIds: readonly string[];
   originMs: number;
   durationS: number;
   /** The records are kept at this rate (others are skipped). */
   sampleRateHz: number;
+  /** Waveforms are requested from at most this many operating stations (the nearest). */
+  maxStations?: number;
 }
+
+const DEFAULT_MAX_STATIONS = 24;
 
 function isoSeconds(ms: number): string {
   return new Date(ms).toISOString().slice(0, 19);
 }
 
-export function observedUrls(request: ObservedRequest): { dataselect: string; station: string } {
-  const networks = [...new Set(request.stationIds.map((id) => id.split('.')[0] ?? ''))];
-  const stations = request.stationIds.map((id) => id.split('.')[1] ?? '');
-  const start = isoSeconds(request.originMs - PRE_EVENT_S * 1000);
-  const end = isoSeconds(request.originMs + request.durationS * 1000);
-  const selection = `net=${networks.join(',')}&sta=${stations.join(',')}&cha=HN?`;
+function selection(stationIds: readonly string[]): string {
+  const networks = [...new Set(stationIds.map((id) => id.split('.')[0] ?? ''))];
+  const stations = stationIds.map((id) => id.split('.')[1] ?? '');
+  return `net=${networks.join(',')}&sta=${stations.join(',')}&cha=HN?`;
+}
+
+function timeWindow(request: ObservedRequest): { start: string; end: string } {
   return {
-    dataselect: `/api/koeri/dataselect/1/query?${selection}&start=${start}&end=${end}`,
-    station: `/api/koeri/station/1/query?${selection}&level=channel&starttime=${start}&endtime=${end}`,
+    start: isoSeconds(request.originMs - PRE_EVENT_S * 1000),
+    end: isoSeconds(request.originMs + request.durationS * 1000),
   };
+}
+
+/** Channel metadata (sensitivities and operating periods) of the candidate stations. */
+export function stationUrl(request: ObservedRequest): string {
+  const { start, end } = timeWindow(request);
+  return `/api/koeri/station/1/query?${selection(request.stationIds)}&level=channel&starttime=${start}&endtime=${end}`;
+}
+
+/** Waveforms of the given stations around the origin. */
+export function dataselectUrl(request: ObservedRequest, stationIds: readonly string[]): string {
+  const { start, end } = timeWindow(request);
+  return `/api/koeri/dataselect/1/query?${selection(stationIds)}&start=${start}&end=${end}`;
 }
 
 /** Acceleration (cm/s²) aligned to the origin from one decoded channel, or null if unusable. */
@@ -81,23 +98,37 @@ export function toAcceleration(
   return out;
 }
 
-/** Fetches and converts the records; stations without data are absent from the result. */
+/**
+ * Fetches and converts the records; stations without data are absent from the result. The
+ * station metadata is read first, so waveforms are requested only from stations that had
+ * accelerometer channels at the origin time (today's nearest stations may not have existed for
+ * a historical earthquake).
+ */
 export async function fetchObservedRecords(
   request: ObservedRequest,
   fetcher: Fetcher = (url) => fetch(url),
 ): Promise<ObservedRecord[]> {
-  const urls = observedUrls(request);
-  const [waveforms, metadata] = await Promise.all([
-    fetcher(urls.dataselect),
-    fetcher(urls.station),
-  ]);
+  const metadata = await fetcher(stationUrl(request));
   // FDSN answers 204 when no data matches.
-  if (waveforms.status === 204 || metadata.status === 204) return [];
-  if (!waveforms.ok || !metadata.ok) {
-    throw new Error(`HTTP ${String(waveforms.ok ? metadata.status : waveforms.status)}`);
-  }
-  const traces = readMiniSeed(await waveforms.arrayBuffer());
+  if (metadata.status === 204) return [];
+  if (!metadata.ok) throw new Error(`HTTP ${String(metadata.status)}`);
   const sensitivities = channelSensitivities(await metadata.text());
+  const operating = request.stationIds
+    .filter((stationId) =>
+      sensitivities.some(
+        (c) =>
+          c.id.startsWith(`${stationId}.`) &&
+          c.startMs <= request.originMs &&
+          request.originMs < c.endMs,
+      ),
+    )
+    .slice(0, request.maxStations ?? DEFAULT_MAX_STATIONS);
+  if (operating.length === 0) return [];
+
+  const waveforms = await fetcher(dataselectUrl(request, operating));
+  if (waveforms.status === 204) return [];
+  if (!waveforms.ok) throw new Error(`HTTP ${String(waveforms.status)}`);
+  const traces = readMiniSeed(await waveforms.arrayBuffer());
 
   const byStation = new Map<string, ObservedRecord>();
   for (const trace of traces) {

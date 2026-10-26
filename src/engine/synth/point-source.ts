@@ -35,7 +35,7 @@ const RADIATION = { P: 0.52, S: 0.63 } as const;
 const CORNER_FACTOR = { P: 0.32 / 0.21, S: 1 } as const;
 const FREE_SURFACE = 2;
 /** Share of S motion on one horizontal component (Boore, 2003). */
-export const HORIZONTAL_PARTITION = Math.SQRT1_2;
+const HORIZONTAL_PARTITION = Math.SQRT1_2;
 
 /**
  * Campbell (2003) western North America crustal amplification (quarter-wavelength), linear in

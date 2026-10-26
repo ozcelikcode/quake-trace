@@ -18,7 +18,7 @@ const RURAL_ISD_KM = 1.732;
 /** ISD by settlement class, in `SETTLEMENT` order (rural, cluster, centre). */
 const ISD_KM = [RURAL_ISD_KM, 1.299, 0.5] as const;
 /** Fixed seed of the synthetic layout, independent of the scenario seed. */
-export const SYNTHETIC_SITE_SEED = 286;
+const SYNTHETIC_SITE_SEED = 286;
 
 export function siteAreaKm2(isdKm: number): number {
   return (Math.sqrt(3) / 2) * isdKm * isdKm;

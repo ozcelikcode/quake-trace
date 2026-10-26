@@ -11,7 +11,7 @@
 
 export const STA_S = 0.5;
 export const LTA_S = 60;
-export const TRIGGER_RATIO = 4;
+const TRIGGER_RATIO = 4;
 
 export function staLtaRatio(
   signal: ArrayLike<number>,

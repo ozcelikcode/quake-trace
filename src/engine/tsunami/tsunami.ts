@@ -25,7 +25,7 @@ const DEFAULT_FRAME_S = 15;
  * display assumption). Measured from the initial surface because the Okada uplift itself reaches
  * coasts tens of kilometres away.
  */
-export const ARRIVAL_THRESHOLD_M = 0.01;
+const ARRIVAL_THRESHOLD_M = 0.01;
 const MM = 1000;
 const INT16_MAX = 32_767;
 

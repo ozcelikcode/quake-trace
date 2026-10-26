@@ -17,12 +17,12 @@ import { stochasticMotions } from './stochastic';
  *   STA/LTA trigger sees realistic pre-event noise.
  */
 
-export const VERTICAL_TO_HORIZONTAL = 2 / 3;
+const VERTICAL_TO_HORIZONTAL = 2 / 3;
 /**
  * Assumed ambient noise floor, cm/s² rms (about 50 µg). A display and trigger assumption, not
  * calibrated against station noise.
  */
-export const NOISE_RMS_CMS2 = 0.05;
+const NOISE_RMS_CMS2 = 0.05;
 
 export interface StationSynthesisInput {
   mw: number;

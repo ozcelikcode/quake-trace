@@ -63,6 +63,8 @@ describe('Marmara tsunami on the prepared bathymetry', () => {
       expect(result.source.slipM).toBeGreaterThan(1.5);
       expect(result.source.slipM).toBeLessThan(3);
     },
+    // The 10 s budget is the assertion; the default 5 s test timeout would cut it short.
+    20_000,
   );
 
   it('gives the oblique-normal Main Marmara Fault decimetre-scale uplift and subsidence', () => {

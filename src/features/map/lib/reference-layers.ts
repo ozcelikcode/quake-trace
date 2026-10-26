@@ -30,7 +30,7 @@ export const REFERENCE_SOURCES = {
   facilities: 'quaketrace-facilities',
 } as const;
 
-export const FACILITY_LAYER = 'quaketrace-facilities';
+const FACILITY_LAYER = 'quaketrace-facilities';
 
 /**
  * Feature-state `status` of a facility: 0 not yet reached by the S wave (hidden), then
@@ -61,7 +61,7 @@ export function facilitiesToGeoJson(infra: Infra): GeoJSON.FeatureCollection<Geo
   };
 }
 
-export const STATION_ICON = 'quaketrace-station-triangle';
+const STATION_ICON = 'quaketrace-station-triangle';
 export const STATION_LAYER = 'quaketrace-stations';
 
 export function stationsToGeoJson(stations: Station[]): GeoJSON.FeatureCollection<GeoJSON.Point> {

@@ -116,7 +116,7 @@
       "computeTime": "Compute time",
       "origin": "Catalog event",
       "originValue": "M {{magnitude}} · {{time}} UTC",
-      "fault": "Placed on fault",
+      "fault": "Rupture placement",
       "faultValue": "{{fault}}, {{distance}} km away",
       "observed": "Observed records",
       "observedStatus": {
@@ -127,7 +127,8 @@
         "error": "unavailable"
       },
       "customFault": "Fault",
-      "seed": "Seed"
+      "seed": "Seed",
+      "epicentreValue": "At the epicentre, along {{fault}} (fault {{distance}} km away)"
     },
     "presets": {
       "north-marmara": {
@@ -299,7 +300,7 @@
       "replay-marmara-2025": "2025 Marmara Ereğlisi – Silivri earthquake"
     },
     "source": "Parameters: {{catalog}}",
-    "note": "Replays use the catalog magnitude and hypocentre on the nearest mapped fault. Where the KOERI node holds strong-motion records for the event, telemetry shows them instead of synthetic ones."
+    "note": "Replays use the catalog magnitude and hypocentre: within 15 km of a fault the rupture is placed on it, otherwise at the epicentre along the nearest fault's strike. Where KOERI recorded strong motion, telemetry shows the real record instead of the synthetic one."
   },
   "live": {
     "feeds": "Catalogs",
@@ -310,7 +311,7 @@
     },
     "loading": "Reading the catalogs…",
     "empty": "No earthquakes in the region in the last 7 days.",
-    "simulateHint": "Simulate this earthquake on the nearest fault.",
+    "simulateHint": "Simulate this earthquake with its catalog magnitude and hypocentre.",
     "tooSmall": "Simulation needs M {{magnitude}} or larger.",
     "simulate": "Simulate",
     "note": "Real earthquakes of the last 7 days in the Marmara region from AFAD, Kandilli (KOERI), EMSC and USGS, merged when within 30 s and 30 km; values from the national agency first. Refreshed every minute. Not an official warning system."

@@ -7,7 +7,7 @@ import type { Scenario, ScenarioDraft } from '@/types/scenario';
 export const CUSTOM_SCENARIO_ID = 'custom';
 
 /** Smallest magnitude the editor offers: below it the finite-fault model adds little. */
-export const MIN_DRAFT_MW = 5;
+const MIN_DRAFT_MW = 5;
 const DEFAULT_DRAFT_MW = 7;
 export const MW_STEP = 0.1;
 

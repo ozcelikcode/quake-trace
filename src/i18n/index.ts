@@ -10,7 +10,7 @@ export type Language = (typeof supportedLanguages)[number];
 
 export const defaultLanguage: Language = 'tr';
 
-export const resources = {
+const resources = {
   tr: { translation: tr },
   en: { translation: en },
 } as const;

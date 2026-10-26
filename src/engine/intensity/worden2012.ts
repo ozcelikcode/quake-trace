@@ -29,8 +29,8 @@ const PGV_RELATION: Relation = {
 
 /** g in cm/s², rounded as in ShakeMap so intensities match its maps. */
 export const G_CMS2 = 981;
-export const MMI_MIN = 1;
-export const MMI_MAX = 10;
+const MMI_MIN = 1;
+const MMI_MAX = 10;
 
 function clampMmi(mmi: number): number {
   return Math.min(MMI_MAX, Math.max(MMI_MIN, mmi));

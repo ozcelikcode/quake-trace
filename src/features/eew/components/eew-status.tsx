@@ -9,13 +9,13 @@ import { eewPhase } from '../lib/eew-phase';
 
 /**
  * Early-warning state in the status bar: detection after the first trigger, then the alert with
- * the first magnitude estimate. A live region announces each change.
+ * the first magnitude estimate until the shaking ends. A live region announces each change.
  */
 /** `compact` (phones) shows only the magnitude next to the alert dot; the full text stays for screen readers. */
 export function EewStatus({ compact = false }: { compact?: boolean }) {
   const { t, i18n } = useTranslation();
   const warning = useScenarioStore((state) => state.result?.earlyWarning);
-  const phase = usePlaybackStore((state) => eewPhase(warning, state.timeS));
+  const phase = usePlaybackStore((state) => eewPhase(warning, state.timeS, state.extents.shaking));
 
   const label =
     phase === 'alert' && warning

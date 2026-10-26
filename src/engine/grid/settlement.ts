@@ -11,8 +11,8 @@ import type { GridSpec } from '@/types/grid';
 export const SETTLEMENT = { rural: 0, cluster: 1, centre: 2 } as const;
 export type Settlement = (typeof SETTLEMENT)[keyof typeof SETTLEMENT];
 
-export const URBAN_CENTRE_DENSITY = 1500;
-export const URBAN_CLUSTER_DENSITY = 300;
+const URBAN_CENTRE_DENSITY = 1500;
+const URBAN_CLUSTER_DENSITY = 300;
 
 const RAD = Math.PI / 180;
 
