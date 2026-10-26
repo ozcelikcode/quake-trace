@@ -1,9 +1,10 @@
-import type { FacilityDamage, VulnerabilityFunction } from '@/types/damage';
+import type { CriticalFacilityKind, FacilityDamage, VulnerabilityFunction } from '@/types/damage';
 
 import { expectedRatio } from './vulnerability';
 
 export interface FacilitySite {
   id: string;
+  kind: CriticalFacilityKind;
   lon: number;
   lat: number;
   sArrivalS: number;

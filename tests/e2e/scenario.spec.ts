@@ -114,7 +114,7 @@ test('issues the early warning and counts down to S-wave arrival', async ({ page
   const summary = page.getByTestId('eew-summary');
   await expect(summary.getByText(/T\+\d+,\d s/)).toBeVisible();
   await expect(summary.getByText(/gerçek Mw 7,4/)).toBeVisible();
-  await expect(page.getByText('Kör bölge').first()).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Kör bölge' }).first()).toBeVisible();
   await expect(page.getByText(/^S − \d+ s$/).first()).toBeVisible();
 });
 
@@ -131,6 +131,30 @@ test('estimates damage and facility states as the S wave spreads', async ({ page
     page.getByTestId('infra-summary').getByText(/\d+ \/ \d+ tesise ulaştı/),
   ).toBeVisible();
   await expect(page.getByText(/hasar %\d+,\d · \d+ can kaybı/).first()).toBeVisible();
+});
+
+test('shows network load and emergency response, and switches the map shading', async ({
+  page,
+}) => {
+  test.skip(project() === 'phone-ios', 'covered by the other phone profile');
+  await runNorthMarmara(page);
+  await pauseAndJump(page, 3);
+  await openImpactPanel(page);
+
+  const network = page.getByTestId('network-summary');
+  await expect(network.getByText(/[\d.]+ \/ [\d.]+ istasyona ulaştı/)).toBeVisible();
+  await expect(network.getByText(/^%\d+$/)).toBeVisible();
+  const response = page.getByTestId('response-summary');
+  await expect(response.getByText(/^\d+,\d dk$/).first()).toBeVisible();
+  await expect(page.getByText(/itfaiye \d+,\d dk/).first()).toBeVisible();
+
+  // On tablets the panel is a modal drawer over the map; close it to reach the legend.
+  if (project() === 'tablet') await page.keyboard.press('Escape');
+  const shading = page.getByRole('radiogroup', { name: 'Harita renklendirmesi' });
+  await shading.getByRole('radio', { name: 'Şebeke' }).click();
+  await expect(page.getByText('Taşınamayan arama (kişi/km²)')).toBeVisible();
+  await shading.getByRole('radio', { name: 'Şiddet' }).click();
+  await expect(page.getByText('Şiddet (MMI)')).toBeVisible();
 });
 
 test('stays accessible with a scenario loaded', async ({ page }) => {

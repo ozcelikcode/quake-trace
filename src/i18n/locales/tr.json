@@ -60,7 +60,15 @@
       "rupture": "Fay kırılması",
       "blindZone": "Kör bölge sınırı",
       "estimatedEpicenter": "Tahmini merkez",
-      "facilities": "Tesis: çalışır / kısıtlı / olası hizmet dışı"
+      "facilities": "Tesis: çalışır / kısıtlı / olası hizmet dışı",
+      "raster": "Harita renklendirmesi",
+      "rasterIntensity": "Şiddet",
+      "rasterNetwork": "Şebeke",
+      "network": "Taşınamayan arama (kişi/km²)",
+      "corridors": "Müdahale güzergâhları (kalınlık: kullanım)",
+      "debris": "Molozla yavaşlayan sokak",
+      "bridgeClosed": "Kapalı köprü",
+      "sites": "Baz istasyonu: normal / tıkalı / devre dışı"
     }
   },
   "sheet": {
@@ -180,5 +188,34 @@
       "outOfService": "Olası hizmet dışı"
     },
     "note": "Hastane, itfaiye ve emniyet (OpenStreetMap), tek bir betonarme sınıfıyla değerlendirildi; durum eşikleri (%5 ve %20 beklenen hasar) gösterim varsayımıdır."
+  },
+  "network": {
+    "title": "Hücresel şebeke (simülasyon)",
+    "reached": "{{count}} / {{total}} istasyona ulaştı",
+    "state": {
+      "normal": "Normal",
+      "congested": "Tıkalı",
+      "down": "Devre dışı"
+    },
+    "residentsCongested": "Tıkalı istasyondaki nüfus",
+    "blocked": "Taşınamayan arama",
+    "syntheticSites": "İstasyonlar sentetiktir; nüfusa göre ITU-R M.2135 aralıklarıyla yerleştirildi.",
+    "note": "Sarsıntıyı hissedenler için talep yoğun saatin 55 katına kadar çıkar (2011 Tōhoku) ve yaklaşık 1,4 saatte söner; bina hasarı tesis sınıfından. Elektrik kesintisi modellenmedi."
+  },
+  "routing": {
+    "title": "Acil müdahale (simülasyon)",
+    "medianBefore": "Medyan itfaiye varışı, önce",
+    "medianAfter": "Medyan itfaiye varışı, sonra",
+    "debris": "Molozla yavaşlayan sokak",
+    "bridges": "Kapalı köprü",
+    "minutes": "{{value}} dk",
+    "km": "{{value}} km",
+    "worst": "En büyük gecikme: {{district}}, +{{increase}} dk",
+    "cutOff_one": "{{count}} ilçeye karayoluyla ulaşılamıyor",
+    "cutOff_other": "{{count}} ilçeye karayoluyla ulaşılamıyor",
+    "row": "itfaiye {{value}} dk (+{{increase}})",
+    "rowCutOff": "karayolu bağlantısı kesik",
+    "note": "OpenStreetMap ana yollarında yasal hız sınırlarıyla, hizmetteki itfaiyelerden ve hastanelere en kısa güzergâhlar. Köprüler Hazus kırılganlığıyla kapanır; dar kent içi sokaklar beklenen bina hasarıyla yavaşlar (varsayım).",
+    "rowUnchanged": "itfaiye {{value}} dk"
   }
 }

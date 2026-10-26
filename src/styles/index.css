@@ -27,6 +27,11 @@
   --color-info: var(--state-info);
   --color-wave-p: var(--wave-p);
   --color-wave-s: var(--wave-s);
+  --color-load-0: var(--load-0);
+  --color-load-1: var(--load-1);
+  --color-load-2: var(--load-2);
+  --color-load-3: var(--load-3);
+  --color-load-4: var(--load-4);
 
   --font-*: initial;
   --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;

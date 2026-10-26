@@ -1,10 +1,13 @@
+import type { DistrictStats, Infra, Vulnerability } from '@/data/schemas';
 import {
-  criticalFacilityKinds,
-  type DistrictStats,
-  type Infra,
-  type Vulnerability,
-} from '@/data/schemas';
-import type { DamageInputs } from '@/types/damage';
+  CRITICAL_FACILITY_KINDS,
+  type CriticalFacilityKind,
+  type DamageInputs,
+} from '@/types/damage';
+
+function isCriticalKind(kind: string): kind is CriticalFacilityKind {
+  return (CRITICAL_FACILITY_KINDS as readonly string[]).includes(kind);
+}
 
 /** Prepared datasets in the shape the damage estimate takes. */
 export function damageInputs(
@@ -13,7 +16,6 @@ export function damageInputs(
   population: Float32Array,
   infra: Infra,
 ): DamageInputs {
-  const kinds: readonly string[] = criticalFacilityKinds;
   return {
     stock: stats.districts.map((district) => ({
       index: district.index,
@@ -24,9 +26,10 @@ export function damageInputs(
     functions: vulnerability.functions,
     population,
     facilities: infra.features.flatMap((feature) => {
-      if (feature.geometry.type !== 'Point' || !kinds.includes(feature.properties.kind)) return [];
+      const { kind, id } = feature.properties;
+      if (feature.geometry.type !== 'Point' || !isCriticalKind(kind)) return [];
       const [lon, lat] = feature.geometry.coordinates;
-      return [{ id: feature.properties.id, lon, lat }];
+      return [{ id, kind, lon, lat }];
     }),
   };
 }

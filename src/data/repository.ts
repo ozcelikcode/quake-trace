@@ -1,10 +1,12 @@
 import type { z } from 'zod';
 
+import type { RoadGraph } from '@/types/roads';
+
 import { decodeCellSites, type CellSites } from './cell-sites';
 import { DataError } from './errors';
 import { decodeGrid, type Grid } from './grid';
 import { manifestSchema, type DatasetEntry, type Manifest } from './manifest';
-import { decodeRoadGraph, type RoadGraph } from './road-graph';
+import { decodeRoadGraph } from './road-graph';
 import {
   districtStatsSchema,
   districtsSchema,

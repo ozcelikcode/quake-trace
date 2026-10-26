@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **5 (damage and critical infrastructure) complete** on branch `feat/phase-5-damage` (from phase 4, `6baeabf`). `main` was fast-forwarded to phase 2 (`5aec3bf`) at the user's request (2026-10-25); the user pushed `main` and the phase 3 branch (including a WIP commit `4cf6f5f` "quake-trace" made from their side). Next: phase 6 (cell tower load, routing and corridors, heatmaps).
+Phase: **6 (cell network, routing and corridors, heatmap) complete** on branch `feat/phase-6-network-routing` (from phase 5, `e122e1b`). Phase 3–5 branches are pushed to GitHub with upstream (2026-10-26). `main` is at phase 2 (`5aec3bf`). Next: phase 7 (tsunami).
 
 ## What works
 
@@ -14,9 +14,11 @@ Phase: **5 (damage and critical infrastructure) complete** on branch `feat/phase
 - Simulation worker (Comlink), scenario and playback stores, four Main Marmara Fault presets.
 - Telemetry (phase 3): synthetic three-component accelerograms (100 Hz) at the 50 accelerometer stations, scaled to the ASB14 median; STA/LTA triggers; focused station with Z/N/E traces, picks, playhead and peak-so-far readouts; record-section station list in trigger order; stations flash on the map when they trigger; clicking a station on the map focuses it. Scenario compute about 0.5–0.9 s per preset in Node.
 - Damage (phase 5): expected structural loss and night fatalities per district (GEM 2025 Türkiye vulnerability, averaged over ground-motion σ), revealed as the S wave arrives; damage summary and per-district line in the impact panel; 1,388 critical facilities assessed and coloured on the map when reached. North Marmara: ≈ 100,000 complete-loss-equivalent buildings, ≈ 6,400 fatalities (İstanbul ≈ 6,000; İBB 2019: 14,145).
+- Cell network and emergency response (phase 6): about 32,750 synthetic cell sites (no OpenCelliD key), call demand up to 55× the busy hour for those who felt the shaking, site and resident counts by state and calls not carried in the impact panel; network raster (calls not carried per km²) selectable in the legend; sites shown from zoom 11. Fire response times before/after per district (KTY speeds, Hazus bridge closures, debris-slowed streets), hospital access after, response corridors weighted by lost buildings drawn as the S wave reaches each district. North Marmara: median fire response 5.8 → 5.9 min, 2,650 km of streets slowed, no bridge closed. Whole scenario about 0.5 s in Node.
 - Early warning (phase 4): location by grid search on the first four triggers (1–2 km error on the presets), Pd magnitude with modelled saturation (first estimates M 6.2–6.5 for Mw 6.9–7.4), alert at T+6–11 s; status-bar alert chip (live region), EEW summary and per-district warning time / countdown / blind zone in the impact panel, blind-zone boundary and estimated epicentre on the map, detection and alert markers on the timeline.
 - First vertical slice: choose a preset, compute in the worker, play back. MMI raster draped on the terrain appears as the S wave arrives; P and S wavefronts as 3D curtains; rupture front and epicentre; legend and "Simulation" watermark; timeline (play/pause, slider, 0.5×–10×, Space and arrow shortcuts); scenario summary; district arrival table (impact tab).
-- Tooling: Vitest 174 tests (engine against OpenQuake, analytic and published references), Playwright 33 e2e tests across four profiles including scenario, telemetry, early-warning and damage flows and axe scans with a scenario loaded, pipeline 48 tests, CI with app, pipeline and e2e jobs.
+- Tooling (phase 6): Vitest 222 tests, Playwright 36 passed / 16 skipped, pipeline 53 tests.
+- Tooling (earlier): Vitest 174 tests (engine against OpenQuake, analytic and published references), Playwright 33 e2e tests across four profiles including scenario, telemetry, early-warning and damage flows and axe scans with a scenario loaded, pipeline 48 tests, CI with app, pipeline and e2e jobs.
 - Verified 2026-10-26: typecheck, lint, format, unit/integration, e2e, build; telemetry screenshots on desktop and phone, dark and light.
 
 ## Phases
@@ -31,7 +33,7 @@ Each phase ends with CI green and a deployable `main`.
 - [x] **3. Telemetry** — `random` module and scenario seed, stochastic records per station scaled to the GMPE median, canvas waveform panels synced to the clock, STA/LTA picks, stations flashing on trigger.
 - [x] **4. EEW** — detection, location, Pd magnitude, alert, district countdowns, blind zone, timeline markers.
 - [x] **5. Damage and critical infrastructure** — GEM vulnerability, district losses and fatalities, facility states, İBB 2019 validation.
-- [ ] **6. Cell tower load, routing and corridors, heatmaps.**
+- [x] **6. Cell tower load, routing and corridors, heatmaps** — synthetic sites (OpenCelliD optional), call-demand load, damage-aware routing, corridors, network raster.
 - [ ] **7. Tsunami.**
 - [ ] **8. Aftershocks (ETAS) and multi-scale timeline.**
 - [ ] **9. Live mode and historical replay** with real feeds and seismograms.
@@ -51,6 +53,8 @@ Each phase ends with CI green and a deployable `main`.
 - Damage: GEM data is CC BY-NC-SA 4.0 (non-commercial); time of day fixed at night (residents at home); facility state thresholds are assumptions; underestimates İBB 2019 fatalities by about 2.4× (different magnitude/rupture, median-centred stock assumptions).
 - EEW: no telemetry or processing latency; depth fixed at 10 km; event log entries arrive with phase 10.
 - Synthetic records are point-source shapes (Boore 2003) with finite-fault arrival times; P shares the S-wave attenuation (simplification). Compute time on phones (2–3× slower than desktop) is not yet measured.
+- Network: power cuts and battery autonomy are not modelled, so no site goes down in the presets (DOCOMO lost most sites to power cuts in 2011); demand ignores time of day; the surge decays over hours, beyond the current scenario timeline (multi-scale timeline in phase 8).
+- Routing: debris slowdown is an assumption; OSM bridge types unknown (Hazus HWB28 for all); no traffic, no ferries (Adalar shows as cut off by road); the road graph is copied to the worker on each run.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 
 ## Evolution of decisions
@@ -70,3 +74,4 @@ Each phase ends with CI green and a deployable `main`.
 - 2026-10-26: EEW Pd modelled from the rupture grown in 3 s (Wu & Zhao 2006 + seeded scatter), not measured from the point-source records, which radiate the full moment at once and gave M 8–9 estimates.
 - 2026-10-26: Phone status bar shows the brand mark only, so the clock and alert fit.
 - 2026-10-26: Synthetic records scaled to the median (not sampled with σ) to keep map and telemetry consistent.
+- 2026-10-26: Phase 6: synthetic cell sites (no key); debris closures replaced by slowdown; network raster shows calls not carried per km² rather than saturated demand; phone legend moved to the top of the map.

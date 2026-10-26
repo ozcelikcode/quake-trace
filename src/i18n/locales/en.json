@@ -60,7 +60,15 @@
       "rupture": "Fault rupture",
       "blindZone": "Blind zone boundary",
       "estimatedEpicenter": "Estimated epicentre",
-      "facilities": "Facility: operational / limited / likely out"
+      "facilities": "Facility: operational / limited / likely out",
+      "raster": "Map shading",
+      "rasterIntensity": "Intensity",
+      "rasterNetwork": "Network",
+      "network": "Calls not carried (people/km²)",
+      "corridors": "Response routes (width: use)",
+      "debris": "Street slowed by debris",
+      "bridgeClosed": "Closed bridge",
+      "sites": "Cell site: normal / congested / down"
     }
   },
   "sheet": {
@@ -180,5 +188,34 @@
       "outOfService": "Likely out"
     },
     "note": "Hospitals, fire stations and police (OpenStreetMap), assessed with one reinforced-concrete class; the state thresholds (5 % and 20 % expected loss) are a display assumption."
+  },
+  "network": {
+    "title": "Cell network (simulation)",
+    "reached": "{{count}} of {{total}} sites reached",
+    "state": {
+      "normal": "Normal",
+      "congested": "Congested",
+      "down": "Down"
+    },
+    "residentsCongested": "People on congested sites",
+    "blocked": "Calls not carried",
+    "syntheticSites": "Sites are synthetic, placed from population with ITU-R M.2135 spacing.",
+    "note": "Demand up to 55× the busy hour (2011 Tōhoku), for those who felt the shaking, decaying over about 1.4 h; host-building damage from the facility class. Power cuts are not modelled."
+  },
+  "routing": {
+    "title": "Emergency response (simulation)",
+    "medianBefore": "Median fire response, before",
+    "medianAfter": "Median fire response, after",
+    "debris": "Streets slowed by debris",
+    "bridges": "Closed bridges",
+    "minutes": "{{value}} min",
+    "km": "{{value}} km",
+    "worst": "Largest delay: {{district}}, +{{increase}} min",
+    "cutOff_one": "{{count}} district cannot be reached by road",
+    "cutOff_other": "{{count}} districts cannot be reached by road",
+    "row": "fire {{value}} min (+{{increase}})",
+    "rowCutOff": "cut off by road",
+    "note": "Shortest routes on OpenStreetMap major roads at legal speed limits, from fire stations and to hospitals still in service. Bridges close from Hazus fragility; narrow urban streets slow with expected building loss (assumption).",
+    "rowUnchanged": "fire {{value}} min"
   }
 }

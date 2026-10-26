@@ -32,6 +32,13 @@
   /* Physical quantities, identical in both themes; mirrored in features/map/lib/simulation-renderer.ts. */
   --wave-p: rgb(94 200 255);
   --wave-s: rgb(255 166 77);
+
+  /* Sequential load scale (cell network demand), mirrored in features/map/lib/layer-palette.ts. */
+  --load-0: rgb(72 52 150);
+  --load-1: rgb(136 62 176);
+  --load-2: rgb(200 74 160);
+  --load-3: rgb(242 116 110);
+  --load-4: rgb(255 196 112);
 }
 
 :root[data-theme='dark'] {

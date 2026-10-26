@@ -14,6 +14,27 @@ const api = {
       result.pgvCms.buffer,
       result.mmi.buffer,
       result.records.accelCmS2.buffer,
+      ...(result.network
+        ? [
+            result.network.siteLonLat.buffer,
+            result.network.sitePopulation.buffer,
+            result.network.siteDensity.buffer,
+            result.network.siteSArrivalS.buffer,
+            result.network.sitePeakDemand.buffer,
+            result.network.siteLossRatio.buffer,
+            result.network.cellSite.buffer,
+          ]
+        : []),
+      ...(result.routing
+        ? [
+            result.routing.impairedEdges.buffer,
+            result.routing.impairment.buffer,
+            result.routing.impairedAtS.buffer,
+            result.routing.corridorEdges.buffer,
+            result.routing.corridorUsage.buffer,
+            result.routing.corridorFromS.buffer,
+          ]
+        : []),
     ]);
   },
 };

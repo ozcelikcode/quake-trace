@@ -5,9 +5,18 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import { valueAt, type Grid } from '@/data/grid';
 import { DataRepository, type DataFetcher } from '@/data/repository';
-import type { Districts, DistrictStats, Faults, Stations, Vulnerability } from '@/data/schemas';
+import type {
+  Districts,
+  DistrictStats,
+  Faults,
+  Infra,
+  Stations,
+  Vulnerability,
+} from '@/data/schemas';
 import { simulate } from '@/engine/sim/simulate';
+import { damageInputs } from '@/features/scenario/lib/damage-inputs';
 import { resolvePreset, SCENARIO_PRESETS } from '@/features/scenario/lib/presets';
+import type { RoadGraph } from '@/types/roads';
 import type { SimulationResult } from '@/types/simulation';
 
 import ibb2019 from '../../fixtures/damage/ibb-2019-scenario.json';
@@ -25,19 +34,33 @@ let stations: Stations;
 let population: Grid;
 let districtStats: DistrictStats;
 let vulnerability: Vulnerability;
+let infra: Infra;
+let roads: RoadGraph;
 
 beforeAll(async () => {
-  [faults, districts, vs30, districtCells, stations, population, districtStats, vulnerability] =
-    await Promise.all([
-      repository.json('faults'),
-      repository.json('districts'),
-      repository.grid('vs30'),
-      repository.grid('districtCells'),
-      repository.json('stations'),
-      repository.grid('population'),
-      repository.json('districtStats'),
-      repository.json('vulnerability'),
-    ]);
+  [
+    faults,
+    districts,
+    vs30,
+    districtCells,
+    stations,
+    population,
+    districtStats,
+    vulnerability,
+    infra,
+    roads,
+  ] = await Promise.all([
+    repository.json('faults'),
+    repository.json('districts'),
+    repository.grid('vs30'),
+    repository.grid('districtCells'),
+    repository.json('stations'),
+    repository.grid('population'),
+    repository.json('districtStats'),
+    repository.json('vulnerability'),
+    repository.json('infra'),
+    repository.roads(),
+  ]);
 });
 
 function run(presetId: string): SimulationResult {
@@ -49,17 +72,9 @@ function run(presetId: string): SimulationResult {
     vs30: vs30.values,
     districtCells: districtCells.values,
     stations: stations.stations.filter((station) => station.accelerometer),
-    damage: {
-      stock: districtStats.districts.map((district) => ({
-        index: district.index,
-        population: district.population,
-        buildings: district.buildings,
-        estimated: district.buildingSource === 'estimated',
-      })),
-      functions: vulnerability.functions,
-      population: population.values,
-      facilities: [],
-    },
+    damage: damageInputs(districtStats, vulnerability, population.values, infra),
+    network: { siteLonLat: null },
+    roads,
   });
 }
 
@@ -162,6 +177,51 @@ describe('Marmara scenario presets on the prepared data', () => {
     expect(modelledDeaths / referenceDeaths).toBeGreaterThan(0.2);
     expect(modelledDeaths / referenceDeaths).toBeLessThan(2);
   });
+
+  it('serves the whole population with synthetic cell sites and congests the shaken area', () => {
+    const { network, mmi } = run('north-marmara');
+    expect(network?.synthetic).toBe(true);
+    if (!network) return;
+    // ITU-R M.2135-1 spacing over the region's land: about 33,000 sites.
+    expect(network.siteCount).toBeGreaterThan(30_000);
+    expect(network.siteCount).toBeLessThan(36_000);
+    let landPopulation = 0;
+    for (let cell = 0; cell < mmi.length; cell++) {
+      if (!Number.isNaN(districtCells.values[cell] ?? Number.NaN)) {
+        landPopulation += Math.max(0, population.values[cell] ?? 0);
+      }
+    }
+    const served = network.sitePopulation.reduce((sum, value) => sum + value, 0);
+    expect(served / landPopulation).toBeCloseTo(1, 3);
+    // Central İstanbul feels intensity VI or more: demand at the 55× peak.
+    const fatihCell = (41.01 - 41.8) / -0.01;
+    const site = network.cellSite[Math.floor(fatihCell) * 500 + Math.floor((28.95 - 26) / 0.01)];
+    expect(network.sitePeakDemand[site ?? -1]).toBe(55);
+  });
+
+  it.each(['north-marmara', 'izmit-1999'])(
+    '%s: response times grow after the shaking but no İstanbul or Kocaeli district is cut off',
+    (id) => {
+      const { routing } = run(id);
+      expect(routing).not.toBeNull();
+      if (!routing) return;
+      const provinces = new Set(['İstanbul', 'Kocaeli']);
+      // Adalar (the Princes' Islands) has no road link to a hospital; it is reached by sea.
+      const inScope = routing.districts.filter((response) => {
+        const properties = districts.features[response.index]?.properties;
+        return provinces.has(properties?.province ?? '') && properties?.name !== 'Adalar';
+      });
+      expect(inScope.length).toBe(39 + 12 - 1);
+      for (const response of inScope) {
+        expect(response.fireAfterMin).toBeGreaterThanOrEqual(response.fireBeforeMin - 1e-9);
+        expect(Number.isFinite(response.fireAfterMin)).toBe(true);
+        expect(Number.isFinite(response.hospitalAfterMin)).toBe(true);
+      }
+      expect(inScope.some((response) => response.fireAfterMin > response.fireBeforeMin)).toBe(true);
+      expect(routing.corridorEdges.length).toBeGreaterThan(1000);
+      expect(Math.max(...routing.corridorUsage)).toBe(1);
+    },
+  );
 });
 
 /** Spearman rank correlation (no tie correction; values are continuous). */

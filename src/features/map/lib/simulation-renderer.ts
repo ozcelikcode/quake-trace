@@ -1,31 +1,47 @@
 import type { Layer } from '@deck.gl/core';
 import { LineLayer, PathLayer, ScatterplotLayer } from '@deck.gl/layers';
 import type { MapLibreOverlay } from '@deck.gl/maplibre';
-import type { ImageSource, Map as MapLibreMap } from 'maplibre-gl';
+import type { GeoJSONSource, ImageSource, Map as MapLibreMap } from 'maplibre-gl';
 
+import { siteState } from '@/features/cells';
 import { facilityStatus } from '@/features/infra';
-import type { Theme } from '@/state/ui-store';
+import type { MapRaster, Theme } from '@/state/ui-store';
 import type { GridSpec } from '@/types/grid';
+import type { RoadGraph } from '@/types/roads';
 import type { SimulationResult, StationRecord } from '@/types/simulation';
 
 import { overlayAnchorLayerId } from './layer-order';
-import { REFERENCE_PALETTE } from './layer-palette';
+import { LOAD_ANCHORS, REFERENCE_PALETTE } from './layer-palette';
 import { FACILITY_STATUS_CODES, REFERENCE_SOURCES } from './reference-layers';
 import { TERRAIN_EXAGGERATION } from './map-config';
 import {
+  corridorsToGeoJson,
+  edgeSourceNodes,
+  impairedToGeoJson,
+  RESPONSE_SOURCES,
+  responseLayerSpecs,
+  SITE_STATE_CODES,
+  sitesToGeoJson,
+} from './response-layers';
+import {
+  loadLookupTable,
   mercatorRowMap,
   mmiLookupTable,
   paintIntensity,
+  paintNetwork,
   rupturedPath,
   wavefrontCurtain,
   type CurtainBuffers,
   type CurtainStyle,
 } from './simulation-frames';
+import { TimedReveal } from './timed-reveal';
 
 /**
- * Draws a scenario at a given time: the intensity raster as a MapLibre image source (draped on
- * the terrain, below the reference lines) and the wavefronts, rupture, epicentre and station
- * triggers as deck.gl layers lifted onto the terrain with the elevation grid.
+ * Draws a scenario at a given time: the intensity or network raster as a MapLibre image source
+ * (draped on the terrain, below the reference lines), the response layers (corridors, impaired
+ * roads, cell sites) as MapLibre GeoJSON layers revealed through feature state, and the
+ * wavefronts, rupture, epicentre and station triggers as deck.gl layers lifted onto the terrain
+ * with the elevation grid.
  */
 
 const INTENSITY_SOURCE = 'quaketrace-intensity';
@@ -84,7 +100,15 @@ export class SimulationRenderer {
   readonly #map: MapLibreMap;
   readonly #overlay: MapLibreOverlay;
   readonly #lookup = mmiLookupTable();
+  readonly #loadLookup = loadLookupTable(LOAD_ANCHORS);
+  #raster: MapRaster = 'intensity';
+  #roads: RoadGraph | undefined;
   #result: SimulationResult | null = null;
+  /** Response layer data and reveal state, rebuilt for a new result or road graph. */
+  #response: {
+    data: Record<keyof typeof RESPONSE_SOURCES, GeoJSON.FeatureCollection>;
+    reveals: Record<keyof typeof RESPONSE_SOURCES, TimedReveal>;
+  } | null = null;
   #elevation: Float32Array | undefined;
   #image: ImageData | null = null;
   #pixels: Uint32Array | null = null;
@@ -114,6 +138,19 @@ export class SimulationRenderer {
     this.#lastTimeS = Number.NaN;
   }
 
+  setRaster(raster: MapRaster): void {
+    this.#raster = raster;
+    this.#lastTimeS = Number.NaN;
+  }
+
+  /** The road graph the routing result indexes; corridors need it for their geometry. */
+  setRoads(graph: RoadGraph | undefined): void {
+    if (graph === this.#roads) return;
+    this.#roads = graph;
+    this.#buildResponse();
+    this.attach();
+  }
+
   /** Index of the focused station's record, or -1. */
   setFocusedStation(index: number): void {
     this.#focusedStation = index;
@@ -126,6 +163,7 @@ export class SimulationRenderer {
     this.resetFacilityStates();
     this.#lastTimeS = Number.NaN;
     this.#removeRaster();
+    this.#buildResponse();
     if (!result) {
       this.#image = null;
       this.#pixels = null;
@@ -162,7 +200,69 @@ export class SimulationRenderer {
       },
       below,
     );
+    this.#attachResponse();
     this.#lastTimeS = Number.NaN;
+  }
+
+  #buildResponse(): void {
+    const result = this.#result;
+    const graph = this.#roads;
+    if (!result?.routing || !result.network || !graph) {
+      this.#response = null;
+      return;
+    }
+    const { routing, network } = result;
+    const sources = edgeSourceNodes(graph);
+    this.#response = {
+      data: {
+        corridors: corridorsToGeoJson(routing, graph, sources),
+        impaired: impairedToGeoJson(routing, graph, sources),
+        sites: sitesToGeoJson(network),
+      },
+      reveals: {
+        corridors: new TimedReveal(routing.corridorFromS),
+        impaired: new TimedReveal(routing.impairedAtS),
+        sites: new TimedReveal(network.siteSArrivalS),
+      },
+    };
+  }
+
+  /** Adds the response sources and layers; feature states start hidden. */
+  #attachResponse(): void {
+    const response = this.#response;
+    if (!response) return;
+    for (const [key, id] of Object.entries(RESPONSE_SOURCES) as [
+      keyof typeof RESPONSE_SOURCES,
+      string,
+    ][]) {
+      const source = this.#map.getSource<GeoJSONSource>(id);
+      if (source) void source.setData(response.data[key]);
+      else this.#map.addSource(id, { type: 'geojson', data: response.data[key] });
+      this.#map.removeFeatureState({ source: id });
+      response.reveals[key].reset();
+    }
+    const beforeLabels = overlayAnchorLayerId(this.#map.getStyle().layers);
+    for (const spec of responseLayerSpecs(this.#theme)) {
+      if (this.#map.getLayer(spec.id)) continue;
+      this.#map.addLayer(spec, spec.type === 'line' ? beforeLabels : undefined);
+    }
+  }
+
+  #updateResponse(result: SimulationResult, timeS: number): void {
+    const response = this.#response;
+    const network = result.network;
+    if (!response || !network || !this.#map.getSource(RESPONSE_SOURCES.sites)) return;
+    const showLine = (source: string) => (id: number, shown: boolean) => {
+      this.#map.setFeatureState({ source, id }, { shown });
+    };
+    response.reveals.corridors.update(timeS, showLine(RESPONSE_SOURCES.corridors));
+    response.reveals.impaired.update(timeS, showLine(RESPONSE_SOURCES.impaired));
+    response.reveals.sites.update(timeS, (site, shown) => {
+      // A site's state is fixed once the S wave has passed: demand stays above normal for hours.
+      const arrival = network.siteSArrivalS[site] ?? Number.POSITIVE_INFINITY;
+      const state = shown ? SITE_STATE_CODES[siteState(network, site, arrival)] : 0;
+      this.#map.setFeatureState({ source: RESPONSE_SOURCES.sites, id: site }, { state });
+    });
   }
 
   render(timeS: number): void {
@@ -171,15 +271,26 @@ export class SimulationRenderer {
     this.#lastTimeS = timeS;
 
     if (this.#pixels && this.#rowMap && this.#image) {
-      paintIntensity(
-        this.#pixels,
-        result.grid,
-        this.#rowMap,
-        result.tS,
-        result.mmi,
-        this.#lookup,
-        timeS,
-      );
+      if (this.#raster === 'network' && result.network) {
+        paintNetwork(
+          this.#pixels,
+          result.grid,
+          this.#rowMap,
+          result.network,
+          this.#loadLookup,
+          timeS,
+        );
+      } else {
+        paintIntensity(
+          this.#pixels,
+          result.grid,
+          this.#rowMap,
+          result.tS,
+          result.mmi,
+          this.#lookup,
+          timeS,
+        );
+      }
       this.#map.getSource<ImageSource>(INTENSITY_SOURCE)?.updateImage({ image: this.#image });
     }
 
@@ -236,6 +347,7 @@ export class SimulationRenderer {
     ];
     this.#overlay.setProps({ layers });
     this.#updateFacilities(result, timeS);
+    this.#updateResponse(result, timeS);
   }
 
   /** Forgets written facility states, for a new result, style or facility source. */
@@ -373,6 +485,12 @@ export class SimulationRenderer {
   #removeRaster(): void {
     if (this.#map.getLayer(INTENSITY_LAYER)) this.#map.removeLayer(INTENSITY_LAYER);
     if (this.#map.getSource(INTENSITY_SOURCE)) this.#map.removeSource(INTENSITY_SOURCE);
+    for (const spec of responseLayerSpecs(this.#theme)) {
+      if (this.#map.getLayer(spec.id)) this.#map.removeLayer(spec.id);
+    }
+    for (const id of Object.values(RESPONSE_SOURCES)) {
+      if (this.#map.getSource(id)) this.#map.removeSource(id);
+    }
   }
 }
 

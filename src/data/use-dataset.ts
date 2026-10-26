@@ -22,6 +22,16 @@ export function useGridDataset(id: GridDatasetId) {
   });
 }
 
+/** Cell sites, or undefined when no OpenCelliD data was built. */
+export function useCellSites() {
+  return useQuery({
+    ...datasetQuery,
+    queryKey: ['data', 'cells'],
+    // Query data cannot be undefined, so a missing dataset is stored as null.
+    queryFn: async () => (await dataRepository.cells()) ?? null,
+  });
+}
+
 export function useRoadGraph(enabled = true) {
   return useQuery({
     ...datasetQuery,

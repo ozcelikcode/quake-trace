@@ -1,6 +1,8 @@
+import { blockedDensity } from '@/features/cells';
 import { mmiColor } from '@/lib/color/mmi';
 import { isolineSegments } from '@/lib/math/isolines';
 import type { GridSpec } from '@/types/grid';
+import type { NetworkResult } from '@/types/network';
 
 /**
  * Per-frame geometry and pixels of a scenario, as pure functions of the simulation result and
@@ -68,6 +70,78 @@ export function paintIntensity(
         continue;
       }
       const color = lookup[Math.round((mmi[cell] ?? 0) * 10)] ?? 0;
+      const fade = Math.min(1, (timeS - arrival) / SHAKING_FADE_S);
+      const alpha = Math.round((color >>> 24) * fade);
+      pixels[pixelRow + c] = ((alpha << 24) | (color & 0xffffff)) >>> 0;
+    }
+  }
+}
+
+/** Range of the network raster: residents per km² whose calls cannot be carried. */
+export const BLOCKED_DENSITY_MIN = 10;
+export const BLOCKED_DENSITY_MAX = 10_000;
+
+/**
+ * Index 0–255 on the logarithmic load scale for a blocked-call density; below the minimum the
+ * cell stays transparent.
+ */
+export function loadIndex(density: number): number {
+  if (!(density > BLOCKED_DENSITY_MIN)) return 0;
+  const k =
+    Math.log(density / BLOCKED_DENSITY_MIN) / Math.log(BLOCKED_DENSITY_MAX / BLOCKED_DENSITY_MIN);
+  return Math.min(255, Math.max(1, Math.round(k * 255)));
+}
+
+/**
+ * Load scale index → packed RGBA (`LOAD_ANCHORS`, the --load-0 … --load-4 tokens). Index 0 is
+ * transparent; colours are opaque enough to read from the first step.
+ */
+export function loadLookupTable(
+  anchors: readonly (readonly [number, number, number])[],
+  maxAlpha = 0.9,
+): Uint32Array {
+  const table = new Uint32Array(256);
+  const last = anchors.length - 1;
+  for (let i = 1; i < 256; i++) {
+    const k = i / 255;
+    const position = k * last;
+    const low = Math.min(last - 1, Math.floor(position));
+    const f = position - low;
+    const from = anchors[low] ?? [0, 0, 0];
+    const to = anchors[low + 1] ?? from;
+    const mix = (channel: 0 | 1 | 2) =>
+      Math.round(from[channel] + f * (to[channel] - from[channel]));
+    const alpha = Math.round((0.55 + 0.45 * k) * maxAlpha * 255);
+    table[i] = ((alpha << 24) | (mix(2) << 16) | (mix(1) << 8) | mix(0)) >>> 0;
+  }
+  return table;
+}
+
+/**
+ * Paints, for each cell, the density of residents whose calls its serving site cannot carry at
+ * `timeS`, fading in as the S wave reaches the site.
+ */
+export function paintNetwork(
+  pixels: Uint32Array,
+  spec: GridSpec,
+  rowMap: Int32Array,
+  network: NetworkResult,
+  lookup: Uint32Array,
+  timeS: number,
+): void {
+  const { nx } = spec;
+  const { cellSite } = network;
+  for (let r = 0; r < spec.ny; r++) {
+    const gridRow = (rowMap[r] ?? 0) * nx;
+    const pixelRow = r * nx;
+    for (let c = 0; c < nx; c++) {
+      const site = cellSite[gridRow + c] ?? -1;
+      const arrival = site < 0 ? Number.POSITIVE_INFINITY : (network.siteSArrivalS[site] ?? 0);
+      if (arrival > timeS) {
+        pixels[pixelRow + c] = 0;
+        continue;
+      }
+      const color = lookup[loadIndex(blockedDensity(network, site, timeS))] ?? 0;
       const fade = Math.min(1, (timeS - arrival) / SHAKING_FADE_S);
       const alpha = Math.round((color >>> 24) * fade);
       pixels[pixelRow + c] = ((alpha << 24) | (color & 0xffffff)) >>> 0;

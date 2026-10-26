@@ -5,14 +5,9 @@ import type {
   StyleImageMetadata,
 } from 'maplibre-gl';
 
-import {
-  criticalFacilityKinds,
-  type Districts,
-  type Faults,
-  type Infra,
-  type Station,
-} from '@/data/schemas';
+import type { Districts, Faults, Infra, Station } from '@/data/schemas';
 import type { Theme } from '@/state/ui-store';
+import { CRITICAL_FACILITY_KINDS } from '@/types/damage';
 
 import { overlayAnchorLayerId } from './layer-order';
 import { REFERENCE_PALETTE } from './layer-palette';
@@ -49,7 +44,7 @@ export const FACILITY_STATUS_CODES = {
 } as const;
 
 export function facilitiesToGeoJson(infra: Infra): GeoJSON.FeatureCollection<GeoJSON.Point> {
-  const kinds: readonly string[] = criticalFacilityKinds;
+  const kinds: readonly string[] = CRITICAL_FACILITY_KINDS;
   return {
     type: 'FeatureCollection',
     features: infra.features.flatMap((feature) =>

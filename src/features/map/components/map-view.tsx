@@ -7,7 +7,7 @@ import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&ur
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useGridDataset } from '@/data/use-dataset';
+import { useGridDataset, useRoadGraph } from '@/data/use-dataset';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
 import { resolveFocusedStation, useTelemetryStore } from '@/state/telemetry-store';
@@ -52,6 +52,8 @@ export function MapView() {
   const theme = useUiStore((state) => state.theme);
   const reference = useReferenceData();
   const elevation = useGridDataset('elevation').data;
+  const roads = useRoadGraph().data;
+  const mapRaster = useUiStore((state) => state.mapRaster);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const styleUrlRef = useRef<string | null>(null);
@@ -160,6 +162,18 @@ export function MapView() {
     renderer.setTheme(theme);
     renderer.render(currentTime());
   }, [renderer, theme]);
+
+  useEffect(() => {
+    if (!renderer) return;
+    renderer.setRoads(roads);
+    renderer.render(currentTime());
+  }, [renderer, roads]);
+
+  useEffect(() => {
+    if (!renderer) return;
+    renderer.setRaster(mapRaster);
+    renderer.render(currentTime());
+  }, [renderer, mapRaster]);
 
   // Frames are drawn outside React: the clock changes up to 60 times a second.
   useEffect(() => {

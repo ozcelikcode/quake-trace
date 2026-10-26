@@ -54,7 +54,7 @@ describe('district damage', () => {
   const sigma = { PGA: 0, 'SA(0.3)': 0, 'SA(0.6)': 0, 'SA(1.0)': 0 };
 
   it('weights cells by population and classes by their share', () => {
-    const [result] = districtDamage({
+    const { districts, cellLossRatio } = districtDamage({
       stock,
       functions,
       districtCells,
@@ -62,10 +62,14 @@ describe('district damage', () => {
       measures: { PGA: pga, 'SA(0.3)': zero, 'SA(0.6)': zero, 'SA(1.0)': zero },
       sigmaLn: sigma,
     });
+    const [result] = districts;
     // At 1 g: half the buildings at 0.9, half at 0.45.
     expect(result?.lossRatio).toBeCloseTo(0.675, 12);
     expect(result?.buildingsLost).toBeCloseTo(67.5, 10);
     expect(result?.fatalities).toBeCloseTo(1000 * 0.00675, 10);
+    // Per cell: the populated cell carries the district's loss, cells outside districts none.
+    expect(cellLossRatio[0]).toBeCloseTo(0.675, 6);
+    expect(cellLossRatio[2]).toBe(0);
   });
 
   it('rejects a class without a vulnerability function', () => {
@@ -84,8 +88,8 @@ describe('district damage', () => {
   it('gives facilities the loss ratio of their class at the site', () => {
     const [facility, unknown] = facilityDamage(
       [
-        { id: 'a', lon: 29, lat: 41, sArrivalS: 5, level: 1 },
-        { id: 'b', lon: 29, lat: 41, sArrivalS: 5, level: Number.NaN },
+        { id: 'a', kind: 'hospital', lon: 29, lat: 41, sArrivalS: 5, level: 1 },
+        { id: 'b', kind: 'police', lon: 29, lat: 41, sArrivalS: 5, level: Number.NaN },
       ],
       fn('COM', [0, 0.5]),
       0,

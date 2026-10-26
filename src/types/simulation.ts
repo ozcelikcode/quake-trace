@@ -1,5 +1,7 @@
 import type { DistrictDamage, FacilityDamage } from './damage';
 import type { GridSpec } from './grid';
+import type { NetworkResult } from './network';
+import type { RoutingResult } from './routing';
 import type { LonLat } from './scenario';
 
 export interface RuptureSummary {
@@ -101,6 +103,10 @@ export interface SimulationResult {
   earlyWarning: EarlyWarning | null;
   /** Null when no building stock was given. */
   damage: { districts: DistrictDamage[]; facilities: FacilityDamage[] } | null;
+  /** Cell sites and call demand; null without sites or damage inputs. */
+  network: NetworkResult | null;
+  /** Road closures, response times and corridors; null without a road network. */
+  routing: RoutingResult | null;
   /** Time by which the S wave has crossed the grid and station shaking has ended, seconds. */
   durationS: number;
   computeMs: number;

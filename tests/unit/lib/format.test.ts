@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatClock, formatNumber } from '@/lib/format';
+import { formatClock, formatCompact, formatNumber, formatPercent } from '@/lib/format';
 
 describe('formatting', () => {
   it('formats the simulation clock', () => {
@@ -13,5 +13,20 @@ describe('formatting', () => {
   it('formats numbers per locale', () => {
     expect(formatNumber(1234.56, 'tr', 1)).toBe('1.234,6');
     expect(formatNumber(1234.56, 'en', 1)).toBe('1,234.6');
+  });
+});
+
+describe('formatCompact', () => {
+  it('shortens scale ticks per locale', () => {
+    expect(formatCompact(10_000, 'en')).toBe('10K');
+    expect(formatCompact(10_000, 'tr')).toBe('10\u00a0B');
+    expect(formatCompact(100, 'tr')).toBe('100');
+  });
+});
+
+describe('formatPercent', () => {
+  it('places the sign by locale', () => {
+    expect(formatPercent(0.04, 'tr', 1)).toBe('%4,0');
+    expect(formatPercent(0.98, 'en')).toBe('98%');
   });
 });

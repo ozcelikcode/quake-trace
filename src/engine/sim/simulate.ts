@@ -2,6 +2,9 @@ import { LocalProjection } from '@/lib/math/geo';
 import { cellIndex } from '@/lib/math/grid';
 import type { DamageInputs, SpectralMeasure } from '@/types/damage';
 import type { GridSpec } from '@/types/grid';
+import type { NetworkResult } from '@/types/network';
+import type { RoadGraph } from '@/types/roads';
+import type { RoutingResult } from '@/types/routing';
 import type { Scenario } from '@/types/scenario';
 import type { DistrictImpact, SimulationResult, StationSite } from '@/types/simulation';
 
@@ -10,10 +13,14 @@ import { districtDamage } from '../damage/district-damage';
 import { facilityDamage } from '../damage/facilities';
 import { earlyWarning } from '../eew/early-warning';
 import { asb14LnMedian, asb14TotalSigma } from '../gmpe/asb14';
+import { settlementClasses } from '../grid/settlement';
 import { combinedMmi } from '../intensity/worden2012';
+import { cellNetwork } from '../network/network';
+import { emergencyResponse } from '../routing/response';
 import { buildRupture } from '../rupture/finite-fault';
 import { IASP91_CRUST, layerIndexAt, type VelocityLayer } from '../velocity/layered-model';
 import { RuptureArrivals } from './arrivals';
+import { districtCentres } from './district-centres';
 import { PolygonDistance } from './polygon-distance';
 import { planStations, synthesizeRecords } from './stations';
 
@@ -28,6 +35,13 @@ export interface SimulationInput {
   stations?: readonly StationSite[];
   /** Building stock, vulnerability and facilities for damage estimates (needs `districtCells`). */
   damage?: DamageInputs;
+  /**
+   * Cell sites for the network load (needs `damage`); `siteLonLat` null generates synthetic
+   * sites from the population.
+   */
+  network?: { siteLonLat: Float32Array | null };
+  /** Major road network for emergency routing (needs `damage`). */
+  roads?: RoadGraph;
   model?: readonly VelocityLayer[];
 }
 
@@ -112,6 +126,8 @@ export function simulate(input: SimulationInput): SimulationResult {
   const durationS = Math.ceil(lastArrival) + DURATION_PADDING_S;
   const records = synthesizeRecords(stations, scenario.seed, durationS);
 
+  const districts = input.districtCells ? districtImpacts(input.districtCells, tP, tS, mmi) : [];
+
   return {
     scenarioId: scenario.id,
     grid,
@@ -130,21 +146,19 @@ export function simulate(input: SimulationInput): SimulationResult {
       traceTimesS: rupture.traceTimesS,
       ruptureDurationS: rupture.durationS,
     },
-    districts: input.districtCells ? districtImpacts(input.districtCells, tP, tS, mmi) : [],
+    districts,
     records,
-    damage:
-      input.damage && input.districtCells
-        ? estimateDamage(input.damage, input.districtCells, {
-            grid,
-            vs30,
-            rjbKm,
-            pgaG,
-            tS,
-            mw: rupture.mw,
-            rakeDeg,
-            surface,
-          })
-        : null,
+    ...impactEstimates(input, districts, {
+      grid,
+      vs30,
+      rjbKm,
+      pgaG,
+      tS,
+      mmi,
+      mw: rupture.mw,
+      rakeDeg,
+      surface,
+    }),
     earlyWarning: earlyWarning({
       stations: records.stations,
       rupture,
@@ -189,17 +203,120 @@ interface GroundMotionContext {
   rjbKm: Float32Array;
   pgaG: Float32Array;
   tS: Float32Array;
+  mmi: Float32Array;
   mw: number;
   rakeDeg: number;
   surface: PolygonDistance;
 }
 
-/** Spectral accelerations on the district cells, then district and facility damage. */
-function estimateDamage(
-  inputs: DamageInputs,
+type ImpactEstimates = Pick<SimulationResult, 'damage' | 'network' | 'routing'>;
+
+/** Damage, then the cell network and road response that depend on it. */
+function impactEstimates(
+  input: SimulationInput,
+  impacts: readonly DistrictImpact[],
+  context: GroundMotionContext,
+): ImpactEstimates {
+  const { damage: inputs, districtCells } = input;
+  if (!inputs || !districtCells) return { damage: null, network: null, routing: null };
+  const { grid, vs30, mw, rakeDeg } = context;
+  const motionAt = (lon: number, lat: number) => {
+    const cell = cellIndex(grid, lon, lat);
+    return {
+      cell,
+      motion: {
+        mw,
+        rjbKm: context.surface.distanceKm(lon, lat),
+        vs30: cell < 0 ? Number.NaN : (vs30[cell] ?? Number.NaN),
+        rakeDeg,
+      },
+    };
+  };
+  const arrivalAt = (cell: number) =>
+    cell < 0 ? Number.POSITIVE_INFINITY : (context.tS[cell] ?? Number.POSITIVE_INFINITY);
+
+  const facilityFunction = inputs.functions.find((fn) => fn.taxonomy === FACILITY_TAXONOMY);
+  if (!facilityFunction) throw new RangeError(`no vulnerability function for ${FACILITY_TAXONOMY}`);
+  const facilitySigma = asb14TotalSigma(facilityFunction.imt);
+  const facilities = facilityDamage(
+    inputs.facilities.map((facility) => {
+      const { cell, motion } = motionAt(facility.lon, facility.lat);
+      return {
+        ...facility,
+        sArrivalS: arrivalAt(cell),
+        level: Math.exp(asb14LnMedian(facilityFunction.imt, motion)),
+      };
+    }),
+    facilityFunction,
+    facilitySigma,
+  );
+
+  const spectral = spectralOnCells(districtCells, context);
+  const { districts, cellLossRatio } = districtDamage({
+    stock: inputs.stock,
+    functions: inputs.functions,
+    districtCells,
+    population: inputs.population,
+    measures: spectral,
+    sigmaLn: {
+      PGA: asb14TotalSigma('PGA'),
+      'SA(0.3)': asb14TotalSigma('SA(0.3)'),
+      'SA(0.6)': asb14TotalSigma('SA(0.6)'),
+      'SA(1.0)': asb14TotalSigma('SA(1.0)'),
+    },
+  });
+
+  const settlement = settlementClasses(grid, inputs.population);
+  const network: NetworkResult | null = input.network
+    ? cellNetwork({
+        grid,
+        land: districtCells,
+        population: inputs.population,
+        settlement,
+        siteLonLat: input.network.siteLonLat ?? undefined,
+        tS: context.tS,
+        mmi: context.mmi,
+        hostFunction: facilityFunction,
+        hostLevel: spectral[facilityFunction.imt],
+        hostSigmaLn: facilitySigma,
+      })
+    : null;
+
+  let routing: RoutingResult | null = null;
+  if (input.roads) {
+    const centres = districtCentres(grid, districtCells, inputs.population);
+    const arrivals = new Map(impacts.map((impact) => [impact.index, impact.sArrivalS]));
+    routing = emergencyResponse({
+      graph: input.roads,
+      grid,
+      settlement,
+      cellLossRatio,
+      sa1G: (lon, lat) => Math.exp(asb14LnMedian('SA(1.0)', motionAt(lon, lat).motion)),
+      tS: context.tS,
+      facilities,
+      districts: districts.flatMap((district) => {
+        const centre = centres.get(district.index);
+        if (!centre) return [];
+        return [
+          {
+            index: district.index,
+            ...centre,
+            sArrivalS: arrivals.get(district.index) ?? Number.POSITIVE_INFINITY,
+            buildingsLost: district.buildingsLost,
+          },
+        ];
+      }),
+    });
+  }
+
+  return { damage: { districts, facilities }, network, routing };
+}
+
+/** Every vulnerability measure on the district cells: PGA from the grid, SA from ASB14. */
+function spectralOnCells(
   districtCells: Float32Array,
   context: GroundMotionContext,
-): NonNullable<SimulationResult['damage']> {
+): Record<SpectralMeasure, Float32Array> {
   const { vs30, rjbKm, mw, rakeDeg } = context;
   const cellCount = districtCells.length;
   const spectral = {
@@ -214,42 +331,5 @@ function estimateDamage(
       spectral[measure][cell] = Math.exp(asb14LnMedian(measure, motion));
     }
   }
-
-  const facilityFunction = inputs.functions.find((fn) => fn.taxonomy === FACILITY_TAXONOMY);
-  if (!facilityFunction) throw new RangeError(`no vulnerability function for ${FACILITY_TAXONOMY}`);
-  const sites = inputs.facilities.map((facility) => {
-    const cell = cellIndex(context.grid, facility.lon, facility.lat);
-    const siteVs30 = cell < 0 ? Number.NaN : (vs30[cell] ?? Number.NaN);
-    const motion = {
-      mw,
-      rjbKm: context.surface.distanceKm(facility.lon, facility.lat),
-      vs30: siteVs30,
-      rakeDeg,
-    };
-    return {
-      id: facility.id,
-      lon: facility.lon,
-      lat: facility.lat,
-      sArrivalS:
-        cell < 0 ? Number.POSITIVE_INFINITY : (context.tS[cell] ?? Number.POSITIVE_INFINITY),
-      level: Math.exp(asb14LnMedian(facilityFunction.imt, motion)),
-    };
-  });
-
-  return {
-    districts: districtDamage({
-      stock: inputs.stock,
-      functions: inputs.functions,
-      districtCells,
-      population: inputs.population,
-      measures: { PGA: context.pgaG, ...spectral },
-      sigmaLn: {
-        PGA: asb14TotalSigma('PGA'),
-        'SA(0.3)': asb14TotalSigma('SA(0.3)'),
-        'SA(0.6)': asb14TotalSigma('SA(0.6)'),
-        'SA(1.0)': asb14TotalSigma('SA(1.0)'),
-      },
-    }),
-    facilities: facilityDamage(sites, facilityFunction, asb14TotalSigma(facilityFunction.imt)),
-  };
+  return { PGA: context.pgaG, ...spectral };
 }

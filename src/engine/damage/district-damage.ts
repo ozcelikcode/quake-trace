@@ -21,13 +21,19 @@ export interface DistrictDamageInput {
   sigmaLn: Record<SpectralMeasure, number>;
 }
 
+export interface DistrictDamageResult {
+  districts: DistrictDamage[];
+  /** Expected structural loss ratio of the buildings in each grid cell (0 outside districts). */
+  cellLossRatio: Float32Array;
+}
+
 /**
  * Expected structural loss and night-time fatalities per district: each district's buildings
  * and residents are spread over its grid cells in proportion to population (evenly when the
  * district has no populated cell); every class's vulnerability function is averaged over the
  * lognormal variability of its own intensity measure in each cell.
  */
-export function districtDamage(input: DistrictDamageInput): DistrictDamage[] {
+export function districtDamage(input: DistrictDamageInput): DistrictDamageResult {
   const byTaxonomy = new Map(input.functions.map((fn) => [fn.taxonomy, fn]));
   const districts = input.stock.map((district) => {
     const classes = classShares(district.buildings.byPeriod, district.buildings.byStoreys).map(
@@ -44,6 +50,7 @@ export function districtDamage(input: DistrictDamageInput): DistrictDamage[] {
   const byIndex = new Map(districts.map((entry) => [entry.district.index, entry]));
 
   const { districtCells, population } = input;
+  const cellLossRatio = new Float32Array(districtCells.length);
   for (let cell = 0; cell < districtCells.length; cell++) {
     const entry = byIndex.get(districtCells[cell] ?? Number.NaN);
     if (!entry) continue;
@@ -59,14 +66,17 @@ export function districtDamage(input: DistrictDamageInput): DistrictDamage[] {
         ? Math.max(0, population[cell] ?? 0) / entry.population
         : 1 / entry.cells;
     if (weight === 0) continue;
+    let cellLoss = 0;
     for (const { fn, measure, sigma, share } of entry.classes) {
       const median = measure[cell] ?? 0;
-      entry.loss += weight * share * expectedRatio(fn.imls, fn.structural, median, sigma);
+      cellLoss += share * expectedRatio(fn.imls, fn.structural, median, sigma);
       entry.fatality += weight * share * expectedRatio(fn.imls, fn.fatality, median, sigma);
     }
+    cellLossRatio[cell] = cellLoss;
+    entry.loss += weight * cellLoss;
   }
 
-  return districts.map(({ district, loss, fatality }) => ({
+  const results = districts.map(({ district, loss, fatality }) => ({
     index: district.index,
     buildings: district.buildings.total,
     lossRatio: loss,
@@ -74,4 +84,5 @@ export function districtDamage(input: DistrictDamageInput): DistrictDamage[] {
     fatalities: district.population * fatality,
     estimated: district.estimated,
   }));
+  return { districts: results, cellLossRatio };
 }

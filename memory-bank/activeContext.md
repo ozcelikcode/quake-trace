@@ -2,9 +2,15 @@
 
 ## Current focus
 
-Phase 5 (damage and critical infrastructure) is complete on branch `feat/phase-5-damage`: district losses and night fatalities from GEM 2025 Türkiye vulnerability, facility states on the map, validated against the İBB 2019 scenario. Next is phase 6: cell tower load, routing and corridors, heatmaps.
+Phase 6 (cell network load, emergency routing and corridors, network heatmap) is complete on branch `feat/phase-6-network-routing` (from phase 5). Next is phase 7: tsunami.
 
-## Recent changes (2026-10-26, phase 5)
+## Recent changes (2026-10-26, phase 6)
+
+- Git: phase 3–5 branches pushed with upstream after the user signed in with `gh` (`gh auth setup-git`).
+- Engine: `grid` (DEGURBA settlement classes, point index), `network` (synthetic sites at ITU-R M.2135 spacing, raster service areas, DOCOMO/Bagrow call demand, host-building loss), `routing` (Dijkstra, KTY speeds, Hazus HWB28 bridges, debris slowdown, district response times, corridors). `districtDamage` also returns the per-cell loss ratio; `SimulationResult.network` and `.routing`; facility kinds and thresholds moved to `types/damage.ts`; `RoadGraph` type moved to `types/roads.ts`.
+- App: features `cells` (site state, network summary) and `routing` (response summary, district row text); map network raster selectable in the legend, corridor / impaired-road / site layers with `TimedReveal`; `--load` tokens; `useCellSites`; `formatCompact`, `formatPercent` (fixes `%` placement in English).
+
+## Changes (2026-10-26, phase 5)
 
 - Pipeline: `vulnerability` dataset (GEM v2026.0.0, CC BY-NC-SA 4.0), fixtures: ASB14 SA(0.6) column and the İBB 2019 district totals.
 - Engine: ASB14 SA(0.6); `damage/` (OpenQuake-style interpolation, expectation over σ, building classes, district damage, facilities); `SimulationResult.damage`; shared `types/damage.ts`.
@@ -30,9 +36,9 @@ Phase 5 (damage and critical infrastructure) is complete on branch `feat/phase-5
 
 ## Next steps
 
-1. Phase 6: cell sites (OpenCelliD key or synthetic sites), call-demand load model, road graph routing with damage-aware costs, corridors and heatmaps.
-2. Cell sites: OpenCelliD key before phase 6, otherwise synthetic sites (decided 2026-10-25).
-3. User (optional): review, commit/push/PR on request; deploy to Cloudflare when ready.
+1. Phase 7: tsunami (Okada 1985 source, linear shallow water on the 500 m bathymetry, coastal arrivals), in its own worker.
+2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
+3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.
 
 ## Active decisions and considerations
 
@@ -51,4 +57,6 @@ Phase 5 (damage and critical infrastructure) is complete on branch `feat/phase-5
 - The Memory Bank is the user's top priority for project continuity.
 - The user wants the phase status reported in every update and delegates technical choices ("hangisi öneriliyorsa").
 - Library checks pay off: typescript-eslint did not support TS 7, jsx-a11y did not support ESLint 10, react-refresh 0.5 exports a named `reactRefresh`, vaul ignores `modal={false}`, MapLibre's container CSS overrides `position: absolute`, pyosmium needs nodes read for the location cache, deck.gl does not drape on MapLibre terrain, and MapLibre canvas sources stay stale under terrain.
+- Binary thresholds on expected values create artefacts at network scale (debris closures isolated whole cities); prefer continuous effects, and check the regional result before keeping a rule.
+- A model that saturates (call demand) makes a flat map; show a quantity with spatial contrast (blocked calls per km²).
 - Real data needs defensive handling: AFAD needs a browser user agent, İBB CSVs mix UTF-8 and Windows-1254, the 2017 İBB data still calls Eyüpsultan "Eyüp", WorldPop uses a negative nodata value, OSM has `beds=0`, and EFSM20 uses `RL`/`LL` codes.

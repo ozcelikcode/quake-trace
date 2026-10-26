@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { useJsonDataset } from '@/data/use-dataset';
+import { NetworkSummary } from '@/features/cells';
 import { EewSummary } from '@/features/eew';
 import { InfraSummary } from '@/features/infra';
+import { ResponseSummary, responseText } from '@/features/routing';
 import { mmiCss, mmiRoman } from '@/lib/color/mmi';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format';
@@ -40,9 +42,10 @@ export function ImpactPanel() {
 
   const number = (value: number, digits = 0) => formatNumber(value, i18n.language, digits);
   const damageByIndex = new Map(result.damage?.districts.map((d) => [d.index, d]));
-  const reachedDamage = impacts
-    .slice(0, reached)
-    .flatMap((impact) => damageByIndex.get(impact.index) ?? []);
+  const reachedImpacts = impacts.slice(0, reached);
+  const reachedDamage = reachedImpacts.flatMap((impact) => damageByIndex.get(impact.index) ?? []);
+  const reachedIndices = new Set(reachedImpacts.map((impact) => impact.index));
+  const responseByIndex = new Map(result.routing?.districts.map((r) => [r.index, r]));
   const warningCell = (sArrivalS: number) => {
     if (alertS === undefined || second < alertS) return { text: '—', blind: false };
     if (sArrivalS <= alertS) return { text: t('impact.blindZone'), blind: true };
@@ -64,6 +67,8 @@ export function ImpactPanel() {
           <InfraSummary facilities={result.damage.facilities} />
         </>
       )}
+      {result.network && <NetworkSummary network={result.network} />}
+      {result.routing && <ResponseSummary routing={result.routing} reached={reachedIndices} />}
       <section aria-labelledby="impact-title" className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between gap-2">
           <h3 id="impact-title" className="label-micro">
@@ -87,6 +92,7 @@ export function ImpactPanel() {
               const properties = districts.features[impact.index]?.properties;
               const warning = warningCell(impact.sArrivalS);
               const damage = position < reached ? damageByIndex.get(impact.index) : undefined;
+              const response = position < reached ? responseByIndex.get(impact.index) : undefined;
               return (
                 <tr
                   key={impact.index}
@@ -105,6 +111,7 @@ export function ImpactPanel() {
                           fatalities: number(Math.round(damage.fatalities)),
                         })}`}
                       {damage?.estimated && ` ${t('impact.estimatedStock')}`}
+                      {response && ` · ${responseText(t, i18n.language, response)}`}
                     </span>
                   </td>
                   <td className="py-1.5 pr-2 text-right num text-caption whitespace-nowrap text-fg-secondary">

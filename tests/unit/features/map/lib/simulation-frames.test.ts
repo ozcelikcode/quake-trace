@@ -1,14 +1,21 @@
 import { describe, expect, it } from 'vitest';
 
+import { LOAD_ANCHORS } from '@/features/map/lib/layer-palette';
 import {
+  BLOCKED_DENSITY_MAX,
+  BLOCKED_DENSITY_MIN,
+  loadIndex,
+  loadLookupTable,
   mercatorRowMap,
   mmiLookupTable,
   paintIntensity,
+  paintNetwork,
   rupturedPath,
   SHAKING_FADE_S,
   wavefrontCurtain,
 } from '@/features/map/lib/simulation-frames';
 import type { GridSpec } from '@/types/grid';
+import type { NetworkResult } from '@/types/network';
 
 const spec: GridSpec = { west: 26, north: 41.8, dLon: 0.01, dLat: 0.01, nx: 4, ny: 200 };
 
@@ -74,5 +81,41 @@ describe('simulation frames', () => {
       [2, 0],
       [2.5, 0],
     ]);
+  });
+});
+
+describe('network raster', () => {
+  it('maps blocked-call density onto the load scale logarithmically from 10 to 10,000 per km²', () => {
+    const table = loadLookupTable(LOAD_ANCHORS);
+    expect(loadIndex(BLOCKED_DENSITY_MIN)).toBe(0);
+    expect(loadIndex(Number.NaN)).toBe(0);
+    expect(loadIndex(100)).toBe(85);
+    expect(loadIndex(BLOCKED_DENSITY_MAX)).toBe(255);
+    expect(loadIndex(1e6)).toBe(255);
+    expect(table[0]).toBe(0);
+    const [r, g, b] = LOAD_ANCHORS.at(-1) ?? [0, 0, 0];
+    expect(table[255]).toBe(((Math.round(0.9 * 255) << 24) | (b << 16) | (g << 8) | r) >>> 0);
+  });
+
+  it('paints each cell with its serving site once the S wave has reached it', () => {
+    const tiny: GridSpec = { west: 0, north: 0.01, dLon: 0.01, dLat: 0.01, nx: 3, ny: 1 };
+    const network: NetworkResult = {
+      synthetic: true,
+      siteCount: 2,
+      siteLonLat: new Float32Array(4),
+      sitePopulation: new Float32Array(2),
+      siteDensity: Float32Array.from([1e6, 1e6]),
+      siteSArrivalS: Float32Array.from([1, 100]),
+      sitePeakDemand: Float32Array.from([55, 55]),
+      siteLossRatio: Float32Array.from([0, 0]),
+      cellSite: Int32Array.from([0, 1, -1]),
+      decayS: 1e9,
+    };
+    const pixels = new Uint32Array(3);
+    const table = loadLookupTable(LOAD_ANCHORS);
+    paintNetwork(pixels, tiny, Int32Array.from([0]), network, table, 10);
+    expect(pixels[0]).toBe(table[255]);
+    expect(pixels[1]).toBe(0);
+    expect(pixels[2]).toBe(0);
   });
 });

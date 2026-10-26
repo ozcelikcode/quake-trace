@@ -21,3 +21,32 @@ export function formatNumber(value: number, locale: string, fractionDigits = 0):
   }
   return formatter.format(value);
 }
+
+const compactFormatters = new Map<string, Intl.NumberFormat>();
+
+/** Short locale-aware number for scale ticks: 10 B in Turkish, 10K in English. */
+export function formatCompact(value: number, locale: string): string {
+  let formatter = compactFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { notation: 'compact' });
+    compactFormatters.set(locale, formatter);
+  }
+  return formatter.format(value);
+}
+
+const percentFormatters = new Map<string, Intl.NumberFormat>();
+
+/** Locale-aware percentage of a 0–1 share: %4,0 in Turkish, 4.0% in English. */
+export function formatPercent(share: number, locale: string, fractionDigits = 0): string {
+  const key = `${locale}:${String(fractionDigits)}`;
+  let formatter = percentFormatters.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, {
+      style: 'percent',
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    });
+    percentFormatters.set(key, formatter);
+  }
+  return formatter.format(share);
+}

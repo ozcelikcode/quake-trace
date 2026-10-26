@@ -1,4 +1,4 @@
-import { useGridDataset, useJsonDataset } from '@/data/use-dataset';
+import { useCellSites, useGridDataset, useJsonDataset, useRoadGraph } from '@/data/use-dataset';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
 import { simulationWorker } from '@/workers/simulation-client';
@@ -16,7 +16,11 @@ export function useRunScenario() {
   const vulnerability = useJsonDataset('vulnerability').data;
   const infra = useJsonDataset('infra').data;
   const population = useGridDataset('population').data;
+  const roads = useRoadGraph().data;
+  const cells = useCellSites();
   const ready = Boolean(
+    roads &&
+    cells.isSuccess &&
     faults &&
     vs30 &&
     districtCells &&
@@ -38,7 +42,9 @@ export function useRunScenario() {
       !districtStats ||
       !vulnerability ||
       !infra ||
-      !population
+      !population ||
+      !roads ||
+      !cells.isSuccess
     ) {
       return;
     }
@@ -55,6 +61,9 @@ export function useRunScenario() {
           .filter((station) => station.accelerometer)
           .map(({ id, lon, lat }) => ({ id, lon, lat })),
         damage: damageInputs(districtStats, vulnerability, population.values, infra),
+        // Without OpenCelliD data the engine places synthetic sites.
+        network: { siteLonLat: cells.data?.siteLonLat ?? null },
+        roads,
       });
       scenarioStore.succeed(result);
       usePlaybackStore.getState().load(result.durationS);

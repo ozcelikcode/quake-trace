@@ -61,7 +61,7 @@ quake-trace/
 
 Features: `map`, `timeline`, `telemetry`, `scenario`, `live`, `replay`, `eew`, `impact`, `infra`, `cells`, `routing`, `tsunami`, `aftershocks`, `events`, `about`.
 
-Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `eew`, `damage`, `network`, `routing`, `tsunami`, `etas`, `random`, `sim`.
+Engine modules: `grid` (settlement classes, point index), `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `eew`, `damage`, `network`, `routing`, `tsunami`, `etas`, `random`, `sim`.
 
 ## Rules of the layout
 
@@ -96,6 +96,8 @@ Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `ee
 - **Telemetry drawing.** Waveforms are canvases painted outside React by `useCanvasFrame` (resize, visibility, theme and clock subscriptions); records are reduced to 50 ms min/max envelopes with a running peak, and painters draw one stroke per device column up to the playback time, never beyond it. Readouts that change every frame (peak so far) are written to DOM nodes from the same paint. Station rows are in trigger order, so triggered stations are a prefix and React re-renders only when that count changes.
 - **Focused station.** `state/telemetry-store.ts` holds the chosen station id; `resolveFocusedStation` (first trigger when none is chosen) is shared by the telemetry panel and the map ring, because features cannot import each other.
 - **Map feature state.** Facilities are a MapLibre circle layer (`promoteId: 'id'`) whose colour comes from feature state written by `SimulationRenderer` only when a facility's state changes; states are reset on new results and style reloads.
+- **Response layers.** Corridors, impaired roads and cell sites are scenario GeoJSON sources built by `response-layers.ts` from the result and the road graph (`SimulationRenderer.setRoads`); `TimedReveal` keeps items sorted by time and writes feature state only for items whose visibility changes. The road graph is loaded once by the scenario feature and the map (TanStack Query) and copied to the worker with each run (one 5.6 MB buffer).
+- **Shared constants.** Facility kinds and the facility state thresholds live in `types/damage.ts`, because the engine (routing, network) and the UI (infra) use the same rule.
 - **Shared types.** Types used by both the engine and the UI (`GridSpec`, `Scenario`, `SimulationResult`) live in `src/types/`, because features may not import the engine.
 
 ## Critical paths
@@ -127,3 +129,7 @@ Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `ee
 | 2026-10-26 | GEM 2025 vulnerability (CC BY-NC-SA) for damage | Verifiable Türkiye-specific functions; HAZUS coefficients could not be verified; licence fits the non-commercial portfolio |
 | 2026-10-26 | EEW Pd modelled from the grown rupture, not measured from records | Point-source stochastic records carry the full moment from the first second |
 | 2026-10-26 | Records only for accelerometer stations, scaled to the median | Strong-motion telemetry; map and telemetry stay consistent |
+| 2026-10-26 | Synthetic cell sites from population (ITU-R M.2135 spacing) while no OpenCelliD key exists | Free and verifiable; the engine takes real sites unchanged when `cells.bin` is built |
+| 2026-10-26 | Debris slows streets instead of closing them | Binary closures fragmented urban networks into unreachable islands |
+| 2026-10-26 | Network raster shows calls not carried per km², not demand | Demand saturates at the peak wherever shaking is felt, so the demand map was uniform |
+| 2026-10-26 | Dijkstra tested against Bellman–Ford; A* not used | Multi-source shortest-path trees serve every district at once |

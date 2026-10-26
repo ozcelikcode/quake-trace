@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { formatNumber } from '@/lib/format';
+import { formatNumber, formatPercent } from '@/lib/format';
 import type { DistrictDamage } from '@/types/damage';
 
 import { roundSignificant } from '../lib/round-significant';
@@ -24,7 +24,7 @@ export function DamageSummary({ reached, total }: DamageSummaryProps) {
     [t('damage.buildingsLost'), approximate(lost)],
     [
       t('damage.lossRatio'),
-      buildings > 0 ? `%${formatNumber((lost / buildings) * 100, i18n.language, 1)}` : '—',
+      buildings > 0 ? formatPercent(lost / buildings, i18n.language, 1) : '—',
     ],
     [t('damage.fatalities'), approximate(fatalities)],
     [

@@ -1,13 +1,10 @@
+import { FACILITY_LIMITED_FROM, FACILITY_OUT_OF_SERVICE_FROM } from '@/types/damage';
+
 /**
  * Operational state of a critical facility from the expected structural loss ratio of its
- * building class. The thresholds are a modelling assumption for display, not a published
- * functionality model: below 5 % the building is taken as usable, from 20 % as likely out of
- * service.
+ * building class (thresholds in `types/damage.ts`).
  */
 export type FacilityStatus = 'pending' | 'operational' | 'limited' | 'outOfService';
-
-export const LIMITED_FROM = 0.05;
-export const OUT_OF_SERVICE_FROM = 0.2;
 
 /** `pending` until the S wave has reached the facility. */
 export function facilityStatus(
@@ -16,6 +13,6 @@ export function facilityStatus(
   timeS: number,
 ): FacilityStatus {
   if (timeS < sArrivalS) return 'pending';
-  if (lossRatio >= OUT_OF_SERVICE_FROM) return 'outOfService';
-  return lossRatio >= LIMITED_FROM ? 'limited' : 'operational';
+  if (lossRatio >= FACILITY_OUT_OF_SERVICE_FROM) return 'outOfService';
+  return lossRatio >= FACILITY_LIMITED_FROM ? 'limited' : 'operational';
 }

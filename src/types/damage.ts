@@ -45,9 +45,29 @@ export interface DistrictDamage {
   estimated: boolean;
 }
 
+/** Facility kinds whose building damage matters for the response. */
+export const CRITICAL_FACILITY_KINDS = ['hospital', 'fireStation', 'police'] as const;
+export type CriticalFacilityKind = (typeof CRITICAL_FACILITY_KINDS)[number];
+
+export interface CriticalFacility {
+  id: string;
+  kind: CriticalFacilityKind;
+  lon: number;
+  lat: number;
+}
+
+/**
+ * Loss-ratio thresholds of a facility's display state. A modelling assumption, not a published
+ * functionality model: below 5 % the building is taken as usable, from 20 % as likely out of
+ * service. The same out-of-service threshold removes hospitals and fire stations from routing.
+ */
+export const FACILITY_LIMITED_FROM = 0.05;
+export const FACILITY_OUT_OF_SERVICE_FROM = 0.2;
+
 /** A critical facility with its expected structural loss ratio at the site. */
 export interface FacilityDamage {
   id: string;
+  kind: CriticalFacilityKind;
   lon: number;
   lat: number;
   lossRatio: number;
@@ -61,6 +81,5 @@ export interface DamageInputs {
   functions: readonly VulnerabilityFunction[];
   /** Residents per grid cell. */
   population: Float32Array;
-  /** Critical facilities (hospitals, fire stations, police). */
-  facilities: readonly { id: string; lon: number; lat: number }[];
+  facilities: readonly CriticalFacility[];
 }

@@ -130,9 +130,6 @@ export const infraKinds = [
   'gasPipeline',
 ] as const;
 
-/** Facility kinds whose building damage matters for the response. */
-export const criticalFacilityKinds = ['hospital', 'fireStation', 'police'] as const;
-
 export const infraSchema = featureCollection(
   z.discriminatedUnion('type', [point, lineString]),
   z.object({
