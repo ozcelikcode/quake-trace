@@ -9,9 +9,11 @@ import {
   openScenarioPanel,
   pauseAndJump,
   project,
+  skipScenarioFlowOnCi,
 } from './_helpers/layout';
 
 test.use({ locale: 'tr-TR' });
+test.beforeEach(skipScenarioFlowOnCi);
 
 const clock = (page: Page) => page.getByTestId('simulation-clock').first();
 

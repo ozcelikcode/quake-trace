@@ -75,6 +75,7 @@ Viewports: 1440×900 desktop, 1024×768 tablet, 390×844 phone (iPhone class), 4
 
 ## Environments and accessibility
 
+- Scenario-playback e2e flows (`scenario`, `editor-events`, the replay flow) run on the desktop profile in CI and on every profile locally (`skipScenarioFlowOnCi`): GitHub runners have no GPU, and with software WebGL a playing scenario starved the tablet and phone pages until clicks timed out (22 failures on 2026-10-26). Shell and layout tests still run on all profiles in CI; run the full suite locally before merging layout changes.
 - Wall-clock budgets (preset under 2 s, tsunami hour under 10 s) are asserted on developer machines and skipped when `CI` is set: shared GitHub runners measured 2.3–2.5 s for the presets (2026-10-26). Every other assertion of those tests runs in CI.
 
 - Vitest runs in Node by default; files that need the DOM declare `// @vitest-environment jsdom` at the top.

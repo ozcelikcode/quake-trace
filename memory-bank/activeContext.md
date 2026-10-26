@@ -2,7 +2,7 @@
 
 ## Current focus
 
-Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). All planned phases are done; next steps are the user's: review, merge to `main`, deploy.
+Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). All planned phases are done and merged into `main`; the remaining step is the user's Cloudflare login and deploy.
 
 ## Recent changes (2026-10-26, review after phase 11)
 
@@ -11,6 +11,7 @@ Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). 
 - The status-bar alert chip ends with the shaking (`eewPhase(…, shakingEndS)`); it no longer shows a red alert hours later on the response scale.
 - The tsunami integration test's timeout now covers its 10 s budget (it was cut at the default 5 s).
 - Exports used only in their own file are no longer exported (knip scan); no unused files or dependencies.
+- First CI runs on `main` (merged by fast-forward): `astral-sh/setup-uv` pinned to `v10.3.2` (no floating `v10` tag); wall-clock budgets checked off CI only; scenario e2e flows on desktop only in CI (no GPU on runners).
 
 ## Changes (2026-10-26, phase 11)
 
@@ -77,7 +78,7 @@ Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). 
 
 ## Next steps
 
-1. User: review the phase branches, merge to `main`, deploy to Cloudflare (`npx wrangler login`, `npm run deploy`).
+1. User: deploy to Cloudflare (`npx wrangler login`, then `npm run deploy`).
 2. Optional: lazy-load rarely used panels to shrink the 245 KB shell chunk; OpenCelliD key for real cell sites; ASB14 σ sampling for uncertainty bands.
 2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 import { expect, test, type Page } from '@playwright/test';
 
-import { isPhone, openScenarioPanel, project } from './_helpers/layout';
+import { isPhone, openScenarioPanel, project, skipScenarioFlowOnCi } from './_helpers/layout';
 
 test.use({ locale: 'tr-TR' });
 
@@ -38,6 +38,7 @@ async function openTab(page: Page, name: string) {
 test('replays the 2025 Marmara earthquake with the observed record of KO.SLVT', async ({
   page,
 }) => {
+  skipScenarioFlowOnCi();
   test.skip(project() === 'phone-ios', 'covered by the other phone profile');
   await serveFeeds(page);
   await openTab(page, 'Tarihsel');

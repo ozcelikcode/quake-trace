@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **11 (polish) complete** on branch `feat/phase-11-polish` (from phase 10, `a6de0ee`). Phase 3–10 branches are pushed to GitHub with upstream. `main` is at phase 2 (`5aec3bf`). All planned phases are done; merging and deploying are the user's next steps.
+Phase: **11 (polish) complete** on branch `feat/phase-11-polish` (from phase 10, `a6de0ee`). Phase 3–10 branches are pushed to GitHub with upstream. `main` contains every phase. All planned phases are done and `main` is fast-forwarded to this branch; deploying needs the user's Cloudflare login.
 
 ## What works
 

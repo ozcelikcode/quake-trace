@@ -3,6 +3,18 @@ import { test, type Page } from '@playwright/test';
 export const project = () => test.info().project.name;
 export const isPhone = () => project().startsWith('phone');
 
+/**
+ * CI runners have no GPU: the map and deck.gl layers render with software WebGL, and on the
+ * tablet and phone profiles a playing scenario starves the page (clicks time out). Scenario flows
+ * therefore run on the desktop profile in CI and on every profile locally.
+ */
+export function skipScenarioFlowOnCi() {
+  test.skip(
+    Boolean(process.env.CI) && project() !== 'desktop',
+    'scenario playback needs a GPU; CI covers it on desktop',
+  );
+}
+
 /** Shows the scenario panel in the current layout. */
 export async function openScenarioPanel(page: Page) {
   if (isPhone()) {

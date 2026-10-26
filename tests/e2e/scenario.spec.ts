@@ -7,9 +7,11 @@ import {
   openScenarioPanel,
   pauseAndJump,
   project,
+  skipScenarioFlowOnCi,
 } from './_helpers/layout';
 
 test.use({ locale: 'tr-TR' });
+test.beforeEach(skipScenarioFlowOnCi);
 
 /** Starts the North Marmara preset and waits until playback has begun. */
 async function runNorthMarmara(page: Page) {
