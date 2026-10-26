@@ -52,10 +52,12 @@
     "scale": "Timeline scale",
     "scales": {
       "shaking": "Shaking",
-      "tsunami": "Tsunami"
+      "tsunami": "Tsunami",
+      "response": "Response"
     },
     "tsunamiArrival": "Tsunami reaches the first coast",
-    "tsunamiComputing": "Tsunami is being computed"
+    "tsunamiComputing": "Tsunami is being computed",
+    "largestAftershock": "Largest aftershock"
   },
   "map": {
     "label": "3D topographic map of the Marmara region",
@@ -77,7 +79,8 @@
       "bridgeClosed": "Closed bridge",
       "sites": "Cell site: normal / congested / down",
       "rasterTsunami": "Tsunami",
-      "tsunami": "Sea surface (m)"
+      "tsunami": "Sea surface (m)",
+      "aftershocks": "Aftershocks (size: magnitude)"
     }
   },
   "sheet": {
@@ -242,5 +245,15 @@
     "metresAt": "{{value}} m, {{district}}",
     "openScale": "Show the tsunami timeline",
     "note": "Okada (1985) seafloor motion of the rupture, linear shallow-water waves on EMODnet bathymetry (500 m). No run-up, no landslide sources; heights are offshore estimates near the coast."
+  },
+  "aftershocks": {
+    "title": "Aftershocks (simulation)",
+    "count": "M ≥ 3 so far",
+    "largest": "Largest so far",
+    "largestValue": "M {{magnitude}} at {{time}}",
+    "forecastM5": "M ≥ 5 in the next 24 h",
+    "forecastM6": "M ≥ 6 in the next 24 h",
+    "openScale": "Show the 72-hour response timeline",
+    "note": "A synthetic sequence from the Reasenberg & Jones (1989) generic California model (modified Omori decay, Gutenberg–Richter magnitudes); locations scattered along the rupture. Probabilities come from the same model, not an official forecast."
   }
 }

@@ -91,7 +91,7 @@ export function useRunScenario() {
         roads,
       });
       scenarioStore.succeed(result);
-      usePlaybackStore.getState().load(result.durationS);
+      usePlaybackStore.getState().load(result.durationS, result.aftershocks.durationS);
       void runTsunami(scenario, bathymetry, districtCells);
     } catch (error) {
       console.error(error);

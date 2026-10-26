@@ -7,6 +7,7 @@ import { create } from 'zustand';
 export const TIMELINE_SCALES = {
   shaking: { speeds: [0.5, 1, 2, 5, 10], defaultSpeed: 1, stepS: 1, jumpS: 10 },
   tsunami: { speeds: [10, 30, 60, 120], defaultSpeed: 30, stepS: 10, jumpS: 60 },
+  response: { speeds: [600, 1800, 3600, 14_400], defaultSpeed: 3600, stepS: 600, jumpS: 3600 },
 } as const;
 export type TimelineScale = keyof typeof TIMELINE_SCALES;
 export const timelineScales = Object.keys(TIMELINE_SCALES) as TimelineScale[];
@@ -30,8 +31,11 @@ interface PlaybackState {
   extents: Record<TimelineScale, number>;
   playing: boolean;
   speed: number;
-  /** Rewinds to the origin for a new scenario of the given shaking duration and plays it. */
-  load: (durationS: number) => void;
+  /**
+   * Rewinds to the origin for a new scenario and plays its shaking; `responseS` opens the
+   * response scale (the aftershock window).
+   */
+  load: (durationS: number, responseS?: number) => void;
   /** Makes a scale available (or unavailable with 0). */
   setExtent: (scale: TimelineScale, durationS: number) => void;
   /** Switches to an available scale, keeping the clock within it. */
@@ -51,15 +55,15 @@ export const usePlaybackStore = create<PlaybackState>()((set) => ({
   timeS: 0,
   durationS: 0,
   scale: 'shaking',
-  extents: { shaking: 0, tsunami: 0 },
+  extents: { shaking: 0, tsunami: 0, response: 0 },
   playing: false,
   speed: TIMELINE_SCALES.shaking.defaultSpeed,
-  load: (durationS) => {
+  load: (durationS, responseS = 0) => {
     set({
       timeS: 0,
       durationS,
       scale: 'shaking',
-      extents: { shaking: durationS, tsunami: 0 },
+      extents: { shaking: durationS, tsunami: 0, response: responseS },
       playing: true,
       speed: TIMELINE_SCALES.shaking.defaultSpeed,
     });

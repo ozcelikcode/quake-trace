@@ -199,6 +199,20 @@ describe('Marmara scenario presets on the prepared data', () => {
     expect(network.sitePeakDemand[site ?? -1]).toBe(55);
   });
 
+  it('follows the North Marmara mainshock with a three-day aftershock sequence', () => {
+    const { aftershocks, rupture } = run('north-marmara');
+    // Reasenberg–Jones expects about 950 M ≥ 3 shocks in three days after Mw 7.4.
+    expect(aftershocks.count).toBeGreaterThan(700);
+    expect(aftershocks.count).toBeLessThan(1300);
+    const largest = Math.max(...aftershocks.magnitude);
+    // Båth's law: the largest aftershock is typically about 1.2 units below the mainshock.
+    expect(largest).toBeGreaterThan(rupture.mw - 2.5);
+    expect(largest).toBeLessThan(rupture.mw);
+    // Half of them within the first few hours.
+    const median = aftershocks.timeS[Math.floor(aftershocks.count / 2)] ?? 0;
+    expect(median).toBeLessThan(12 * 3600);
+  });
+
   it.each(['north-marmara', 'izmit-1999'])(
     '%s: response times grow after the shaking but no İstanbul or Kocaeli district is cut off',
     (id) => {

@@ -16,11 +16,13 @@ import { LOAD_ANCHORS, REFERENCE_PALETTE, TSUNAMI_NEG, TSUNAMI_POS } from './lay
 import { FACILITY_STATUS_CODES, REFERENCE_SOURCES } from './reference-layers';
 import { TERRAIN_EXAGGERATION } from './map-config';
 import {
+  aftershocksToGeoJson,
   corridorsToGeoJson,
   edgeSourceNodes,
   impairedToGeoJson,
   RESPONSE_SOURCES,
   responseLayerSpecs,
+  type ResponseSource,
   SITE_STATE_CODES,
   sitesToGeoJson,
 } from './response-layers';
@@ -110,11 +112,13 @@ export class SimulationRenderer {
   #raster: MapRaster = 'intensity';
   #roads: RoadGraph | undefined;
   #result: SimulationResult | null = null;
-  /** Response layer data and reveal state, rebuilt for a new result or road graph. */
-  #response: {
-    data: Record<keyof typeof RESPONSE_SOURCES, GeoJSON.FeatureCollection>;
-    reveals: Record<keyof typeof RESPONSE_SOURCES, TimedReveal>;
-  } | null = null;
+  /**
+   * Response layer data and reveal state per source, rebuilt for a new result or road graph;
+   * corridors and impaired roads need the road graph, sites the network.
+   */
+  #response: Partial<
+    Record<ResponseSource, { data: GeoJSON.FeatureCollection; reveal: TimedReveal }>
+  > = {};
   #elevation: Float32Array | undefined;
   #image: ImageData | null = null;
   #pixels: Uint32Array | null = null;
@@ -221,57 +225,63 @@ export class SimulationRenderer {
   #buildResponse(): void {
     const result = this.#result;
     const graph = this.#roads;
-    if (!result?.routing || !result.network || !graph) {
-      this.#response = null;
-      return;
+    this.#response = {};
+    if (!result) return;
+    const response = this.#response;
+    if (result.routing && graph) {
+      const sources = edgeSourceNodes(graph);
+      response.corridors = {
+        data: corridorsToGeoJson(result.routing, graph, sources),
+        reveal: new TimedReveal(result.routing.corridorFromS),
+      };
+      response.impaired = {
+        data: impairedToGeoJson(result.routing, graph, sources),
+        reveal: new TimedReveal(result.routing.impairedAtS),
+      };
     }
-    const { routing, network } = result;
-    const sources = edgeSourceNodes(graph);
-    this.#response = {
-      data: {
-        corridors: corridorsToGeoJson(routing, graph, sources),
-        impaired: impairedToGeoJson(routing, graph, sources),
-        sites: sitesToGeoJson(network),
-      },
-      reveals: {
-        corridors: new TimedReveal(routing.corridorFromS),
-        impaired: new TimedReveal(routing.impairedAtS),
-        sites: new TimedReveal(network.siteSArrivalS),
-      },
+    if (result.network) {
+      response.sites = {
+        data: sitesToGeoJson(result.network),
+        reveal: new TimedReveal(result.network.siteSArrivalS),
+      };
+    }
+    response.aftershocks = {
+      data: aftershocksToGeoJson(result.aftershocks),
+      reveal: new TimedReveal(result.aftershocks.timeS),
     };
   }
 
   /** Adds the response sources and layers; feature states start hidden. */
   #attachResponse(): void {
-    const response = this.#response;
-    if (!response) return;
-    for (const [key, id] of Object.entries(RESPONSE_SOURCES) as [
-      keyof typeof RESPONSE_SOURCES,
-      string,
-    ][]) {
+    for (const key of Object.keys(RESPONSE_SOURCES) as ResponseSource[]) {
+      const entry = this.#response[key];
+      if (!entry) continue;
+      const id = RESPONSE_SOURCES[key];
       const source = this.#map.getSource<GeoJSONSource>(id);
-      if (source) void source.setData(response.data[key]);
-      else this.#map.addSource(id, { type: 'geojson', data: response.data[key] });
+      if (source) void source.setData(entry.data);
+      else this.#map.addSource(id, { type: 'geojson', data: entry.data });
       this.#map.removeFeatureState({ source: id });
-      response.reveals[key].reset();
+      entry.reveal.reset();
     }
     const beforeLabels = overlayAnchorLayerId(this.#map.getStyle().layers);
     for (const spec of responseLayerSpecs(this.#theme)) {
-      if (this.#map.getLayer(spec.id)) continue;
+      if (!('source' in spec) || typeof spec.source !== 'string') continue;
+      if (this.#map.getLayer(spec.id) || !this.#map.getSource(spec.source)) continue;
       this.#map.addLayer(spec, spec.type === 'line' ? beforeLabels : undefined);
     }
   }
 
   #updateResponse(result: SimulationResult, timeS: number): void {
-    const response = this.#response;
-    const network = result.network;
-    if (!response || !network || !this.#map.getSource(RESPONSE_SOURCES.sites)) return;
-    const showLine = (source: string) => (id: number, shown: boolean) => {
-      this.#map.setFeatureState({ source, id }, { shown });
+    const show = (key: ResponseSource) => (id: number, shown: boolean) => {
+      this.#map.setFeatureState({ source: RESPONSE_SOURCES[key], id }, { shown });
     };
-    response.reveals.corridors.update(timeS, showLine(RESPONSE_SOURCES.corridors));
-    response.reveals.impaired.update(timeS, showLine(RESPONSE_SOURCES.impaired));
-    response.reveals.sites.update(timeS, (site, shown) => {
+    for (const key of ['corridors', 'impaired', 'aftershocks'] as const) {
+      if (this.#map.getSource(RESPONSE_SOURCES[key]))
+        this.#response[key]?.reveal.update(timeS, show(key));
+    }
+    const network = result.network;
+    if (!network || !this.#map.getSource(RESPONSE_SOURCES.sites)) return;
+    this.#response.sites?.reveal.update(timeS, (site, shown) => {
       // A site's state is fixed once the S wave has passed: demand stays above normal for hours.
       const arrival = network.siteSArrivalS[site] ?? Number.POSITIVE_INFINITY;
       const state = shown ? SITE_STATE_CODES[siteState(network, site, arrival)] : 0;

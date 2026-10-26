@@ -59,9 +59,9 @@ quake-trace/
    └─ fixtures/                 shared reference data and recorded responses
 ```
 
-Features: `map`, `timeline`, `telemetry`, `scenario`, `live`, `replay`, `eew`, `impact`, `infra`, `cells`, `routing`, `tsunami`, `aftershocks`, `events`, `about`.
+Features: `map`, `timeline`, `telemetry`, `scenario`, `live`, `replay`, `eew`, `impact`, `infra`, `cells`, `routing`, `tsunami`, `aftershocks` (built), `events`, `about`.
 
-Engine modules: `grid` (settlement classes, point index), `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `eew`, `damage`, `network`, `routing`, `tsunami`, `etas`, `random`, `sim`.
+Engine modules: `grid` (settlement classes, point index), `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `eew`, `damage`, `network`, `routing`, `tsunami`, `aftershocks` (planned as `etas`), `random`, `sim`.
 
 ## Rules of the layout
 
@@ -98,7 +98,7 @@ Engine modules: `grid` (settlement classes, point index), `velocity`, `rupture`,
 - **Map feature state.** Facilities are a MapLibre circle layer (`promoteId: 'id'`) whose colour comes from feature state written by `SimulationRenderer` only when a facility's state changes; states are reset on new results and style reloads.
 - **Tsunami in its own worker.** `use-run-scenario.ts` starts `workers/tsunami.worker.ts` after the shaking result; `state/tsunami-store.ts` holds the result with a run token so a late result for an older scenario is dropped. When it arrives the playback store's `tsunami` extent is set and the scale becomes selectable; choosing it switches the map raster to the sea surface (map-view subscription).
 - **Timeline scales.** `state/playback-store.ts` keeps one clock with per-scale extents (`TIMELINE_SCALES`: speeds, default speed, keyboard steps); `durationS` is the active scale's end.
-- **Response layers.** Corridors, impaired roads and cell sites are scenario GeoJSON sources built by `response-layers.ts` from the result and the road graph (`SimulationRenderer.setRoads`); `TimedReveal` keeps items sorted by time and writes feature state only for items whose visibility changes. The road graph is loaded once by the scenario feature and the map (TanStack Query) and copied to the worker with each run (one 5.6 MB buffer).
+- **Response layers.** Corridors, impaired roads, cell sites and aftershocks are scenario GeoJSON sources, each built only when its data exists, built by `response-layers.ts` from the result and the road graph (`SimulationRenderer.setRoads`); `TimedReveal` keeps items sorted by time and writes feature state only for items whose visibility changes. The road graph is loaded once by the scenario feature and the map (TanStack Query) and copied to the worker with each run (one 5.6 MB buffer).
 - **Shared constants.** Facility kinds and the facility state thresholds live in `types/damage.ts`, because the engine (routing, network) and the UI (infra) use the same rule.
 - **Shared types.** Types used by both the engine and the UI (`GridSpec`, `Scenario`, `SimulationResult`) live in `src/types/`, because features may not import the engine.
 
@@ -138,3 +138,4 @@ Engine modules: `grid` (settlement classes, point index), `velocity`, `rupture`,
 | 2026-10-26 | Okada ported from GeoClaw, verified with Okada Table 2; linear TUNAMI-type solver on the 500 m grid in a separate worker | Verifiable source; one hour in about 3 s without blocking the next scenario |
 | 2026-10-26 | Tsunami arrival measured as change from the initial (coseismic) surface | The Okada field reaches distant coasts at t = 0 |
 | 2026-10-26 | Timeline scales Shaking / Tsunami built in phase 7 (Response follows in phase 8) | An hour of tsunami cannot be played on the shaking timeline |
+| 2026-10-26 | Aftershocks from Reasenberg–Jones (1989) sampled as one Poisson sequence, not an ETAS cascade; module named `aftershocks` | Verifiable parameters; the fitted sequence already contains secondary events and an ETAS cascade with them is near-critical |

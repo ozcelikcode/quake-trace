@@ -14,6 +14,13 @@ const api = {
       result.pgvCms.buffer,
       result.mmi.buffer,
       result.records.accelCmS2.buffer,
+      result.aftershocks.timeS.buffer,
+      result.aftershocks.lon.buffer,
+      result.aftershocks.lat.buffer,
+      result.aftershocks.depthKm.buffer,
+      result.aftershocks.magnitude.buffer,
+      result.aftershocks.forecastM5.buffer,
+      result.aftershocks.forecastM6.buffer,
       ...(result.network
         ? [
             result.network.siteLonLat.buffer,

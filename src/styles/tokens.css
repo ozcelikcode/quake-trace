@@ -43,6 +43,9 @@
   /* Diverging sea-surface scale, mirrored in features/map/lib/layer-palette.ts. */
   --tsunami-pos: rgb(255 92 76);
   --tsunami-neg: rgb(64 148 255);
+
+  /* Aftershock points, mirrored in features/map/lib/layer-palette.ts. */
+  --aftershock: rgb(214 112 236);
 }
 
 :root[data-theme='dark'] {

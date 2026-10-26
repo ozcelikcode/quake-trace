@@ -66,6 +66,7 @@ Physical quantities:
 | `--wave-p` | P wave (cool cyan-blue) |
 | `--wave-s` | S wave (amber to red) |
 | `--mmi-1` … `--mmi-10` | USGS ShakeMap intensity scale, kept close to the standard for recognizability |
+| `--aftershock` | Aftershock points and timeline tick (orchid), identical in both themes |
 | `--tsunami-pos` / `--tsunami-neg` | Diverging sea-surface scale (coral red / blue), identical in both themes; mirrored as `TSUNAMI_POS` / `TSUNAMI_NEG` in `layer-palette.ts` |
 | `--load-0` … `--load-4` | Sequential scale for the network raster (indigo → magenta → coral → amber), identical in both themes; mirrored as `LOAD_ANCHORS` in `layer-palette.ts` |
 
@@ -113,6 +114,7 @@ Rules: every pair used for text meets WCAG 2.2 AA (4.5:1 body, 3:1 large text an
 - Built (phase 5): damage summary readouts (rounded to 2 significant figures with ≈), facility state summary (ok / warning / critical dots with labels), district damage line, map facility points hidden until reached, then in state colours; legend entry.
 - Built (phase 6): network summary (site states with dots, people on congested sites, calls not carried, synthetic-site note), emergency response summary (median fire response before/after, slowed street km, closed bridges, largest delay, cut-off districts in critical text), district row response text, map legend segmented control Intensity / Network with the load scale (compact ticks), corridor / debris / bridge / site keys. Phone: the legend sits at the top of the map, below the watermark, with scale and control only (keys hidden), so the bottom sheet never covers the control. Percentages use `formatPercent` (`%4,0` in Turkish, `4.0%` in English).
 - Built (phase 7): timeline scale segmented control (Shaking / Tsunami, tsunami disabled with "…" while computing) and per-scale speeds; tsunami summary (status line in a live region while computing, slip, seafloor uplift/subsidence, first arrival and highest coastal wave with district, coastal districts listed as they are reached, button to open the tsunami scale, educational note); legend third shading option Tsunami with the diverging scale.
+- Built (phase 8): Response timeline scale (h:mm:ss clock, hour jumps), aftershock summary (count so far, largest with time, 24-hour M ≥ 5 / M ≥ 6 probabilities as percentages, button to open the response scale, model note), aftershock legend key, largest-aftershock timeline tick in --aftershock. The compact (phone) timeline drops its clock, which the status bar already shows, so the slider keeps its width next to the scale control.
 - To build: layer toggle row, event log row, toast for alerts, popover, dialog.
 - MMI colours come from `src/lib/color/mmi.ts` (ShakeMap scale); the same module feeds the raster, legend and swatches.
 - Touch targets grow on coarse pointers (`pointer-coarse:` variants) to at least 44 px.

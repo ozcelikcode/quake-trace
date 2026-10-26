@@ -2,9 +2,14 @@
 
 ## Current focus
 
-Phase 7 (tsunami) is complete on branch `feat/phase-7-tsunami` (from phase 6). Next is phase 8: aftershocks (ETAS) and the response timeline scale.
+Phase 8 (aftershocks and the response timeline) is complete on branch `feat/phase-8-aftershocks` (from phase 7). Next is phase 9: live mode and historical replay.
 
-## Recent changes (2026-10-26, phase 7)
+## Recent changes (2026-10-26, phase 8)
+
+- Engine: `aftershocks` (`reasenberg-jones.ts` rate, closed-form counts, Omori and Gutenberg–Richter samplers; `catalog.ts` 72-hour M ≥ 3 catalog along the rupture, Poisson count, hourly 24-hour M ≥ 5/6 probabilities); `SimulationResult.aftershocks`; `types/aftershocks.ts`.
+- App: Response timeline scale (72 h), largest-aftershock marker, h:mm:ss clock (and a rounding fix: 59.96 s no longer reads 00:60.0), aftershock map layer, feature `aftershocks` (impact summary), `--aftershock` token; phone timeline without the duplicate clock.
+
+## Changes (2026-10-26, phase 7)
 
 - Git: the working copy was found on `main` again at the start; phase 7 was branched from phase 6 (nothing lost).
 - Engine: `tsunami` — `okada.ts` (Okada 1985 uz, GeoClaw port, Table 2 tests), `source.ts` (rectangles from the ruptured trace, D = M0/μA, seafloor uplift), `shallow-water.ts` (linear C-grid, forward-backward, open edges), `tsunami.ts` (one hour, 15 s frames on the 1 km grid, coastal summaries). `types/tsunami.ts`.
@@ -42,7 +47,7 @@ Phase 7 (tsunami) is complete on branch `feat/phase-7-tsunami` (from phase 6). N
 
 ## Next steps
 
-1. Phase 8: ETAS aftershocks over 72 h and the Response timeline scale (extends `TIMELINE_SCALES`).
+1. Phase 9: live earthquake feeds (USGS, EMSC, AFAD and Kandilli through the proxy), real seismograms (FDSN via seisplotjs), historical replays (1999 Gölcük, 2019 and 2025 Silivri; verify parameters with AFAD/KOERI first).
 2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.
 

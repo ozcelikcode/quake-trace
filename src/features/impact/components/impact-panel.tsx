@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { EmptyState } from '@/components/ui/empty-state';
 import { useJsonDataset } from '@/data/use-dataset';
+import { AftershockSummary } from '@/features/aftershocks';
 import { NetworkSummary } from '@/features/cells';
 import { EewSummary } from '@/features/eew';
 import { InfraSummary } from '@/features/infra';
@@ -71,6 +72,7 @@ export function ImpactPanel() {
       {result.network && <NetworkSummary network={result.network} />}
       {result.routing && <ResponseSummary routing={result.routing} reached={reachedIndices} />}
       <TsunamiSummary />
+      <AftershockSummary catalog={result.aftershocks} />
       <section aria-labelledby="impact-title" className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between gap-2">
           <h3 id="impact-title" className="label-micro">

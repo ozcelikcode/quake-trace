@@ -1,8 +1,17 @@
-/** Simulation clock as mm:ss.s (seconds after origin). */
+/** Simulation clock as mm:ss.s (seconds after origin), or h:mm:ss from an hour on. */
 export function formatClock(seconds: number): string {
   const safe = Math.max(0, seconds);
-  const minutes = Math.floor(safe / 60);
-  const rest = safe - minutes * 60;
+  if (safe >= 3600) {
+    const whole = Math.floor(safe);
+    const hours = Math.floor(whole / 3600);
+    const minutes = Math.floor((whole % 3600) / 60);
+    const rest = whole % 60;
+    return `${String(hours)}:${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`;
+  }
+  // Round to tenths first, so 59.96 s reads 01:00.0 rather than 00:60.0.
+  const tenths = Math.round(safe * 10);
+  const minutes = Math.floor(tenths / 600);
+  const rest = (tenths % 600) / 10;
   return `${String(minutes).padStart(2, '0')}:${rest.toFixed(1).padStart(4, '0')}`;
 }
 

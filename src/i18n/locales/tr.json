@@ -52,10 +52,12 @@
     "scale": "Zaman ölçeği",
     "scales": {
       "shaking": "Sarsıntı",
-      "tsunami": "Tsunami"
+      "tsunami": "Tsunami",
+      "response": "Müdahale"
     },
     "tsunamiArrival": "Tsunami ilk kıyıya ulaşır",
-    "tsunamiComputing": "Tsunami hesaplanıyor"
+    "tsunamiComputing": "Tsunami hesaplanıyor",
+    "largestAftershock": "En büyük artçı"
   },
   "map": {
     "label": "Marmara bölgesi 3B topografik harita",
@@ -77,7 +79,8 @@
       "bridgeClosed": "Kapalı köprü",
       "sites": "Baz istasyonu: normal / tıkalı / devre dışı",
       "rasterTsunami": "Tsunami",
-      "tsunami": "Deniz yüzeyi (m)"
+      "tsunami": "Deniz yüzeyi (m)",
+      "aftershocks": "Artçı depremler (boyut: büyüklük)"
     }
   },
   "sheet": {
@@ -242,5 +245,15 @@
     "metresAt": "{{value}} m, {{district}}",
     "openScale": "Tsunami zaman ölçeğini göster",
     "note": "Kırılmanın Okada (1985) deniz tabanı hareketi, EMODnet batimetrisinde (500 m) doğrusal sığ su dalgaları. Karaya tırmanma ve heyelan kaynakları yok; yükseklikler kıyıya yakın açık deniz tahminidir."
+  },
+  "aftershocks": {
+    "title": "Artçı depremler (simülasyon)",
+    "count": "Şimdiye kadar M ≥ 3",
+    "largest": "Şimdiye kadarki en büyük",
+    "largestValue": "M {{magnitude}}, {{time}}",
+    "forecastM5": "Önümüzdeki 24 sa M ≥ 5",
+    "forecastM6": "Önümüzdeki 24 sa M ≥ 6",
+    "openScale": "72 saatlik müdahale zaman ölçeğini göster",
+    "note": "Reasenberg ve Jones (1989) genel Kaliforniya modelinden sentetik dizi (değiştirilmiş Omori sönümü, Gutenberg–Richter büyüklükleri); konumlar kırılma boyunca dağıtıldı. Olasılıklar aynı modelden gelir, resmî tahmin değildir."
   }
 }

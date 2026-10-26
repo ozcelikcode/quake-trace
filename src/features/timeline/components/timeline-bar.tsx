@@ -39,6 +39,15 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
   );
   const loaded = durationS > 0;
   const warning = useScenarioStore((state) => state.result?.earlyWarning);
+  const largestAftershockS = useScenarioStore((state) => {
+    const catalog = state.result?.aftershocks;
+    if (!catalog || catalog.count === 0) return undefined;
+    let largest = 0;
+    catalog.magnitude.forEach((magnitude, i) => {
+      if (magnitude > (catalog.magnitude[largest] ?? 0)) largest = i;
+    });
+    return catalog.timeS[largest];
+  });
   const markers = [
     ...(warning
       ? [
@@ -66,6 +75,16 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
           },
         ]
       : []),
+    ...(largestAftershockS !== undefined
+      ? [
+          {
+            key: 'aftershock',
+            label: t('timeline.largestAftershock'),
+            timeS: largestAftershockS,
+            className: 'bg-aftershock',
+          },
+        ]
+      : []),
   ].filter((marker) => marker.timeS <= durationS);
 
   return (
@@ -89,9 +108,12 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
 
       {loaded ? (
         <>
-          <span className="w-16 shrink-0 num text-caption text-fg" aria-hidden>
-            {formatClock(timeS)}
-          </span>
+          {/* Phones show the clock in the status bar, so the slider keeps the width. */}
+          {!compact && (
+            <span className="w-16 shrink-0 num text-caption text-fg" aria-hidden>
+              {formatClock(timeS)}
+            </span>
+          )}
           <div className="relative min-w-0 flex-1 ruler px-1">
             {/* Markers share the slider track inset (px-1). */}
             <div className="pointer-events-none absolute inset-y-0 right-1 left-1">
@@ -135,6 +157,7 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
               <ToggleGroupItem
                 key={option}
                 value={option}
+                className={cn(compact && 'px-1.5')}
                 disabled={extents[option] <= 0}
                 title={
                   option === 'tsunami' && tsunamiStatus === 'computing'

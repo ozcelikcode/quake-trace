@@ -1,6 +1,7 @@
 import type { ExpressionSpecification, LayerSpecification } from 'maplibre-gl';
 
 import type { Theme } from '@/state/ui-store';
+import type { AftershockCatalog } from '@/types/aftershocks';
 import type { NetworkResult, SiteState } from '@/types/network';
 import type { RoadGraph } from '@/types/roads';
 import { IMPAIRMENTS, type RoutingResult } from '@/types/routing';
@@ -8,7 +9,7 @@ import { IMPAIRMENTS, type RoutingResult } from '@/types/routing';
 import { REFERENCE_PALETTE } from './layer-palette';
 
 /**
- * Scenario layers of the response: corridors, impaired roads and cell sites, as MapLibre
+ * Scenario layers of the response: corridors, impaired roads, cell sites and aftershocks, as MapLibre
  * GeoJSON layers so they drape on the terrain. Each feature is hidden until the S wave reaches
  * it; `SimulationRenderer` reveals it through feature state.
  */
@@ -17,7 +18,9 @@ export const RESPONSE_SOURCES = {
   corridors: 'quaketrace-corridors',
   impaired: 'quaketrace-impaired',
   sites: 'quaketrace-sites',
+  aftershocks: 'quaketrace-aftershocks',
 } as const;
+export type ResponseSource = keyof typeof RESPONSE_SOURCES;
 
 /** Feature-state `state` of a site: 0 hidden, then its display state. */
 export const SITE_STATE_CODES: Record<SiteState, number> = {
@@ -97,6 +100,23 @@ export function sitesToGeoJson(network: NetworkResult): GeoJSON.FeatureCollectio
   };
 }
 
+export function aftershocksToGeoJson(
+  catalog: AftershockCatalog,
+): GeoJSON.FeatureCollection<GeoJSON.Point> {
+  return {
+    type: 'FeatureCollection',
+    features: Array.from({ length: catalog.count }, (_, i) => ({
+      type: 'Feature' as const,
+      id: i,
+      geometry: {
+        type: 'Point' as const,
+        coordinates: [catalog.lon[i] ?? 0, catalog.lat[i] ?? 0],
+      },
+      properties: { magnitude: catalog.magnitude[i] ?? 0 },
+    })),
+  };
+}
+
 const shown: ExpressionSpecification = ['boolean', ['feature-state', 'shown'], false];
 
 /** Line layers (inserted below the basemap labels) and the site layer, in draw order. */
@@ -157,6 +177,21 @@ export function responseLayerSpecs(theme: Theme): LayerSpecification[] {
         'line-color': palette.bridgeClosed,
         'line-width': 5,
         'line-opacity': ['case', shown, 1, 0],
+      },
+    },
+    {
+      id: 'quaketrace-aftershocks',
+      type: 'circle',
+      source: RESPONSE_SOURCES.aftershocks,
+      // Larger shocks drawn last, on top.
+      layout: { 'circle-sort-key': ['get', 'magnitude'] },
+      paint: {
+        'circle-radius': ['interpolate', ['exponential', 1.6], ['get', 'magnitude'], 3, 2, 7.5, 16],
+        'circle-color': palette.aftershock.fill,
+        'circle-stroke-color': palette.aftershock.outline,
+        'circle-stroke-width': 0.75,
+        'circle-opacity': ['case', shown, 0.8, 0],
+        'circle-stroke-opacity': ['case', shown, 1, 0],
       },
     },
     {

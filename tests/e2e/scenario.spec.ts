@@ -181,6 +181,26 @@ test('computes the tsunami in the background and opens its timeline scale', asyn
   await expect(page.getByText('Deniz yüzeyi (m)')).toBeVisible();
 });
 
+test('plays the aftershock sequence on the 72-hour response scale', async ({ page }) => {
+  test.skip(project() === 'phone-ios', 'covered by the other phone profile');
+  await runNorthMarmara(page);
+  const response = page
+    .getByRole('radiogroup', { name: 'Zaman ölçeği' })
+    .getByRole('radio', { name: 'Müdahale' });
+  await response.click();
+  await expect(response).toHaveAttribute('aria-checked', 'true');
+  await page.keyboard.press('Space');
+  // Shift+→ jumps an hour on this scale.
+  for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowRight');
+  await expect(page.getByTestId('simulation-clock').first()).toContainText(/T\+ \d:\d{2}:\d{2}/);
+
+  await openImpactPanel(page);
+  const summary = page.getByTestId('aftershock-summary');
+  await expect(summary.getByText('Şimdiye kadar M ≥ 3')).toBeVisible();
+  await expect(summary.getByText(/^M \d,\d, T\+ /)).toBeVisible();
+  await expect(summary.getByText(/^%\d+$/).first()).toBeVisible();
+});
+
 test('stays accessible with a scenario loaded', async ({ page }) => {
   test.skip(project() !== 'desktop', 'desktop layout');
   await page.emulateMedia({ reducedMotion: 'reduce' });

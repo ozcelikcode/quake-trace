@@ -161,6 +161,15 @@ export function MapLegend() {
             {t('map.legend.sites')}
           </li>
         )}
+        {result.aftershocks.count > 0 && (
+          <li className="flex items-center gap-2">
+            <span aria-hidden className="flex w-5 items-center justify-between">
+              <span className="size-1 rounded-full bg-aftershock" />
+              <span className="size-2.5 rounded-full bg-aftershock" />
+            </span>
+            {t('map.legend.aftershocks')}
+          </li>
+        )}
         {result.earlyWarning && (
           <>
             <li className="flex items-center gap-2">

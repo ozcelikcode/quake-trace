@@ -1,3 +1,4 @@
+import type { AftershockCatalog } from './aftershocks';
 import type { DistrictDamage, FacilityDamage } from './damage';
 import type { GridSpec } from './grid';
 import type { NetworkResult } from './network';
@@ -107,6 +108,8 @@ export interface SimulationResult {
   network: NetworkResult | null;
   /** Road closures, response times and corridors; null without a road network. */
   routing: RoutingResult | null;
+  /** Synthetic aftershocks of the first three days. */
+  aftershocks: AftershockCatalog;
   /** Time by which the S wave has crossed the grid and station shaking has ended, seconds. */
   durationS: number;
   computeMs: number;

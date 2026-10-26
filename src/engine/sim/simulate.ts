@@ -8,6 +8,7 @@ import type { RoutingResult } from '@/types/routing';
 import type { Scenario } from '@/types/scenario';
 import type { DistrictImpact, SimulationResult, StationSite } from '@/types/simulation';
 
+import { aftershockCatalog } from '../aftershocks/catalog';
 import { FACILITY_TAXONOMY } from '../damage/building-classes';
 import { districtDamage } from '../damage/district-damage';
 import { facilityDamage } from '../damage/facilities';
@@ -17,6 +18,7 @@ import { settlementClasses } from '../grid/settlement';
 import { combinedMmi } from '../intensity/worden2012';
 import { cellNetwork } from '../network/network';
 import { emergencyResponse } from '../routing/response';
+import { createRandom, deriveSeed } from '../random/random';
 import { buildRupture } from '../rupture/finite-fault';
 import { IASP91_CRUST, layerIndexAt, type VelocityLayer } from '../velocity/layered-model';
 import { RuptureArrivals } from './arrivals';
@@ -166,6 +168,16 @@ export function simulate(input: SimulationInput): SimulationResult {
       model,
       seed: scenario.seed,
     }),
+    aftershocks: aftershockCatalog(
+      {
+        mw: rupture.mw,
+        trace: rupture.trace,
+        dipDeg: spec.fault.dipDeg,
+        upperDepthKm: spec.fault.upperDepthKm,
+        lowerDepthKm: spec.fault.lowerDepthKm,
+      },
+      createRandom(deriveSeed(scenario.seed, 'aftershocks')),
+    ),
     durationS,
     computeMs: performance.now() - started,
   };

@@ -14,6 +14,8 @@ interface ReferencePalette {
   /** Impaired roads, tuned against --state-warning and --state-critical. */
   debris: string;
   bridgeClosed: string;
+  /** Aftershocks (--aftershock) over an outline in the surface hue. */
+  aftershock: { fill: string; outline: string };
 }
 
 /**
@@ -53,6 +55,7 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
     corridor: { line: 'rgb(240, 244, 250)', casing: 'rgba(13, 17, 23, 0.85)' },
     debris: 'rgb(232, 190, 90)',
     bridgeClosed: 'rgb(235, 87, 70)',
+    aftershock: { fill: 'rgb(214, 112, 236)', outline: 'rgba(13, 17, 23, 0.85)' },
   },
   light: {
     fault: 'rgba(184, 64, 44, 0.9)',
@@ -69,5 +72,6 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
     corridor: { line: 'rgb(22, 30, 46)', casing: 'rgba(255, 255, 255, 0.9)' },
     debris: 'rgb(190, 130, 20)',
     bridgeClosed: 'rgb(200, 50, 40)',
+    aftershock: { fill: 'rgb(214, 112, 236)', outline: 'rgba(255, 255, 255, 0.9)' },
   },
 };

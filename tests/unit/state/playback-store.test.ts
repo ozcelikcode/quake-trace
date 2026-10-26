@@ -10,7 +10,7 @@ describe('playback clock', () => {
       timeS: 0,
       durationS: 0,
       scale: 'shaking',
-      extents: { shaking: 0, tsunami: 0 },
+      extents: { shaking: 0, tsunami: 0, response: 0 },
       playing: false,
       speed: 1,
     });
@@ -87,6 +87,9 @@ describe('playback clock', () => {
     expect(store()).toMatchObject({ scale: 'shaking', durationS: 100 });
     store().setExtent('tsunami', 3600);
     store().load(80);
-    expect(store().extents).toEqual({ shaking: 80, tsunami: 0 });
+    expect(store().extents).toEqual({ shaking: 80, tsunami: 0, response: 0 });
+    store().load(80, 259_200);
+    store().setScale('response');
+    expect(store()).toMatchObject({ scale: 'response', durationS: 259_200, speed: 3600 });
   });
 });
