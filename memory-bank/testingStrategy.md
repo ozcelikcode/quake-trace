@@ -39,7 +39,7 @@ tests/
 | `tsunami` | Okada (1985) published test case; shallow-water wave speed √(gh) on a flat bottom; mass conservation |
 | `routing` | A* equals Dijkstra on random graphs |
 | `etas` | Omori-Utsu decay recovered from generated catalogs within tolerance |
-| `damage` | Damage-state probabilities sum to 1; monotonic in ground motion |
+| `damage` **(built)** | OpenQuake-style interpolation (linear, 0 below, flat above); expected ratio equals the median value without σ and exceeds it on convex parts; class shares sum to 1 under independence; population-weighted district loss on a hand-computed case; missing function rejected; facility loss. Integration: North Marmara vs the İBB 2019 fixture, Spearman > 0.65 on district fatalities and total within 0.2–2× |
 | `random` **(built)** | Same seed gives identical streams; uniform mean and variance; normal mean, variance and 2σ tail share; distinct sub-stream seeds |
 | `synth` **(built)** | Window analytic conditions (peak 1 at ε, η at tη, zero slope, b = 1.25315); Brune corner (0.1124 Hz at Mw 7), M0^(-1/3) scaling, Madariaga ratio, spreading, amplification table, ω² slope, P/S ratio; realizations reproduce the target spectrum band by band (±25 %), no mean, energy inside the window; station record PGA equals the target, noise floor before P, P projection on Z and the radial component |
 | `eew` location and Pd **(built)** | Exact picks from a known source are relocated within 1.5 km; Wu & Zhao relation value and exact inversion; grown-rupture magnitude (disc, band, cap); presets locate within 5 km, alert within 15 s, estimate between 5.5 and Mw + 0.3 |

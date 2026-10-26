@@ -3,12 +3,14 @@ import { LineLayer, PathLayer, ScatterplotLayer } from '@deck.gl/layers';
 import type { MapLibreOverlay } from '@deck.gl/maplibre';
 import type { ImageSource, Map as MapLibreMap } from 'maplibre-gl';
 
+import { facilityStatus } from '@/features/infra';
 import type { Theme } from '@/state/ui-store';
 import type { GridSpec } from '@/types/grid';
 import type { SimulationResult, StationRecord } from '@/types/simulation';
 
 import { overlayAnchorLayerId } from './layer-order';
 import { REFERENCE_PALETTE } from './layer-palette';
+import { FACILITY_STATUS_CODES, REFERENCE_SOURCES } from './reference-layers';
 import { TERRAIN_EXAGGERATION } from './map-config';
 import {
   mercatorRowMap,
@@ -91,6 +93,8 @@ export class SimulationRenderer {
   #theme: Theme = 'dark';
   #focusedStation = -1;
   #blindZone: CurtainBuffers | null = null;
+  /** Facility status codes last written as MapLibre feature state. */
+  readonly #facilityCodes = new Map<string, number>();
   readonly #reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(map: MapLibreMap, overlay: MapLibreOverlay) {
@@ -119,6 +123,7 @@ export class SimulationRenderer {
   setResult(result: SimulationResult | null): void {
     this.#result = result;
     this.#blindZone = null;
+    this.resetFacilityStates();
     this.#lastTimeS = Number.NaN;
     this.#removeRaster();
     if (!result) {
@@ -147,6 +152,7 @@ export class SimulationRenderer {
     const below = this.#map.getLayer(RASTER_BELOW)
       ? RASTER_BELOW
       : overlayAnchorLayerId(this.#map.getStyle().layers);
+    this.resetFacilityStates();
     this.#map.addLayer(
       {
         id: INTENSITY_LAYER,
@@ -229,6 +235,29 @@ export class SimulationRenderer {
       ...this.#warningLayers(result, timeS),
     ];
     this.#overlay.setProps({ layers });
+    this.#updateFacilities(result, timeS);
+  }
+
+  /** Forgets written facility states, for a new result, style or facility source. */
+  resetFacilityStates(): void {
+    this.#facilityCodes.clear();
+    this.#lastTimeS = Number.NaN;
+    if (this.#map.getSource(REFERENCE_SOURCES.facilities)) {
+      this.#map.removeFeatureState({ source: REFERENCE_SOURCES.facilities });
+    }
+  }
+
+  /** Writes a facility's state only when it changes (when the S wave reaches it). */
+  #updateFacilities(result: SimulationResult, timeS: number): void {
+    const source = REFERENCE_SOURCES.facilities;
+    if (!this.#map.getSource(source)) return;
+    for (const facility of result.damage?.facilities ?? []) {
+      const code =
+        FACILITY_STATUS_CODES[facilityStatus(facility.lossRatio, facility.sArrivalS, timeS)];
+      if (this.#facilityCodes.get(facility.id) === code) continue;
+      this.#facilityCodes.set(facility.id, code);
+      this.#map.setFeatureState({ source, id: facility.id }, { status: code });
+    }
   }
 
   /** After the alert: the blind-zone boundary and the estimated epicentre. */

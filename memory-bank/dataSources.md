@@ -21,9 +21,11 @@ Built 2026-10-25 with `uv run quaketrace-pipeline build --all` (run from `pipeli
 | `roads` | `roads.bin` | OpenStreetMap, Geofabrik Türkiye extract | ODbL 1.0 | motorway…tertiary (+ links): 194,810 nodes, 354,612 directed edges, 5.6 MB. Flags: bridge, tunnel, one-way, link |
 | `cells` | `cells.bin` | OpenCelliD, MCC 286 | CC-BY-SA 4.0 | **Pending:** needs a free API key in `pipeline/.env` (`OPENCELLID_API_KEY`). Module and tests are ready; the app treats cells as optional |
 
-Test fixtures (`uv run quaketrace-pipeline fixtures`, written to `tests/fixtures/`): `gmpe/asb14-rjb-mean.json`, the 540-row ASB14 Rjb verification table from OpenQuake hazardlib `v3.26.2` (PGA, PGV, SA 0.3 s, SA 1.0 s medians), with its source URL and reference inside the file.
+| `vulnerability` | `vulnerability.json` | GEM Global Vulnerability Model, release `v2026.0.0`, `Europe/Turkey` structural and fatality NRML (Nafeh, Aljawhari and Silva, 2025, doi:10.5281/zenodo.8391742) | **CC BY-NC-SA 4.0** (non-commercial; derived file under the same licence) | 10 functions: CR/LFINF with CDL+ERL, CDM+ERL, CDM+ERM × H:3, 6, 10 (RES) and CDM+ERM/H:3/COM for facilities; mean loss ratios only. Commercial use of quakeTrace would need a GEM licence |
 
-Validation-only source (phase 5): İBB Açık Veri "Deprem Senaryosu Analiz Sonuçları" (959 neighbourhoods; damage, casualties and pipe damage for the İBB 2019 Mw 7.5 scenario).
+Test fixtures (`uv run quaketrace-pipeline fixtures`, written to `tests/fixtures/`): `gmpe/asb14-rjb-mean.json`, the 540-row ASB14 Rjb verification table from OpenQuake hazardlib `v3.26.2` (PGA, PGV, SA 0.3, 0.6 and 1.0 s medians); `damage/ibb-2019-scenario.json`, the İBB 2019 scenario (Mw 7.5, night) summed per İstanbul district (very heavy, heavy, moderate, light damage, fatalities), each with source URL inside the file.
+
+Validation-only source (phase 5, used): İBB Açık Veri "Deprem Senaryosu Analiz Sonuçları" (959 neighbourhoods, Windows-1254 CSV; totals 13,496 very heavy and 34,334 heavy damaged buildings, 14,145 fatalities).
 
 ## Runtime services
 

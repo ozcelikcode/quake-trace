@@ -4,10 +4,11 @@ import { asb14LnMedian, asb14TotalSigma, type IntensityMeasure } from '@/engine/
 
 import fixture from '../../../fixtures/gmpe/asb14-rjb-mean.json';
 
-const measures: [IntensityMeasure, 'pgaG' | 'pgvCms' | 'sa03G' | 'sa10G'][] = [
+const measures: [IntensityMeasure, 'pgaG' | 'pgvCms' | 'sa03G' | 'sa06G' | 'sa10G'][] = [
   ['PGA', 'pgaG'],
   ['PGV', 'pgvCms'],
   ['SA(0.3)', 'sa03G'],
+  ['SA(0.6)', 'sa06G'],
   ['SA(1.0)', 'sa10G'],
 ];
 

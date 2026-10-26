@@ -1,0 +1,319 @@
+{
+ "description": "İBB 2019 earthquake scenario (Mw 7.5, night), totals per district",
+ "source": "https://data.ibb.gov.tr/dataset/c13514d9-86b1-4b83-a9b9-1a15cb5f254c/resource/9c3ac492-de4b-4245-b418-7ad3df67a193/download/deprem-senaryosu-analiz-sonuclar.csv",
+ "license": "İBB Açık Veri Lisansı",
+ "districts": [
+  {
+   "name": "adalar",
+   "veryHeavy": 413.0,
+   "heavy": 743.0,
+   "moderate": 1894.0,
+   "light": 1842.0,
+   "fatalities": 76.0
+  },
+  {
+   "name": "arnavutköy",
+   "veryHeavy": 41.0,
+   "heavy": 243.0,
+   "moderate": 1704.0,
+   "light": 4950.0,
+   "fatalities": 0.0
+  },
+  {
+   "name": "ataşehir",
+   "veryHeavy": 123.0,
+   "heavy": 471.0,
+   "moderate": 2756.0,
+   "light": 6833.0,
+   "fatalities": 89.0
+  },
+  {
+   "name": "avcılar",
+   "veryHeavy": 233.0,
+   "heavy": 1261.0,
+   "moderate": 5545.0,
+   "light": 9285.0,
+   "fatalities": 465.0
+  },
+  {
+   "name": "bahçelievler",
+   "veryHeavy": 796.0,
+   "heavy": 1490.0,
+   "moderate": 5668.0,
+   "light": 9686.0,
+   "fatalities": 1633.0
+  },
+  {
+   "name": "bakırköy",
+   "veryHeavy": 782.0,
+   "heavy": 1306.0,
+   "moderate": 3394.0,
+   "light": 3939.0,
+   "fatalities": 1046.0
+  },
+  {
+   "name": "bayrampaşa",
+   "veryHeavy": 614.0,
+   "heavy": 1182.0,
+   "moderate": 4059.0,
+   "light": 7415.0,
+   "fatalities": 520.0
+  },
+  {
+   "name": "bağcılar",
+   "veryHeavy": 796.0,
+   "heavy": 1825.0,
+   "moderate": 8001.0,
+   "light": 15397.0,
+   "fatalities": 1179.0
+  },
+  {
+   "name": "başakşehir",
+   "veryHeavy": 115.0,
+   "heavy": 575.0,
+   "moderate": 2977.0,
+   "light": 6243.0,
+   "fatalities": 71.0
+  },
+  {
+   "name": "beykoz",
+   "veryHeavy": 113.0,
+   "heavy": 443.0,
+   "moderate": 2756.0,
+   "light": 7356.0,
+   "fatalities": 25.0
+  },
+  {
+   "name": "beylikdüzü",
+   "veryHeavy": 321.0,
+   "heavy": 950.0,
+   "moderate": 3004.0,
+   "light": 4331.0,
+   "fatalities": 527.0
+  },
+  {
+   "name": "beyoğlu",
+   "veryHeavy": 410.0,
+   "heavy": 841.0,
+   "moderate": 3132.0,
+   "light": 7158.0,
+   "fatalities": 217.0
+  },
+  {
+   "name": "beşiktaş",
+   "veryHeavy": 64.0,
+   "heavy": 187.0,
+   "moderate": 1053.0,
+   "light": 3241.0,
+   "fatalities": 26.0
+  },
+  {
+   "name": "büyükçekmece",
+   "veryHeavy": 439.0,
+   "heavy": 1635.0,
+   "moderate": 6622.0,
+   "light": 9367.0,
+   "fatalities": 288.0
+  },
+  {
+   "name": "esenler",
+   "veryHeavy": 391.0,
+   "heavy": 813.0,
+   "moderate": 3739.0,
+   "light": 8302.0,
+   "fatalities": 638.0
+  },
+  {
+   "name": "esenyurt",
+   "veryHeavy": 563.0,
+   "heavy": 1768.0,
+   "moderate": 7911.0,
+   "light": 14672.0,
+   "fatalities": 1003.0
+  },
+  {
+   "name": "eyüpsultan",
+   "veryHeavy": 300.0,
+   "heavy": 841.0,
+   "moderate": 3794.0,
+   "light": 8237.0,
+   "fatalities": 168.0
+  },
+  {
+   "name": "fatih",
+   "veryHeavy": 2083.0,
+   "heavy": 3496.0,
+   "moderate": 9949.0,
+   "light": 15758.0,
+   "fatalities": 1484.0
+  },
+  {
+   "name": "gaziosmanpaşa",
+   "veryHeavy": 129.0,
+   "heavy": 403.0,
+   "moderate": 2276.0,
+   "light": 6969.0,
+   "fatalities": 140.0
+  },
+  {
+   "name": "güngören",
+   "veryHeavy": 342.0,
+   "heavy": 611.0,
+   "moderate": 2407.0,
+   "light": 4597.0,
+   "fatalities": 754.0
+  },
+  {
+   "name": "kadıköy",
+   "veryHeavy": 208.0,
+   "heavy": 505.0,
+   "moderate": 2426.0,
+   "light": 6717.0,
+   "fatalities": 190.0
+  },
+  {
+   "name": "kartal",
+   "veryHeavy": 199.0,
+   "heavy": 593.0,
+   "moderate": 3282.0,
+   "light": 8173.0,
+   "fatalities": 176.0
+  },
+  {
+   "name": "kağıthane",
+   "veryHeavy": 94.0,
+   "heavy": 275.0,
+   "moderate": 1727.0,
+   "light": 5816.0,
+   "fatalities": 84.0
+  },
+  {
+   "name": "küçükçekmece",
+   "veryHeavy": 1240.0,
+   "heavy": 2616.0,
+   "moderate": 8978.0,
+   "light": 13799.0,
+   "fatalities": 1515.0
+  },
+  {
+   "name": "maltepe",
+   "veryHeavy": 237.0,
+   "heavy": 690.0,
+   "moderate": 3388.0,
+   "light": 8156.0,
+   "fatalities": 234.0
+  },
+  {
+   "name": "pendik",
+   "veryHeavy": 274.0,
+   "heavy": 1041.0,
+   "moderate": 5625.0,
+   "light": 13449.0,
+   "fatalities": 195.0
+  },
+  {
+   "name": "sancaktepe",
+   "veryHeavy": 84.0,
+   "heavy": 416.0,
+   "moderate": 2539.0,
+   "light": 6733.0,
+   "fatalities": 48.0
+  },
+  {
+   "name": "sarıyer",
+   "veryHeavy": 102.0,
+   "heavy": 365.0,
+   "moderate": 2486.0,
+   "light": 6977.0,
+   "fatalities": 33.0
+  },
+  {
+   "name": "silivri",
+   "veryHeavy": 444.0,
+   "heavy": 1707.0,
+   "moderate": 7155.0,
+   "light": 11997.0,
+   "fatalities": 58.0
+  },
+  {
+   "name": "sultanbeyli",
+   "veryHeavy": 109.0,
+   "heavy": 648.0,
+   "moderate": 3949.0,
+   "light": 8225.0,
+   "fatalities": 73.0
+  },
+  {
+   "name": "sultangazi",
+   "veryHeavy": 61.0,
+   "heavy": 245.0,
+   "moderate": 1804.0,
+   "light": 6884.0,
+   "fatalities": 57.0
+  },
+  {
+   "name": "tuzla",
+   "veryHeavy": 446.0,
+   "heavy": 1370.0,
+   "moderate": 5310.0,
+   "light": 8239.0,
+   "fatalities": 268.0
+  },
+  {
+   "name": "zeytinburnu",
+   "veryHeavy": 510.0,
+   "heavy": 1025.0,
+   "moderate": 3799.0,
+   "light": 6335.0,
+   "fatalities": 668.0
+  },
+  {
+   "name": "çatalca",
+   "veryHeavy": 63.0,
+   "heavy": 301.0,
+   "moderate": 1656.0,
+   "light": 4053.0,
+   "fatalities": 4.0
+  },
+  {
+   "name": "çekmeköy",
+   "veryHeavy": 16.0,
+   "heavy": 113.0,
+   "moderate": 998.0,
+   "light": 3392.0,
+   "fatalities": 1.0
+  },
+  {
+   "name": "ümraniye",
+   "veryHeavy": 105.0,
+   "heavy": 534.0,
+   "moderate": 3626.0,
+   "light": 10656.0,
+   "fatalities": 42.0
+  },
+  {
+   "name": "üsküdar",
+   "veryHeavy": 146.0,
+   "heavy": 493.0,
+   "moderate": 3341.0,
+   "light": 9610.0,
+   "fatalities": 95.0
+  },
+  {
+   "name": "şile",
+   "veryHeavy": 22.0,
+   "heavy": 106.0,
+   "moderate": 774.0,
+   "light": 2402.0,
+   "fatalities": 0.0
+  },
+  {
+   "name": "şişli",
+   "veryHeavy": 68.0,
+   "heavy": 207.0,
+   "moderate": 1008.0,
+   "light": 4333.0,
+   "fatalities": 55.0
+  }
+ ]
+}

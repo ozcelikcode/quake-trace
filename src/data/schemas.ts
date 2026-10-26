@@ -106,6 +106,21 @@ export const stationsSchema = z.object({
   ),
 });
 
+export const vulnerabilitySchema = z.object({
+  release: z.string(),
+  functions: z
+    .array(
+      z.object({
+        taxonomy: z.string(),
+        imt: z.enum(['PGA', 'SA(0.3)', 'SA(0.6)', 'SA(1.0)']),
+        imls: z.array(z.number().positive()).min(2),
+        structural: z.array(z.number().min(0).max(1)),
+        fatality: z.array(z.number().min(0).max(1)),
+      }),
+    )
+    .min(1),
+});
+
 export const infraKinds = [
   'hospital',
   'fireStation',
@@ -114,6 +129,9 @@ export const infraKinds = [
   'substation',
   'gasPipeline',
 ] as const;
+
+/** Facility kinds whose building damage matters for the response. */
+export const criticalFacilityKinds = ['hospital', 'fireStation', 'police'] as const;
 
 export const infraSchema = featureCollection(
   z.discriminatedUnion('type', [point, lineString]),
@@ -133,3 +151,4 @@ export type DistrictStats = z.infer<typeof districtStatsSchema>;
 export type Stations = z.infer<typeof stationsSchema>;
 export type Station = Stations['stations'][number];
 export type Infra = z.infer<typeof infraSchema>;
+export type Vulnerability = z.infer<typeof vulnerabilitySchema>;

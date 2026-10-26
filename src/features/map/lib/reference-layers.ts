@@ -5,7 +5,13 @@ import type {
   StyleImageMetadata,
 } from 'maplibre-gl';
 
-import type { Districts, Faults, Station } from '@/data/schemas';
+import {
+  criticalFacilityKinds,
+  type Districts,
+  type Faults,
+  type Infra,
+  type Station,
+} from '@/data/schemas';
 import type { Theme } from '@/state/ui-store';
 
 import { overlayAnchorLayerId } from './layer-order';
@@ -19,13 +25,46 @@ export interface ReferenceData {
   districts?: Districts | undefined;
   faults?: Faults | undefined;
   stations?: Station[] | undefined;
+  infra?: Infra | undefined;
 }
 
 export const REFERENCE_SOURCES = {
   districts: 'quaketrace-districts',
   faults: 'quaketrace-faults',
   stations: 'quaketrace-stations',
+  facilities: 'quaketrace-facilities',
 } as const;
+
+export const FACILITY_LAYER = 'quaketrace-facilities';
+
+/**
+ * Feature-state `status` of a facility: 0 not yet reached by the S wave (hidden), then
+ * 1 operational, 2 limited, 3 likely out of service.
+ */
+export const FACILITY_STATUS_CODES = {
+  pending: 0,
+  operational: 1,
+  limited: 2,
+  outOfService: 3,
+} as const;
+
+export function facilitiesToGeoJson(infra: Infra): GeoJSON.FeatureCollection<GeoJSON.Point> {
+  const kinds: readonly string[] = criticalFacilityKinds;
+  return {
+    type: 'FeatureCollection',
+    features: infra.features.flatMap((feature) =>
+      feature.geometry.type === 'Point' && kinds.includes(feature.properties.kind)
+        ? [
+            {
+              type: 'Feature' as const,
+              geometry: { type: 'Point' as const, coordinates: feature.geometry.coordinates },
+              properties: { id: feature.properties.id, kind: feature.properties.kind },
+            },
+          ]
+        : [],
+    ),
+  };
+}
 
 export const STATION_ICON = 'quaketrace-station-triangle';
 export const STATION_LAYER = 'quaketrace-stations';
@@ -86,6 +125,33 @@ export function referenceLayerSpecs(theme: Theme): LayerSpecification[] {
         'icon-opacity': ['case', ['get', 'accelerometer'], 1, 0.65],
       },
     },
+    {
+      id: FACILITY_LAYER,
+      type: 'circle',
+      source: REFERENCE_SOURCES.facilities,
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 2.5, 11, 5],
+        'circle-color': [
+          'match',
+          ['coalesce', ['feature-state', 'status'], 0],
+          FACILITY_STATUS_CODES.limited,
+          palette.facility.limited,
+          FACILITY_STATUS_CODES.outOfService,
+          palette.facility.outOfService,
+          palette.facility.operational,
+        ],
+        'circle-stroke-color': palette.facility.outline,
+        'circle-stroke-width': 0.75,
+        // Hidden until the S wave reaches the facility and its state is known.
+        'circle-opacity': ['case', ['>', ['coalesce', ['feature-state', 'status'], 0], 0], 1, 0],
+        'circle-stroke-opacity': [
+          'case',
+          ['>', ['coalesce', ['feature-state', 'status'], 0], 0],
+          1,
+          0,
+        ],
+      },
+    },
   ];
 }
 
@@ -111,11 +177,16 @@ export function triangleIcon(size = 32): { width: number; height: number; data: 
 
 const LINE_LAYER_TYPES = new Set(['line']);
 
-function upsertSource(map: MapLibreMap, id: string, data: GeoJSON.GeoJSON): void {
+function upsertSource(
+  map: MapLibreMap,
+  id: string,
+  data: GeoJSON.GeoJSON,
+  promoteId?: string,
+): void {
   const source = map.getSource<GeoJSONSource>(id);
   // setData resolves once the worker has parsed the data; nothing waits on it.
   if (source) void source.setData(data);
-  else map.addSource(id, { type: 'geojson', data });
+  else map.addSource(id, { type: 'geojson', data, ...(promoteId ? { promoteId } : {}) });
 }
 
 /** Adds or refreshes reference sources and layers. Safe to call after every style load. */
@@ -128,6 +199,9 @@ export function applyReferenceLayers(map: MapLibreMap, data: ReferenceData, them
   if (data.faults) upsertSource(map, REFERENCE_SOURCES.faults, data.faults);
   if (data.stations)
     upsertSource(map, REFERENCE_SOURCES.stations, stationsToGeoJson(data.stations));
+  if (data.infra) {
+    upsertSource(map, REFERENCE_SOURCES.facilities, facilitiesToGeoJson(data.infra), 'id');
+  }
 
   const beforeLabels = overlayAnchorLayerId(map.getStyle().layers);
   for (const spec of referenceLayerSpecs(theme)) {

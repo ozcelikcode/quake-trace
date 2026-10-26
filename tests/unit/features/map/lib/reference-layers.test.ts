@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Station } from '@/data/schemas';
 import {
+  facilitiesToGeoJson,
   REFERENCE_SOURCES,
   referenceLayerSpecs,
   stationsToGeoJson,
@@ -29,14 +30,28 @@ describe('reference layers', () => {
     expect(collection.features[0]?.properties).toEqual({ id: 'KO.ARMT', accelerometer: true });
   });
 
-  it('draws districts, then faults, then stations, each on its own source', () => {
+  it('draws districts, faults, stations, then facilities, each on its own source', () => {
     const specs = referenceLayerSpecs('dark');
-    expect(specs.map((spec) => spec.type)).toEqual(['line', 'line', 'symbol']);
+    expect(specs.map((spec) => spec.type)).toEqual(['line', 'line', 'symbol', 'circle']);
     expect(specs.map((spec) => ('source' in spec ? spec.source : undefined))).toEqual([
       REFERENCE_SOURCES.districts,
       REFERENCE_SOURCES.faults,
       REFERENCE_SOURCES.stations,
+      REFERENCE_SOURCES.facilities,
     ]);
+  });
+
+  it('keeps only critical facility points', () => {
+    const point = (id: string, kind: 'hospital' | 'assemblyPoint') => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [29, 41] as [number, number] },
+      properties: { id, kind },
+    });
+    const collection = facilitiesToGeoJson({
+      type: 'FeatureCollection',
+      features: [point('a', 'hospital'), point('b', 'assemblyPoint')],
+    });
+    expect(collection.features.map((f) => String(f.properties?.id))).toEqual(['a']);
   });
 
   it('uses different colors per theme', () => {

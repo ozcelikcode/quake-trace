@@ -118,6 +118,21 @@ test('issues the early warning and counts down to S-wave arrival', async ({ page
   await expect(page.getByText(/^S − \d+ s$/).first()).toBeVisible();
 });
 
+test('estimates damage and facility states as the S wave spreads', async ({ page }) => {
+  test.skip(project() === 'phone-ios', 'covered by the other phone profile');
+  await runNorthMarmara(page);
+  await pauseAndJump(page, 3);
+  await openImpactPanel(page);
+
+  const damage = page.getByTestId('damage-summary');
+  await expect(damage.getByText('Can kaybı')).toBeVisible();
+  await expect(damage.getByText(/^≈ [\d.]+$/).first()).toBeVisible();
+  await expect(
+    page.getByTestId('infra-summary').getByText(/\d+ \/ \d+ tesise ulaştı/),
+  ).toBeVisible();
+  await expect(page.getByText(/hasar %\d+,\d · \d+ can kaybı/).first()).toBeVisible();
+});
+
 test('stays accessible with a scenario loaded', async ({ page }) => {
   test.skip(project() !== 'desktop', 'desktop layout');
   await page.emulateMedia({ reducedMotion: 'reduce' });

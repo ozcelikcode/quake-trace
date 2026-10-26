@@ -1,3 +1,4 @@
+import type { DistrictDamage, FacilityDamage } from './damage';
 import type { GridSpec } from './grid';
 import type { LonLat } from './scenario';
 
@@ -98,6 +99,8 @@ export interface SimulationResult {
   records: StationRecords;
   /** Null when fewer than four stations trigger. */
   earlyWarning: EarlyWarning | null;
+  /** Null when no building stock was given. */
+  damage: { districts: DistrictDamage[]; facilities: FacilityDamage[] } | null;
   /** Time by which the S wave has crossed the grid and station shaking has ended, seconds. */
   durationS: number;
   computeMs: number;

@@ -11,6 +11,7 @@ import {
   faultsSchema,
   infraSchema,
   stationsSchema,
+  vulnerabilitySchema,
 } from './schemas';
 
 /** Reads a file from public/data by its manifest path. */
@@ -22,6 +23,7 @@ export const jsonDatasets = {
   districtStats: districtStatsSchema,
   stations: stationsSchema,
   infra: infraSchema,
+  vulnerability: vulnerabilitySchema,
 } as const;
 
 export type JsonDatasetId = keyof typeof jsonDatasets;
@@ -34,6 +36,7 @@ const parsers: { [K in JsonDatasetId]: (value: unknown) => JsonDataset<K> } = {
   districtStats: (value) => jsonDatasets.districtStats.parse(value),
   stations: (value) => jsonDatasets.stations.parse(value),
   infra: (value) => jsonDatasets.infra.parse(value),
+  vulnerability: (value) => jsonDatasets.vulnerability.parse(value),
 };
 export type GridDatasetId = 'population' | 'vs30' | 'bathymetry' | 'districtCells' | 'elevation';
 

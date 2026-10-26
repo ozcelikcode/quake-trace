@@ -38,6 +38,16 @@ export function MapLegend() {
           <span aria-hidden className="h-0.5 w-5 rounded-full bg-fg" />
           {t('map.legend.rupture')}
         </li>
+        {result.damage && (
+          <li className="flex items-center gap-2">
+            <span aria-hidden className="flex w-5 justify-between">
+              <span className="size-1.5 rounded-full bg-ok" />
+              <span className="size-1.5 rounded-full bg-warning" />
+              <span className="size-1.5 rounded-full bg-critical" />
+            </span>
+            {t('map.legend.facilities')}
+          </li>
+        )}
         {result.earlyWarning && (
           <>
             <li className="flex items-center gap-2">

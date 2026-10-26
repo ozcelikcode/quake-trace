@@ -4,11 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/components/ui/empty-state';
 import { useJsonDataset } from '@/data/use-dataset';
 import { EewSummary } from '@/features/eew';
+import { InfraSummary } from '@/features/infra';
 import { mmiCss, mmiRoman } from '@/lib/color/mmi';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format';
 import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
+
+import { DamageSummary } from './damage-summary';
 
 export function ImpactPanel() {
   const { t, i18n } = useTranslation();
@@ -36,6 +39,10 @@ export function ImpactPanel() {
   }
 
   const number = (value: number, digits = 0) => formatNumber(value, i18n.language, digits);
+  const damageByIndex = new Map(result.damage?.districts.map((d) => [d.index, d]));
+  const reachedDamage = impacts
+    .slice(0, reached)
+    .flatMap((impact) => damageByIndex.get(impact.index) ?? []);
   const warningCell = (sArrivalS: number) => {
     if (alertS === undefined || second < alertS) return { text: '—', blind: false };
     if (sArrivalS <= alertS) return { text: t('impact.blindZone'), blind: true };
@@ -51,6 +58,12 @@ export function ImpactPanel() {
   return (
     <div className="flex flex-col gap-4 p-3">
       <EewSummary result={result} />
+      {result.damage && (
+        <>
+          <DamageSummary reached={reachedDamage} total={impacts.length} />
+          <InfraSummary facilities={result.damage.facilities} />
+        </>
+      )}
       <section aria-labelledby="impact-title" className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between gap-2">
           <h3 id="impact-title" className="label-micro">
@@ -73,6 +86,7 @@ export function ImpactPanel() {
             {impacts.map((impact, position) => {
               const properties = districts.features[impact.index]?.properties;
               const warning = warningCell(impact.sArrivalS);
+              const damage = position < reached ? damageByIndex.get(impact.index) : undefined;
               return (
                 <tr
                   key={impact.index}
@@ -83,14 +97,22 @@ export function ImpactPanel() {
                 >
                   <td className="py-1.5 pr-2">
                     <span className="block text-body text-fg">{properties?.name}</span>
-                    <span className="block text-micro text-fg-muted">{properties?.province}</span>
+                    <span className="block text-micro text-fg-muted">
+                      {properties?.province}
+                      {damage &&
+                        ` · ${t('impact.damageLine', {
+                          ratio: number(damage.lossRatio * 100, 1),
+                          fatalities: number(Math.round(damage.fatalities)),
+                        })}`}
+                      {damage?.estimated && ` ${t('impact.estimatedStock')}`}
+                    </span>
                   </td>
-                  <td className="py-1.5 pr-2 text-right num text-caption text-fg-secondary">
+                  <td className="py-1.5 pr-2 text-right num text-caption whitespace-nowrap text-fg-secondary">
                     {number(impact.sArrivalS, 1)} s
                   </td>
                   <td
                     className={cn(
-                      'w-20 py-1.5 pr-2 text-right num text-caption',
+                      'w-20 py-1.5 pr-2 text-right num text-caption whitespace-nowrap',
                       warning.blind ? 'text-critical' : 'text-fg-secondary',
                     )}
                   >

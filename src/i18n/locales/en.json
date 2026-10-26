@@ -59,7 +59,8 @@
       "sWave": "S wave",
       "rupture": "Fault rupture",
       "blindZone": "Blind zone boundary",
-      "estimatedEpicenter": "Estimated epicentre"
+      "estimatedEpicenter": "Estimated epicentre",
+      "facilities": "Facility: operational / limited / likely out"
     }
   },
   "sheet": {
@@ -114,7 +115,9 @@
     "intensity": "Peak intensity",
     "warning": "Warning time",
     "blindZone": "Blind zone",
-    "countdown": "S − {{seconds}} s"
+    "countdown": "S − {{seconds}} s",
+    "damageLine": "loss {{ratio}} % · {{fatalities}} deaths",
+    "estimatedStock": "(estimated stock)"
   },
   "telemetry": {
     "synthetic": "Synthetic record",
@@ -159,5 +162,23 @@
     "locationError": "Location error",
     "warned": "Districts warned / blind zone",
     "note": "Magnitude from Pd in the first 3 s of P; large events are underestimated, as in real systems. Data transmission and processing delays are not modelled."
+  },
+  "damage": {
+    "title": "Damage and losses (simulated, night)",
+    "buildingsLost": "Buildings, complete-loss equivalent",
+    "lossRatio": "Mean structural loss",
+    "fatalities": "Fatalities",
+    "districts": "Districts reached",
+    "note": "Expected values from the GEM 2025 vulnerability model for Türkiye over the ground-motion uncertainty, residents at home (03:00). Building stock outside İstanbul is estimated. Not definitive damage information."
+  },
+  "infra": {
+    "title": "Critical facilities",
+    "reached": "{{count}} of {{total}} reached",
+    "status": {
+      "operational": "Operational",
+      "limited": "Limited",
+      "outOfService": "Likely out"
+    },
+    "note": "Hospitals, fire stations and police (OpenStreetMap), assessed with one reinforced-concrete class; the state thresholds (5 % and 20 % expected loss) are a display assumption."
   }
 }

@@ -7,6 +7,8 @@ interface ReferencePalette {
   stationHalo: string;
   /** The station hue as RGB, for the deck.gl ring around the focused station. */
   selection: [number, number, number];
+  /** Facility states, tuned against --state-ok, --state-warning and --state-critical. */
+  facility: { operational: string; limited: string; outOfService: string; outline: string };
 }
 
 /**
@@ -21,6 +23,12 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
     station: 'rgb(138, 180, 248)',
     stationHalo: 'rgba(13, 17, 23, 0.85)',
     selection: [138, 180, 248],
+    facility: {
+      operational: 'rgb(98, 196, 128)',
+      limited: 'rgb(232, 190, 90)',
+      outOfService: 'rgb(235, 87, 70)',
+      outline: 'rgba(13, 17, 23, 0.9)',
+    },
   },
   light: {
     fault: 'rgba(184, 64, 44, 0.9)',
@@ -28,5 +36,11 @@ export const REFERENCE_PALETTE: Record<Theme, ReferencePalette> = {
     station: 'rgb(37, 99, 200)',
     stationHalo: 'rgba(255, 255, 255, 0.9)',
     selection: [37, 99, 200],
+    facility: {
+      operational: 'rgb(30, 140, 70)',
+      limited: 'rgb(190, 130, 20)',
+      outOfService: 'rgb(200, 50, 40)',
+      outline: 'rgba(255, 255, 255, 0.95)',
+    },
   },
 };

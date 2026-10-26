@@ -5,10 +5,12 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import { valueAt, type Grid } from '@/data/grid';
 import { DataRepository, type DataFetcher } from '@/data/repository';
-import type { Districts, Faults, Stations } from '@/data/schemas';
+import type { Districts, DistrictStats, Faults, Stations, Vulnerability } from '@/data/schemas';
 import { simulate } from '@/engine/sim/simulate';
 import { resolvePreset, SCENARIO_PRESETS } from '@/features/scenario/lib/presets';
 import type { SimulationResult } from '@/types/simulation';
+
+import ibb2019 from '../../fixtures/damage/ibb-2019-scenario.json';
 
 const dataDir = fileURLToPath(new URL('../../../public/data/', import.meta.url));
 const readFromDisk: DataFetcher = async (path) =>
@@ -20,15 +22,22 @@ let districts: Districts;
 let vs30: Grid;
 let districtCells: Grid;
 let stations: Stations;
+let population: Grid;
+let districtStats: DistrictStats;
+let vulnerability: Vulnerability;
 
 beforeAll(async () => {
-  [faults, districts, vs30, districtCells, stations] = await Promise.all([
-    repository.json('faults'),
-    repository.json('districts'),
-    repository.grid('vs30'),
-    repository.grid('districtCells'),
-    repository.json('stations'),
-  ]);
+  [faults, districts, vs30, districtCells, stations, population, districtStats, vulnerability] =
+    await Promise.all([
+      repository.json('faults'),
+      repository.json('districts'),
+      repository.grid('vs30'),
+      repository.grid('districtCells'),
+      repository.json('stations'),
+      repository.grid('population'),
+      repository.json('districtStats'),
+      repository.json('vulnerability'),
+    ]);
 });
 
 function run(presetId: string): SimulationResult {
@@ -40,6 +49,17 @@ function run(presetId: string): SimulationResult {
     vs30: vs30.values,
     districtCells: districtCells.values,
     stations: stations.stations.filter((station) => station.accelerometer),
+    damage: {
+      stock: districtStats.districts.map((district) => ({
+        index: district.index,
+        population: district.population,
+        buildings: district.buildings,
+        estimated: district.buildingSource === 'estimated',
+      })),
+      functions: vulnerability.functions,
+      population: population.values,
+      facilities: [],
+    },
   });
 }
 
@@ -115,4 +135,59 @@ describe('Marmara scenario presets on the prepared data', () => {
       expect(warning.magnitude).toBeLessThan(result.rupture.mw + 0.3);
     },
   );
+
+  it('ranks İstanbul districts like the İBB 2019 scenario and stays within its order of magnitude', () => {
+    // İBB 2019: Mw 7.5 on the Main Marmara Fault, night; the preset is a comparable Mw 7.4.
+    const result = run('north-marmara');
+    const damage = result.damage?.districts ?? [];
+    const pairs = ibb2019.districts.map((reference) => {
+      const feature = districts.features.find(
+        (f) =>
+          f.properties.province === 'İstanbul' &&
+          f.properties.name.toLocaleLowerCase('tr') === reference.name,
+      );
+      const modelled = damage.find((d) => d.index === feature?.properties.index);
+      if (!modelled) throw new Error(`no district for ${reference.name}`);
+      return { reference, modelled };
+    });
+    expect(pairs).toHaveLength(39);
+    expect(
+      spearman(
+        pairs.map((p) => p.modelled.fatalities),
+        pairs.map((p) => p.reference.fatalities),
+      ),
+    ).toBeGreaterThan(0.65);
+    const modelledDeaths = pairs.reduce((sum, p) => sum + p.modelled.fatalities, 0);
+    const referenceDeaths = pairs.reduce((sum, p) => sum + p.reference.fatalities, 0);
+    expect(modelledDeaths / referenceDeaths).toBeGreaterThan(0.2);
+    expect(modelledDeaths / referenceDeaths).toBeLessThan(2);
+  });
 });
+
+/** Spearman rank correlation (no tie correction; values are continuous). */
+function spearman(a: number[], b: number[]): number {
+  const ranks = (values: number[]) => {
+    const order = values
+      .map((value, index) => ({ value, index }))
+      .sort((x, y) => x.value - y.value);
+    const result = new Array<number>(values.length).fill(0);
+    order.forEach(({ index }, rank) => {
+      result[index] = rank;
+    });
+    return result;
+  };
+  const ra = ranks(a);
+  const rb = ranks(b);
+  const mean = (a.length - 1) / 2;
+  let covariance = 0;
+  let varianceA = 0;
+  let varianceB = 0;
+  ra.forEach((rank, i) => {
+    const da = rank - mean;
+    const db = (rb[i] ?? 0) - mean;
+    covariance += da * db;
+    varianceA += da * da;
+    varianceB += db * db;
+  });
+  return covariance / Math.sqrt(varianceA * varianceB);
+}

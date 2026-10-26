@@ -143,7 +143,10 @@ export function MapView() {
   useEffect(() => {
     referenceRef.current = reference;
     const map = mapRef.current;
-    if (map?.isStyleLoaded()) applyReferenceLayers(map, reference, useUiStore.getState().theme);
+    if (!map?.isStyleLoaded()) return;
+    applyReferenceLayers(map, reference, useUiStore.getState().theme);
+    rendererRef.current?.resetFacilityStates();
+    rendererRef.current?.render(currentTime());
   }, [reference]);
 
   useEffect(() => {

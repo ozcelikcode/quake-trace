@@ -330,6 +330,25 @@
         "median": 543.6,
         "max": 900.0
       }
+    },
+    "vulnerability": {
+      "path": "vulnerability.json",
+      "format": "json",
+      "bytes": 13169,
+      "sha256": "0d45fd0f4b78f1ed529720fa295243899986f140eb1cbcca1cbcb25caedd18b5",
+      "generatedAt": "2026-10-26T06:18:43Z",
+      "sources": [
+        {
+          "name": "GEM Global Vulnerability Model v2026.0.0, Türkiye (structural and fatalities)",
+          "url": "https://github.com/gem/global_vulnerability_model",
+          "license": "CC-BY-NC-SA-4.0",
+          "attribution": "Nafeh, Aljawhari and Silva (2025), GEM Foundation, doi:10.5281/zenodo.8391742"
+        }
+      ],
+      "notes": "Mean loss ratios; structural damage per building, fatalities per occupant.",
+      "stats": {
+        "functions": 10
+      }
     }
   }
 }

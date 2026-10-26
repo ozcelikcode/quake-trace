@@ -59,7 +59,8 @@
       "sWave": "S dalgası",
       "rupture": "Fay kırılması",
       "blindZone": "Kör bölge sınırı",
-      "estimatedEpicenter": "Tahmini merkez"
+      "estimatedEpicenter": "Tahmini merkez",
+      "facilities": "Tesis: çalışır / kısıtlı / olası hizmet dışı"
     }
   },
   "sheet": {
@@ -114,7 +115,9 @@
     "intensity": "En yüksek şiddet",
     "warning": "Uyarı süresi",
     "blindZone": "Kör bölge",
-    "countdown": "S − {{seconds}} s"
+    "countdown": "S − {{seconds}} s",
+    "damageLine": "hasar %{{ratio}} · {{fatalities}} can kaybı",
+    "estimatedStock": "(tahmini stok)"
   },
   "telemetry": {
     "synthetic": "Sentetik kayıt",
@@ -159,5 +162,23 @@
     "locationError": "Konum hatası",
     "warned": "Uyarılan / kör bölgedeki ilçe",
     "note": "Büyüklük, P dalgasının ilk 3 saniyesindeki Pd'den; büyük depremler gerçek sistemlerde olduğu gibi düşük tahmin edilir. Veri iletim ve işlem gecikmeleri modellenmedi."
+  },
+  "damage": {
+    "title": "Hasar ve kayıp (simülasyon, gece)",
+    "buildingsLost": "Tamamen yıkık bina eşdeğeri",
+    "lossRatio": "Ortalama yapısal hasar",
+    "fatalities": "Can kaybı",
+    "districts": "Ulaşılan ilçe",
+    "note": "GEM 2025 Türkiye zarar görebilirlik modelinden, yer hareketi belirsizliği üzerinden beklenen değerler; herkes evde (03:00). İstanbul dışındaki bina stoku tahminidir. Kesin hasar bilgisi değildir."
+  },
+  "infra": {
+    "title": "Kritik tesisler",
+    "reached": "{{count}} / {{total}} tesise ulaştı",
+    "status": {
+      "operational": "Çalışır",
+      "limited": "Kısıtlı",
+      "outOfService": "Olası hizmet dışı"
+    },
+    "note": "Hastane, itfaiye ve emniyet (OpenStreetMap), tek bir betonarme sınıfıyla değerlendirildi; durum eşikleri (%5 ve %20 beklenen hasar) gösterim varsayımıdır."
   }
 }

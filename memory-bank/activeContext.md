@@ -2,9 +2,15 @@
 
 ## Current focus
 
-Phase 4 (EEW) is complete on branch `feat/phase-4-eew`: the first four STA/LTA triggers locate the event, a Pd magnitude with realistic saturation follows, and the alert drives the status bar, district countdowns, blind zone and timeline markers. Next is phase 5, damage and critical infrastructure.
+Phase 5 (damage and critical infrastructure) is complete on branch `feat/phase-5-damage`: district losses and night fatalities from GEM 2025 Türkiye vulnerability, facility states on the map, validated against the İBB 2019 scenario. Next is phase 6: cell tower load, routing and corridors, heatmaps.
 
-## Recent changes (2026-10-26, phase 4)
+## Recent changes (2026-10-26, phase 5)
+
+- Pipeline: `vulnerability` dataset (GEM v2026.0.0, CC BY-NC-SA 4.0), fixtures: ASB14 SA(0.6) column and the İBB 2019 district totals.
+- Engine: ASB14 SA(0.6); `damage/` (OpenQuake-style interpolation, expectation over σ, building classes, district damage, facilities); `SimulationResult.damage`; shared `types/damage.ts`.
+- App: `features/infra` (facility status rule, summary), impact panel damage summary and district damage line, map facility layer with feature states, `criticalFacilityKinds` in `data/schemas.ts`.
+
+## Changes (2026-10-26, phase 4)
 
 - Engine: `eew/locate` (grid search, origin time as mean residual), `eew/early-warning` (Pd from the rupture grown in 3 s via W&C94, Wu & Zhao 2006 forward and inverse, alert = 4th trigger + 3 s). `SimulationResult.earlyWarning`.
 - App: `features/eew` (status chip with live region, summary), impact panel warning column, map blind-zone curtain and estimated epicentre, timeline markers.
@@ -24,7 +30,7 @@ Phase 4 (EEW) is complete on branch `feat/phase-4-eew`: the first four STA/LTA t
 
 ## Next steps
 
-1. Phase 5: building damage (HAZUS-style fragility on the district building stock), casualties by time of day, critical infrastructure status; validate against the İBB 2019 scenario.
+1. Phase 6: cell sites (OpenCelliD key or synthetic sites), call-demand load model, road graph routing with damage-aware costs, corridors and heatmaps.
 2. Cell sites: OpenCelliD key before phase 6, otherwise synthetic sites (decided 2026-10-25).
 3. User (optional): review, commit/push/PR on request; deploy to Cloudflare when ready.
 

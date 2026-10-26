@@ -7,7 +7,7 @@
  * Medians: PGA and SA in g, PGV in cm/s. Standard deviations are in natural-log units.
  */
 
-export type IntensityMeasure = 'PGA' | 'PGV' | 'SA(0.3)' | 'SA(1.0)';
+export type IntensityMeasure = 'PGA' | 'PGV' | 'SA(0.3)' | 'SA(0.6)' | 'SA(1.0)';
 
 interface Coefficients {
   a1: number;
@@ -40,6 +40,10 @@ const COEFFICIENTS: Record<IntensityMeasure, Coefficients> = {
   'SA(0.3)': {
     a1: 2.3015, a2: 0.0029, a3: -0.05672, a4: -1.17072, a5: 0.2529, a6: 7.5, a7: -0.5096,
     a8: 0, a9: 0.0469, b1: -0.82609, b2: -0.4573, sigma: 0.6599, tau: 0.3816,
+  },
+  'SA(0.6)': {
+    a1: 1.37505, a2: 0.0029, a3: -0.10747, a4: -0.96429, a5: 0.2529, a6: 7.5, a7: -0.5096,
+    a8: 0, a9: 0.0219, b1: -0.98499, b2: -0.34053, sigma: 0.663, tau: 0.406,
   },
   'SA(1.0)': {
     a1: 0.52349, a2: 0.0029, a3: -0.14345, a4: -0.81838, a5: 0.2529, a6: 7.5, a7: -0.5096,
