@@ -60,6 +60,7 @@ npm run build
 npm run preview        # production build with the Worker, locally
 npm run cf-typegen     # regenerate worker/worker-configuration.d.ts after editing wrangler.jsonc
 npm run deploy         # build + wrangler deploy (needs `npx wrangler login` once)
+gh workflow run smoke.yml   # check the deployed Worker from GitHub Actions
 ```
 
 TypeScript projects: `tsconfig.base.json` holds shared strict options; `tsconfig.app.json` (src), `tsconfig.worker.json` (worker, Cloudflare runtime types), `tsconfig.test.json` (tests + src), `tsconfig.node.json` (config files). TypeScript 6 no longer includes `@types` automatically, so each project lists its `types`.

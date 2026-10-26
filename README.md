@@ -6,6 +6,8 @@ Everything runs in the browser. There is no server to operate and no paid servic
 
 > **Simulation, not a warning system.** quakeTrace is an educational and portfolio project. Simulated output is always labeled as simulation; real earthquake data is always labeled with its source. It is not an official early-warning or alerting service.
 
+**Live:** [quake-trace.ozcelikcode.workers.dev](https://quake-trace.ozcelikcode.workers.dev)
+
 ![North Marmara scenario 22 seconds after the origin: P and S wavefronts, the intensity map, the early-warning alert and live station records](docs/screenshots/desktop-shaking.jpg)
 
 ## What it does

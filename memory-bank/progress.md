@@ -36,7 +36,7 @@ Phase: **11 (polish) complete** on branch `feat/phase-11-polish` (from phase 10,
 Each phase ends with CI green and a deployable `main`.
 
 - [x] **0. Skeleton** — Vite + React + TS strict, Tailwind tokens and fonts, i18n, responsive shell, MapLibre + deck.gl + 3D terrain, lint/format/test tooling with the `tests/` layout, CI, Worker proxy, CORS spike.
-  - [ ] First deploy to Cloudflare (needs the user's account: `npx wrangler login`, then `npm run deploy`, or connect the repo in the dashboard).
+  - [x] First deploy to Cloudflare (2026-10-26, by the user): https://quake-trace.ozcelikcode.workers.dev; checked from GitHub Actions with `.github/workflows/smoke.yml` (page, data, all proxy routes 200, unknown route 404).
 - [x] **1. Data pipeline** — `pipeline/` modules, `public/data/` with manifest and attribution, typed loaders, reference layers on the map.
   - [ ] `cells` dataset (needs `OPENCELLID_API_KEY` in `pipeline/.env`; needed by phase 6, synthetic fallback otherwise).
 - [x] **2. Core engine and first vertical slice** — velocity, rupture, gmpe, intensity, sim; worker; playback and scenario stores; wavefronts, intensity raster, timeline, presets, district arrivals.
@@ -68,6 +68,9 @@ Each phase ends with CI green and a deployable `main`.
 - Tsunami: linear and non-dispersive, no run-up (depth floored at 10 m), no landslide sources, instantaneous uplift; heights are near-coast offshore values. Coastal arrivals are not labelled on the map yet. The 15 MB of frames stay in memory per scenario.
 - Network: power cuts and battery autonomy are not modelled, so no site goes down in the presets (DOCOMO lost most sites to power cuts in 2011); demand ignores time of day; the surge decays over hours (visible on the response scale).
 - Routing: debris slowdown is an assumption; OSM bridge types unknown (Hazus HWB28 for all); no traffic, no ferries (Adalar shows as cut off by road); the road graph is copied to the worker on each run.
+- From the developer's network (Türkiye) every `*.workers.dev` and `*.pages.dev` host times out while other Cloudflare sites load (same IP ranges, so the block is by host name); the deployed app was verified from GitHub Actions instead. Visitors on such networks need a custom domain on the Worker.
+- One Kandilli proxy request returned 504 (upstream timeout at 15 s) in the first smoke run and 200 in 1.3 s a minute later; the upstream is plain HTTP and occasionally slow.
+- The user's tooling can switch the working copy to another branch between commands (seen again 2026-10-26); check the branch before committing.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 
 ## Evolution of decisions

@@ -2,7 +2,7 @@
 
 ## Current focus
 
-Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). All planned phases are done and merged into `main`; the remaining step is the user's Cloudflare login and deploy.
+Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). All planned phases are done and merged into `main`, and the app is deployed at https://quake-trace.ozcelikcode.workers.dev (verified by `.github/workflows/smoke.yml`, run by hand after each deploy).
 
 ## Recent changes (2026-10-26, review after phase 11)
 
@@ -78,7 +78,7 @@ Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). 
 
 ## Next steps
 
-1. User: deploy to Cloudflare (`npx wrangler login`, then `npm run deploy`).
+1. After each deploy: `gh workflow run smoke.yml` (the developer's network cannot reach `*.workers.dev`).
 2. Optional: lazy-load rarely used panels to shrink the 245 KB shell chunk; OpenCelliD key for real cell sites; ASB14 σ sampling for uncertainty bands.
 2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.
