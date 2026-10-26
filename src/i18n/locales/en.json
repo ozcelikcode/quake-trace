@@ -46,7 +46,9 @@
     "play": "Play",
     "pause": "Pause",
     "seek": "Simulation time",
-    "speed": "Playback speed"
+    "speed": "Playback speed",
+    "detection": "First detection",
+    "alert": "Early-warning alert"
   },
   "map": {
     "label": "3D topographic map of the Marmara region",
@@ -55,7 +57,9 @@
       "intensity": "Intensity (MMI)",
       "pWave": "P wave",
       "sWave": "S wave",
-      "rupture": "Fault rupture"
+      "rupture": "Fault rupture",
+      "blindZone": "Blind zone boundary",
+      "estimatedEpicenter": "Estimated epicentre"
     }
   },
   "sheet": {
@@ -107,7 +111,10 @@
     "reached": "{{count}} of {{total}} districts reached",
     "district": "District",
     "sArrival": "S-wave arrival",
-    "intensity": "Peak intensity"
+    "intensity": "Peak intensity",
+    "warning": "Warning time",
+    "blindZone": "Blind zone",
+    "countdown": "S − {{seconds}} s"
   },
   "telemetry": {
     "synthetic": "Synthetic record",
@@ -139,5 +146,18 @@
     "stateTriggered": "triggered",
     "stateWaiting": "waiting",
     "scaleNote": "Each trace is scaled to its own peak."
+  },
+  "eew": {
+    "title": "Early warning (simulated)",
+    "detected": "Earthquake detected",
+    "alert": "Early warning · M {{magnitude}}",
+    "waiting": "Location and magnitude are estimated once four stations have triggered and recorded 3 s of P wave.",
+    "unavailable": "Fewer than four stations triggered, so no early warning was issued.",
+    "alertTime": "Alert",
+    "magnitude": "First magnitude estimate",
+    "magnitudeValue": "M {{estimate}} (true Mw {{actual}})",
+    "locationError": "Location error",
+    "warned": "Districts warned / blind zone",
+    "note": "Magnitude from Pd in the first 3 s of P; large events are underestimated, as in real systems. Data transmission and processing delays are not modelled."
   }
 }

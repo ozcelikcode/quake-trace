@@ -101,6 +101,23 @@ test('streams station records and focuses a station', async ({ page }) => {
   await expect(focus.getByRole('heading', { name: id })).toBeVisible();
 });
 
+test('issues the early warning and counts down to S-wave arrival', async ({ page }) => {
+  test.skip(project() === 'phone-ios', 'covered by the other phone profile');
+  await runNorthMarmara(page);
+  await pauseAndJump(page, 1);
+  // T+10 s: past the alert at about T+8 s for this preset.
+  await expect(page.getByTestId('eew-status')).toContainText(
+    isPhone() ? /M \d,\d/ : /Erken uyarı · M \d,\d/,
+  );
+
+  await openImpactPanel(page);
+  const summary = page.getByTestId('eew-summary');
+  await expect(summary.getByText(/T\+\d+,\d s/)).toBeVisible();
+  await expect(summary.getByText(/gerçek Mw 7,4/)).toBeVisible();
+  await expect(page.getByText('Kör bölge').first()).toBeVisible();
+  await expect(page.getByText(/^S − \d+ s$/).first()).toBeVisible();
+});
+
 test('stays accessible with a scenario loaded', async ({ page }) => {
   test.skip(project() !== 'desktop', 'desktop layout');
   await page.emulateMedia({ reducedMotion: 'reduce' });

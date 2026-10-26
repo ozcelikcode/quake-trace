@@ -106,6 +106,10 @@ describe('station records', () => {
     expect(near?.pgaCmS2).toBeGreaterThan(far?.pgaCmS2 ?? Number.POSITIVE_INFINITY);
   });
 
+  it('issues no early warning with fewer than four triggered stations', () => {
+    expect(simulate(input).earlyWarning).toBeNull();
+  });
+
   it('stays at the noise floor before the P arrival and triggers shortly after it', () => {
     records.stations.forEach((station, index) => {
       const beforeP = component(index, 0).subarray(0, Math.floor(station.pArrivalS * rate) - 5);

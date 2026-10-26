@@ -42,6 +42,17 @@ const P_STYLE: CurtainStyle = {
 };
 const S_STYLE: CurtainStyle = { ...P_STYLE, color: [255, 166, 77] };
 const RUPTURE_LIFT_M = 200;
+/**
+ * Blind-zone boundary: the S-wave isochrone at the alert time, low and in the critical hue
+ * (designSystem.md state colours; WebGL cannot read the CSS token).
+ */
+const BLIND_ZONE_STYLE: CurtainStyle = {
+  color: [235, 87, 70],
+  levelsM: [120],
+  alphas: [0.95],
+  terrainExaggeration: TERRAIN_EXAGGERATION,
+};
+const CRITICAL: [number, number, number] = [235, 87, 70];
 /** A triggered station flashes with one expanding ring, then keeps a steady P-coloured dot. */
 const TRIGGER_PULSE_S = 1.2;
 const STATION_LIFT_M = 60;
@@ -79,6 +90,7 @@ export class SimulationRenderer {
   #lastTimeS = Number.NaN;
   #theme: Theme = 'dark';
   #focusedStation = -1;
+  #blindZone: CurtainBuffers | null = null;
   readonly #reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(map: MapLibreMap, overlay: MapLibreOverlay) {
@@ -89,6 +101,7 @@ export class SimulationRenderer {
   /** Ground elevation on the result's grid (m), used to lift 3D elements onto the terrain. */
   setElevation(values: Float32Array | undefined): void {
     this.#elevation = values;
+    this.#blindZone = null;
     this.#lastTimeS = Number.NaN;
   }
 
@@ -105,6 +118,7 @@ export class SimulationRenderer {
 
   setResult(result: SimulationResult | null): void {
     this.#result = result;
+    this.#blindZone = null;
     this.#lastTimeS = Number.NaN;
     this.#removeRaster();
     if (!result) {
@@ -212,8 +226,43 @@ export class SimulationRenderer {
         wavefrontCurtain(result.tP, result.grid, timeS, this.#elevation, P_STYLE),
       ),
       ...this.#stationLayers(result, timeS),
+      ...this.#warningLayers(result, timeS),
     ];
     this.#overlay.setProps({ layers });
+  }
+
+  /** After the alert: the blind-zone boundary and the estimated epicentre. */
+  #warningLayers(result: SimulationResult, timeS: number): Layer[] {
+    const warning = result.earlyWarning;
+    if (!warning || timeS < warning.alertS) return [];
+    this.#blindZone ??= wavefrontCurtain(
+      result.tS,
+      result.grid,
+      warning.alertS,
+      this.#elevation,
+      BLIND_ZONE_STYLE,
+    );
+    const { lon, lat } = warning.epicenter;
+    const estimate: [number, number, number] = [
+      lon,
+      lat,
+      this.#groundAt(result.grid, lon, lat) + RUPTURE_LIFT_M,
+    ];
+    return [
+      curtainLayer('scenario-blind-zone', this.#blindZone),
+      new ScatterplotLayer<[number, number, number]>({
+        id: 'scenario-estimated-epicentre',
+        data: [estimate],
+        getPosition: (position) => position,
+        getRadius: 11,
+        radiusUnits: 'pixels',
+        stroked: true,
+        filled: false,
+        getLineColor: [...CRITICAL, 255],
+        getLineWidth: 2,
+        lineWidthUnits: 'pixels',
+      }),
+    ];
   }
 
   #stationLayers(result: SimulationResult, timeS: number): Layer[] {

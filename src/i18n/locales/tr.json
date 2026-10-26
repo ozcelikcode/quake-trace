@@ -46,7 +46,9 @@
     "play": "Oynat",
     "pause": "Duraklat",
     "seek": "Simülasyon zamanı",
-    "speed": "Oynatma hızı"
+    "speed": "Oynatma hızı",
+    "detection": "İlk algılama",
+    "alert": "Erken uyarı alarmı"
   },
   "map": {
     "label": "Marmara bölgesi 3B topografik harita",
@@ -55,7 +57,9 @@
       "intensity": "Şiddet (MMI)",
       "pWave": "P dalgası",
       "sWave": "S dalgası",
-      "rupture": "Fay kırılması"
+      "rupture": "Fay kırılması",
+      "blindZone": "Kör bölge sınırı",
+      "estimatedEpicenter": "Tahmini merkez"
     }
   },
   "sheet": {
@@ -107,7 +111,10 @@
     "reached": "{{count}} / {{total}} ilçeye ulaştı",
     "district": "İlçe",
     "sArrival": "S dalgası varışı",
-    "intensity": "En yüksek şiddet"
+    "intensity": "En yüksek şiddet",
+    "warning": "Uyarı süresi",
+    "blindZone": "Kör bölge",
+    "countdown": "S − {{seconds}} s"
   },
   "telemetry": {
     "synthetic": "Sentetik kayıt",
@@ -139,5 +146,18 @@
     "stateTriggered": "tetiklendi",
     "stateWaiting": "bekliyor",
     "scaleNote": "Her iz kendi tepe değerine ölçeklidir."
+  },
+  "eew": {
+    "title": "Erken uyarı (simülasyon)",
+    "detected": "Deprem algılandı",
+    "alert": "Erken uyarı · M {{magnitude}}",
+    "waiting": "Dört istasyon tetiklenip 3 saniyelik P dalgası kaydettiğinde konum ve büyüklük tahmin edilir.",
+    "unavailable": "Dörtten az istasyon tetiklendiği için erken uyarı verilmedi.",
+    "alertTime": "Alarm",
+    "magnitude": "İlk büyüklük tahmini",
+    "magnitudeValue": "M {{estimate}} (gerçek Mw {{actual}})",
+    "locationError": "Konum hatası",
+    "warned": "Uyarılan / kör bölgedeki ilçe",
+    "note": "Büyüklük, P dalgasının ilk 3 saniyesindeki Pd'den; büyük depremler gerçek sistemlerde olduğu gibi düşük tahmin edilir. Veri iletim ve işlem gecikmeleri modellenmedi."
   }
 }

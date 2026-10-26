@@ -3,6 +3,7 @@ import type { GridSpec } from '@/types/grid';
 import type { Scenario } from '@/types/scenario';
 import type { DistrictImpact, SimulationResult, StationSite } from '@/types/simulation';
 
+import { earlyWarning } from '../eew/early-warning';
 import { asb14LnMedian } from '../gmpe/asb14';
 import { combinedMmi } from '../intensity/worden2012';
 import { buildRupture } from '../rupture/finite-fault';
@@ -94,6 +95,7 @@ export function simulate(input: SimulationInput): SimulationResult {
   });
   for (const station of stations) lastArrival = Math.max(lastArrival, station.endS);
   const durationS = Math.ceil(lastArrival) + DURATION_PADDING_S;
+  const records = synthesizeRecords(stations, scenario.seed, durationS);
 
   return {
     scenarioId: scenario.id,
@@ -114,7 +116,14 @@ export function simulate(input: SimulationInput): SimulationResult {
       ruptureDurationS: rupture.durationS,
     },
     districts: input.districtCells ? districtImpacts(input.districtCells, tP, tS, mmi) : [],
-    records: synthesizeRecords(stations, scenario.seed, durationS),
+    records,
+    earlyWarning: earlyWarning({
+      stations: records.stations,
+      rupture,
+      rakeDeg,
+      model,
+      seed: scenario.seed,
+    }),
     durationS,
     computeMs: performance.now() - started,
   };

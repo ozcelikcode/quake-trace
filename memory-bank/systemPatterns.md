@@ -123,4 +123,5 @@ Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `ee
 | 2026-10-25 | Presets on EFSM20 `TRCF045` defined by longitude ranges | The Main Marmara Fault is one 520 km source without segment names |
 | 2026-10-25 | Intensity raster via MapLibre `image` source + `updateImage(ImageData)` | Canvas sources are not refreshed under terrain |
 | 2026-10-26 | Own canvas waveform painter instead of uPlot | One renderer for list rows and focus view, envelope decimation, no per-frame `setData` copies, theme tokens read from CSS; AGENTS.md prefers platform APIs |
+| 2026-10-26 | EEW Pd modelled from the grown rupture, not measured from records | Point-source stochastic records carry the full moment from the first second |
 | 2026-10-26 | Records only for accelerometer stations, scaled to the median | Strong-motion telemetry; map and telemetry stay consistent |

@@ -9,6 +9,7 @@ import { isLanguage, supportedLanguages, toLanguage } from '@/i18n';
 import { useUiStore } from '@/state/ui-store';
 
 import { BrandMark } from './brand-mark';
+import { EewStatus } from '@/features/eew';
 import { ScenarioStatus } from './scenario-status';
 import { SimulationClock } from './simulation-clock';
 import type { LayoutMode } from './use-layout-mode';
@@ -61,12 +62,19 @@ export function StatusBar({ layout }: { layout: LayoutMode }) {
 
       <div className="flex items-center gap-2">
         <BrandMark className="text-signal" />
-        <h1 className="text-body font-semibold tracking-tight text-fg">{t('app.name')}</h1>
+        {/* Phones keep the mark only, leaving room for the clock and the alert. */}
+        <h1
+          className={
+            layout === 'phone' ? 'sr-only' : 'text-body font-semibold tracking-tight text-fg'
+          }
+        >
+          {t('app.name')}
+        </h1>
       </div>
 
       <Divider />
 
-      <div className="flex min-w-0 items-baseline gap-2" aria-live="off">
+      <div className="flex shrink-0 items-baseline gap-2" aria-live="off">
         {layout !== 'phone' && <span className="label-micro">{t('status.clock')}</span>}
         <SimulationClock />
       </div>
@@ -77,6 +85,7 @@ export function StatusBar({ layout }: { layout: LayoutMode }) {
           <ScenarioStatus />
         </>
       )}
+      <EewStatus compact={layout === 'phone'} />
 
       <div className="ml-auto flex items-center gap-1.5">
         <ToggleGroup

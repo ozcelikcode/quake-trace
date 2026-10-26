@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **3 (telemetry) complete** on branch `feat/phase-3-telemetry`. `main` was fast-forwarded to phase 2 (`5aec3bf`) at the user's request (2026-10-25); the user pushed `main` and the phase 3 branch (including a WIP commit `4cf6f5f` "quake-trace" made from their side). Next: phase 4 (EEW).
+Phase: **4 (EEW) complete** on branch `feat/phase-4-eew` (from the phase 3 branch, `e71e55a`). Phase 3 is complete on `feat/phase-3-telemetry`. `main` was fast-forwarded to phase 2 (`5aec3bf`) at the user's request (2026-10-25); the user pushed `main` and the phase 3 branch (including a WIP commit `4cf6f5f` "quake-trace" made from their side). Next: phase 5 (damage and critical infrastructure).
 
 ## What works
 
@@ -13,8 +13,9 @@ Phase: **3 (telemetry) complete** on branch `feat/phase-3-telemetry`. `main` was
 - Engine (`src/engine/`, pure TypeScript): IASP91 travel times, finite-fault rupture with W&C94 scaling, ASB14 Rjb ground motion, Worden 2012 intensity, scenario orchestrator with per-district arrivals; about 0.3 s per preset.
 - Simulation worker (Comlink), scenario and playback stores, four Main Marmara Fault presets.
 - Telemetry (phase 3): synthetic three-component accelerograms (100 Hz) at the 50 accelerometer stations, scaled to the ASB14 median; STA/LTA triggers; focused station with Z/N/E traces, picks, playhead and peak-so-far readouts; record-section station list in trigger order; stations flash on the map when they trigger; clicking a station on the map focuses it. Scenario compute about 0.5–0.9 s per preset in Node.
+- Early warning (phase 4): location by grid search on the first four triggers (1–2 km error on the presets), Pd magnitude with modelled saturation (first estimates M 6.2–6.5 for Mw 6.9–7.4), alert at T+6–11 s; status-bar alert chip (live region), EEW summary and per-district warning time / countdown / blind zone in the impact panel, blind-zone boundary and estimated epicentre on the map, detection and alert markers on the timeline.
 - First vertical slice: choose a preset, compute in the worker, play back. MMI raster draped on the terrain appears as the S wave arrives; P and S wavefronts as 3D curtains; rupture front and epicentre; legend and "Simulation" watermark; timeline (play/pause, slider, 0.5×–10×, Space and arrow shortcuts); scenario summary; district arrival table (impact tab).
-- Tooling: Vitest 151 tests (engine against OpenQuake, analytic and published references), Playwright 27 e2e tests across four profiles including scenario and telemetry flows and axe scans with a scenario loaded, pipeline 48 tests, CI with app, pipeline and e2e jobs.
+- Tooling: Vitest 162 tests (engine against OpenQuake, analytic and published references), Playwright 30 e2e tests across four profiles including scenario, telemetry and early-warning flows and axe scans with a scenario loaded, pipeline 48 tests, CI with app, pipeline and e2e jobs.
 - Verified 2026-10-26: typecheck, lint, format, unit/integration, e2e, build; telemetry screenshots on desktop and phone, dark and light.
 
 ## Phases
@@ -27,7 +28,7 @@ Each phase ends with CI green and a deployable `main`.
   - [ ] `cells` dataset (needs `OPENCELLID_API_KEY` in `pipeline/.env`; needed by phase 6, synthetic fallback otherwise).
 - [x] **2. Core engine and first vertical slice** — velocity, rupture, gmpe, intensity, sim; worker; playback and scenario stores; wavefronts, intensity raster, timeline, presets, district arrivals.
 - [x] **3. Telemetry** — `random` module and scenario seed, stochastic records per station scaled to the GMPE median, canvas waveform panels synced to the clock, STA/LTA picks, stations flashing on trigger.
-- [ ] **4. EEW** — detection, alert, district countdowns, blind zone.
+- [x] **4. EEW** — detection, location, Pd magnitude, alert, district countdowns, blind zone, timeline markers.
 - [ ] **5. Damage and critical infrastructure.**
 - [ ] **6. Cell tower load, routing and corridors, heatmaps.**
 - [ ] **7. Tsunami.**
@@ -46,6 +47,7 @@ Each phase ends with CI green and a deployable `main`.
 - Building counts outside İstanbul are estimates (see `dataSources.md`); the UI must show this when damage results are displayed (phase 5).
 - Wavefronts are cut where they leave the engine grid (for example north of 41.8° N).
 - Median-only ground motion and records: map and telemetry stay consistent; aleatory variability (ASB14 σ, τ) is not sampled yet (candidate for the scenario editor, phase 10).
+- EEW: no telemetry or processing latency; depth fixed at 10 km; event log entries arrive with phase 10.
 - Synthetic records are point-source shapes (Boore 2003) with finite-fault arrival times; P shares the S-wave attenuation (simplification). Compute time on phones (2–3× slower than desktop) is not yet measured.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 
@@ -62,4 +64,6 @@ Each phase ends with CI green and a deployable `main`.
 - 2026-10-25: Intensity raster through a MapLibre image source updated with ImageData; canvas sources stay stale under terrain.
 - 2026-10-25: `random` and `Scenario.seed` deferred to phase 3, where they are first used.
 - 2026-10-26: uPlot not adopted; waveforms use one canvas painter over min/max envelopes (list and focus views, no per-frame data copies).
+- 2026-10-26: EEW Pd modelled from the rupture grown in 3 s (Wu & Zhao 2006 + seeded scatter), not measured from the point-source records, which radiate the full moment at once and gave M 8–9 estimates.
+- 2026-10-26: Phone status bar shows the brand mark only, so the clock and alert fit.
 - 2026-10-26: Synthetic records scaled to the median (not sampled with σ) to keep map and telemetry consistent.

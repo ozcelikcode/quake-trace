@@ -98,4 +98,21 @@ describe('Marmara scenario presets on the prepared data', () => {
     const farthest = byDistance.at(-1);
     expect(nearest?.pgaCmS2).toBeGreaterThan(5 * (farthest?.pgaCmS2 ?? Number.POSITIVE_INFINITY));
   });
+
+  it.each(SCENARIO_PRESETS.map((p) => p.id))(
+    '%s: early warning locates within 5 km and alerts within seconds',
+    (id) => {
+      const result = run(id);
+      const warning = result.earlyWarning;
+      expect(warning).not.toBeNull();
+      if (!warning) return;
+      expect(warning.locationErrorKm).toBeLessThan(5);
+      expect(Math.abs(warning.originS)).toBeLessThan(1);
+      expect(warning.alertS).toBeGreaterThan(warning.firstTriggerS + 3);
+      expect(warning.alertS).toBeLessThan(15);
+      // Pd saturates: the first estimate stays below large magnitudes but above 5.5.
+      expect(warning.magnitude).toBeGreaterThan(5.5);
+      expect(warning.magnitude).toBeLessThan(result.rupture.mw + 0.3);
+    },
+  );
 });

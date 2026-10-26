@@ -62,6 +62,23 @@ export interface StationRecords {
   stations: StationRecord[];
 }
 
+/** What a network early-warning system would have known and when, from the station records. */
+export interface EarlyWarning {
+  /** First STA/LTA trigger in the network, s after origin. */
+  firstTriggerS: number;
+  /** Alert time: the last of those stations has 3 s of P wave. */
+  alertS: number;
+  epicenter: { lon: number; lat: number };
+  depthKm: number;
+  originS: number;
+  /** Pd (peak displacement in the first 3 s of P, cm) and the magnitude it implies, per station. */
+  stations: { id: string; pdCm: number; magnitude: number }[];
+  /** Magnitude from Pd (Wu and Zhao, 2006), mean over the stations. */
+  magnitude: number;
+  /** Distance between estimated and true epicentres, km. */
+  locationErrorKm: number;
+}
+
 /** Everything a scenario produces, indexed like the grid (row-major, north-up). */
 export interface SimulationResult {
   scenarioId: string;
@@ -79,6 +96,8 @@ export interface SimulationResult {
   rupture: RuptureSummary;
   districts: DistrictImpact[];
   records: StationRecords;
+  /** Null when fewer than four stations trigger. */
+  earlyWarning: EarlyWarning | null;
   /** Time by which the S wave has crossed the grid and station shaking has ended, seconds. */
   durationS: number;
   computeMs: number;

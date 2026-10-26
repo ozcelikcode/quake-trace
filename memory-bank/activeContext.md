@@ -2,9 +2,14 @@
 
 ## Current focus
 
-Phase 3 (telemetry) is complete on branch `feat/phase-3-telemetry`: every preset now also produces synthetic accelerograms at the 50 accelerometer stations with STA/LTA triggers, shown in the telemetry panel and as trigger flashes on the map. Next is phase 4, EEW.
+Phase 4 (EEW) is complete on branch `feat/phase-4-eew`: the first four STA/LTA triggers locate the event, a Pd magnitude with realistic saturation follows, and the alert drives the status bar, district countdowns, blind zone and timeline markers. Next is phase 5, damage and critical infrastructure.
 
-## Recent changes (2026-10-26, phase 3)
+## Recent changes (2026-10-26, phase 4)
+
+- Engine: `eew/locate` (grid search, origin time as mean residual), `eew/early-warning` (Pd from the rupture grown in 3 s via W&C94, Wu & Zhao 2006 forward and inverse, alert = 4th trigger + 3 s). `SimulationResult.earlyWarning`.
+- App: `features/eew` (status chip with live region, summary), impact panel warning column, map blind-zone curtain and estimated epicentre, timeline markers.
+
+## Changes (2026-10-26, phase 3)
 
 - Engine: `random` (mulberry32, Box–Muller, FNV-1a sub-streams), `synth` (Boore 2003 stochastic method with Campbell 2003 WNA parameters verified in pyrvt v0.8.1, SMSIM exponential window, P phase with Boore & Boatwright 1984 radiation and Madariaga 1976 corner ratio), `eew/sta-lta` (Trnkoczy 2012 parameters, ObsPy window semantics), `sim/arrivals` (shared arrival model for cells and stations), `sim/stations`. `lib/math/fft` and `lib/math/grid` added. `Scenario.seed` added; presets use seed 1.
 - App: telemetry store (`state/telemetry-store.ts`, focused station + resolver shared with the map), telemetry panel (focused station, record-section list), canvas frame hook, map trigger layers and station click.
@@ -19,7 +24,7 @@ Phase 3 (telemetry) is complete on branch `feat/phase-3-telemetry`: every preset
 
 ## Next steps
 
-1. Phase 4 (EEW): locate from the first four triggers (grid search), Pd/τc magnitude, alert time, district countdowns and blind zone; event log entries; timeline markers.
+1. Phase 5: building damage (HAZUS-style fragility on the district building stock), casualties by time of day, critical infrastructure status; validate against the İBB 2019 scenario.
 2. Cell sites: OpenCelliD key before phase 6, otherwise synthetic sites (decided 2026-10-25).
 3. User (optional): review, commit/push/PR on request; deploy to Cloudflare when ready.
 

@@ -7,6 +7,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/cn';
 import { formatClock } from '@/lib/format';
 import { isPlaybackSpeed, PLAYBACK_SPEEDS, usePlaybackStore } from '@/state/playback-store';
+import { useScenarioStore } from '@/state/scenario-store';
 
 interface TimelineBarProps {
   compact?: boolean;
@@ -23,6 +24,23 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
   const seek = usePlaybackStore((state) => state.seek);
   const setSpeed = usePlaybackStore((state) => state.setSpeed);
   const loaded = durationS > 0;
+  const warning = useScenarioStore((state) => state.result?.earlyWarning);
+  const markers = warning
+    ? [
+        {
+          key: 'detection',
+          label: t('timeline.detection'),
+          timeS: warning.firstTriggerS,
+          className: 'bg-wave-p',
+        },
+        {
+          key: 'alert',
+          label: t('timeline.alert'),
+          timeS: warning.alertS,
+          className: 'bg-critical',
+        },
+      ]
+    : [];
 
   return (
     <section
@@ -49,6 +67,22 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
             {formatClock(timeS)}
           </span>
           <div className="relative min-w-0 flex-1 ruler px-1">
+            {/* Markers share the slider track inset (px-1). */}
+            <div className="pointer-events-none absolute inset-y-0 right-1 left-1">
+              {markers.map((marker) => (
+                <span
+                  key={marker.key}
+                  aria-hidden
+                  title={marker.label}
+                  data-testid={`timeline-marker-${marker.key}`}
+                  className={cn(
+                    'absolute top-0 bottom-0 my-auto h-4 w-0.5 rounded-full',
+                    marker.className,
+                  )}
+                  style={{ left: `${String((marker.timeS / durationS) * 100)}%` }}
+                />
+              ))}
+            </div>
             <Slider
               value={[timeS]}
               min={0}
