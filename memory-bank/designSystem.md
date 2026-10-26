@@ -108,7 +108,8 @@ Rules: every pair used for text meets WCAG 2.2 AA (4.5:1 body, 3:1 large text an
 - Built on Radix primitives following shadcn/ui patterns, written into `src/components/ui/` with the token vocabulary above (no shadcn color names). When adopting another shadcn component, copy it and translate its classes to these tokens.
 - Built (phase 0): `Button` (primary, secondary, ghost; sm, md, icon), `ToggleGroup` (segmented control), `Tooltip`, `Tabs`, `Panel` (header, title, body), `EmptyState`, `Sheet` (modal side drawer, Radix Dialog), `BottomSheet` (non-modal phone region with snap heights, drag, click and arrow-key control).
 - Built (phase 2): `Slider` (accessible name on the thumb); feature-level: timeline bar (play/pause, slider over a ruler, speed segmented control), preset cards, scenario summary readouts (definition grid), district arrival table with MMI swatches, map legend (continuous MMI scale with Roman numerals, wave keys), simulation watermark.
-- To build: timeline scale presets and event markers, station row with sparkline, waveform panel, layer toggle row, event log row, toast for alerts, popover, dialog.
+- Built (phase 3): telemetry focus view (station heading, synthetic badge, readout grid, Z/N/E traces with P trigger and S arrival ticks, playhead, time axis with the unit at the right edge, legend with scale), record-section station row (trigger dot in `wave-p` plus screen-reader state, id and distance, vertical trace, peak so far), map trigger flash and focus ring.
+- To build: timeline scale presets and event markers, layer toggle row, event log row, toast for alerts, popover, dialog.
 - MMI colours come from `src/lib/color/mmi.ts` (ShakeMap scale); the same module feeds the raster, legend and swatches.
 - Touch targets grow on coarse pointers (`pointer-coarse:` variants) to at least 44 px.
 - Every interactive component has visible focus, hover, active, disabled and loading states.

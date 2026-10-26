@@ -2,9 +2,15 @@
 
 ## Current focus
 
-Phase 2 is complete on branch `feat/phase-2-engine`: a preset scenario computes in a worker in about 0.3 s and plays back on the 3D map with intensity, wavefronts, rupture, timeline and district arrivals. Next is phase 3, telemetry.
+Phase 3 (telemetry) is complete on branch `feat/phase-3-telemetry`: every preset now also produces synthetic accelerograms at the 50 accelerometer stations with STA/LTA triggers, shown in the telemetry panel and as trigger flashes on the map. Next is phase 4, EEW.
 
-## Recent changes (2026-10-25)
+## Recent changes (2026-10-26, phase 3)
+
+- Engine: `random` (mulberry32, Box–Muller, FNV-1a sub-streams), `synth` (Boore 2003 stochastic method with Campbell 2003 WNA parameters verified in pyrvt v0.8.1, SMSIM exponential window, P phase with Boore & Boatwright 1984 radiation and Madariaga 1976 corner ratio), `eew/sta-lta` (Trnkoczy 2012 parameters, ObsPy window semantics), `sim/arrivals` (shared arrival model for cells and stations), `sim/stations`. `lib/math/fft` and `lib/math/grid` added. `Scenario.seed` added; presets use seed 1.
+- App: telemetry store (`state/telemetry-store.ts`, focused station + resolver shared with the map), telemetry panel (focused station, record-section list), canvas frame hook, map trigger layers and station click.
+- Git: the user's tooling switched the working copy to `main` twice and committed WIP as `4cf6f5f` "quake-trace" on the phase 3 branch; work continued on top of it. Check the branch before every session.
+
+## Earlier changes (2026-10-25)
 
 - Pipeline: EFSM20 fault-type codes fixed (`RL`, `LL`, `N`, `R`; unknown codes now fail the build), elevation grid from Copernicus GLO-90, `fixtures` command writing the OpenQuake ASB14 verification table.
 - Engine: velocity (IASP91), rupture (finite fault, W&C94, hypocentre as the first subfault), gmpe (ASB14 Rjb), intensity (Worden 2012 + ShakeMap extension), sim (orchestrator, per-district impacts). All coefficients verified against OpenQuake, USGS esi-shakelib and ObsPy sources.
@@ -13,7 +19,7 @@ Phase 2 is complete on branch `feat/phase-2-engine`: a preset scenario computes 
 
 ## Next steps
 
-1. Phase 3: add `engine/random` and `Scenario.seed`; stochastic accelerograms per station (Boore 2003), scaled to the ASB14 median at each station; uPlot waveform panels in the telemetry tab, synced to the clock; STA/LTA triggers; stations flash on trigger.
+1. Phase 4 (EEW): locate from the first four triggers (grid search), Pd/τc magnitude, alert time, district countdowns and blind zone; event log entries; timeline markers.
 2. Cell sites: OpenCelliD key before phase 6, otherwise synthetic sites (decided 2026-10-25).
 3. User (optional): review, commit/push/PR on request; deploy to Cloudflare when ready.
 

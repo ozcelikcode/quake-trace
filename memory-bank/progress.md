@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **2 (core engine and first vertical slice) complete** on branch `feat/phase-2-engine` (stacked on phase 1 `6faa61e` and phase 0 `d3f7e44`). Nothing is pushed. Next: phase 3 (telemetry: synthetic records and waveform panels).
+Phase: **3 (telemetry) complete** on branch `feat/phase-3-telemetry`. `main` was fast-forwarded to phase 2 (`5aec3bf`) at the user's request (2026-10-25); the user pushed `main` and the phase 3 branch (including a WIP commit `4cf6f5f` "quake-trace" made from their side). Next: phase 4 (EEW).
 
 ## What works
 
@@ -12,9 +12,10 @@ Phase: **2 (core engine and first vertical slice) complete** on branch `feat/pha
 - Data pipeline and data layer (phase 1) plus the elevation grid (Copernicus GLO-90) and the ASB14 test fixture.
 - Engine (`src/engine/`, pure TypeScript): IASP91 travel times, finite-fault rupture with W&C94 scaling, ASB14 Rjb ground motion, Worden 2012 intensity, scenario orchestrator with per-district arrivals; about 0.3 s per preset.
 - Simulation worker (Comlink), scenario and playback stores, four Main Marmara Fault presets.
+- Telemetry (phase 3): synthetic three-component accelerograms (100 Hz) at the 50 accelerometer stations, scaled to the ASB14 median; STA/LTA triggers; focused station with Z/N/E traces, picks, playhead and peak-so-far readouts; record-section station list in trigger order; stations flash on the map when they trigger; clicking a station on the map focuses it. Scenario compute about 0.5–0.9 s per preset in Node.
 - First vertical slice: choose a preset, compute in the worker, play back. MMI raster draped on the terrain appears as the S wave arrives; P and S wavefronts as 3D curtains; rupture front and epicentre; legend and "Simulation" watermark; timeline (play/pause, slider, 0.5×–10×, Space and arrow shortcuts); scenario summary; district arrival table (impact tab).
-- Tooling: Vitest 113 tests (engine against OpenQuake, analytic and published references), Playwright 24 e2e tests across four profiles including a scenario run and axe scans with a scenario loaded, pipeline 48 tests, CI with app, pipeline and e2e jobs.
-- Verified 2026-10-25: typecheck, lint, format, unit/integration, e2e, pipeline gates, build; screenshots of a running scenario on desktop and phone.
+- Tooling: Vitest 151 tests (engine against OpenQuake, analytic and published references), Playwright 27 e2e tests across four profiles including scenario and telemetry flows and axe scans with a scenario loaded, pipeline 48 tests, CI with app, pipeline and e2e jobs.
+- Verified 2026-10-26: typecheck, lint, format, unit/integration, e2e, build; telemetry screenshots on desktop and phone, dark and light.
 
 ## Phases
 
@@ -25,7 +26,7 @@ Each phase ends with CI green and a deployable `main`.
 - [x] **1. Data pipeline** — `pipeline/` modules, `public/data/` with manifest and attribution, typed loaders, reference layers on the map.
   - [ ] `cells` dataset (needs `OPENCELLID_API_KEY` in `pipeline/.env`; needed by phase 6, synthetic fallback otherwise).
 - [x] **2. Core engine and first vertical slice** — velocity, rupture, gmpe, intensity, sim; worker; playback and scenario stores; wavefronts, intensity raster, timeline, presets, district arrivals.
-- [ ] **3. Telemetry** — `random` module and scenario seed, stochastic records per station scaled to the GMPE median, uPlot panels synced to the clock, STA/LTA picks, stations flashing on trigger.
+- [x] **3. Telemetry** — `random` module and scenario seed, stochastic records per station scaled to the GMPE median, canvas waveform panels synced to the clock, STA/LTA picks, stations flashing on trigger.
 - [ ] **4. EEW** — detection, alert, district countdowns, blind zone.
 - [ ] **5. Damage and critical infrastructure.**
 - [ ] **6. Cell tower load, routing and corridors, heatmaps.**
@@ -44,7 +45,8 @@ Each phase ends with CI green and a deployable `main`.
 - MapLibre has no API to start compact attribution collapsed; on narrow maps the `maplibregl-compact-show` class is removed after load (`map-view.tsx`).
 - Building counts outside İstanbul are estimates (see `dataSources.md`); the UI must show this when damage results are displayed (phase 5).
 - Wavefronts are cut where they leave the engine grid (for example north of 41.8° N).
-- Median-only ground motion; aleatory variability arrives with phase 3.
+- Median-only ground motion and records: map and telemetry stay consistent; aleatory variability (ASB14 σ, τ) is not sampled yet (candidate for the scenario editor, phase 10).
+- Synthetic records are point-source shapes (Boore 2003) with finite-fault arrival times; P shares the S-wave attenuation (simplification). Compute time on phones (2–3× slower than desktop) is not yet measured.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 
 ## Evolution of decisions
@@ -59,3 +61,5 @@ Each phase ends with CI green and a deployable `main`.
 - 2026-10-25: Phase 2 models: IASP91, W&C94, ASB14, Worden 2012 (verifiable coefficients); Leonard 2014 and Bilal & Askan 2014 deferred.
 - 2026-10-25: Intensity raster through a MapLibre image source updated with ImageData; canvas sources stay stale under terrain.
 - 2026-10-25: `random` and `Scenario.seed` deferred to phase 3, where they are first used.
+- 2026-10-26: uPlot not adopted; waveforms use one canvas painter over min/max envelopes (list and focus views, no per-frame data copies).
+- 2026-10-26: Synthetic records scaled to the median (not sampled with σ) to keep map and telemetry consistent.

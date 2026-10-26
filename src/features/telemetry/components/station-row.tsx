@@ -59,7 +59,7 @@ export function StationRow({
           onFocus(station.id);
         }}
         className={cn(
-          'relative grid w-full grid-cols-[0.5rem_4rem_minmax(0,1fr)_3rem] items-center gap-2 px-3 py-1.5 text-left transition-colors duration-150 hover:bg-surface-3 focus-visible:-outline-offset-2 pointer-coarse:py-2.5',
+          'relative grid w-full grid-cols-[0.5rem_4rem_minmax(0,1fr)_4.5rem] items-center gap-2 px-3 py-1.5 text-left transition-colors duration-150 hover:bg-surface-3 focus-visible:-outline-offset-2 pointer-coarse:py-2.5',
           focused &&
             'bg-surface-2 before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-signal',
         )}

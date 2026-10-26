@@ -41,12 +41,12 @@ export function StationList({
       </div>
       <div
         aria-hidden
-        className="grid grid-cols-[0.5rem_4rem_minmax(0,1fr)_3rem] gap-2 px-3 pb-1 text-micro text-fg-muted"
+        className="grid grid-cols-[0.5rem_4rem_minmax(0,1fr)_4.5rem] gap-2 px-3 pb-1 text-micro text-fg-muted"
       >
         <span />
         <span>{t('telemetry.columns.station')}</span>
         <span>{t('telemetry.columns.trace')}</span>
-        <span className="text-right">{t('telemetry.columns.peak')}</span>
+        <span className="text-right whitespace-nowrap">{t('telemetry.columns.peak')}</span>
       </div>
       <ul>
         {order.map((index, position) => (

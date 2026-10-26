@@ -8,7 +8,7 @@ Everything runs in the browser. There is no server to operate and no paid servic
 
 ## Status
 
-Phases 0–2 are in place. Pick a Main Marmara Fault scenario and watch it in the browser: the rupture spreads along the fault, P and S wavefronts cross the region as curtains of light over the 3D terrain, and the intensity map (MMI) fills in as the S wave arrives. A timeline plays it back or scrubs it at any speed, and a table lists when the S wave reaches each district. Ground motion uses the Akkar–Sandıkkaya–Bommer (2014) model, verified against OpenQuake's reference values. Telemetry, early warning, damage and the other modules follow; see [`memory-bank/progress.md`](memory-bank/progress.md).
+Phases 0–3 are in place. Pick a Main Marmara Fault scenario and watch it in the browser: the rupture spreads along the fault, P and S wavefronts cross the region as curtains of light over the 3D terrain, and the intensity map (MMI) fills in as the S wave arrives. A timeline plays it back or scrubs it at any speed, and a table lists when the S wave reaches each district. Ground motion uses the Akkar–Sandıkkaya–Bommer (2014) model, verified against OpenQuake's reference values. The telemetry panel streams synthetic three-component accelerograms from the 50 strong-motion stations (stochastic method, Boore 2003), with STA/LTA triggers that flash on the map. Early warning, damage and the other modules follow; see [`memory-bank/progress.md`](memory-bank/progress.md).
 
 ## Quick start
 

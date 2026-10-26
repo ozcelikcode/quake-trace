@@ -40,7 +40,10 @@ tests/
 | `routing` | A* equals Dijkstra on random graphs |
 | `etas` | Omori-Utsu decay recovered from generated catalogs within tolerance |
 | `damage` | Damage-state probabilities sum to 1; monotonic in ground motion |
-| `random` | Same seed gives identical streams across runs |
+| `random` **(built)** | Same seed gives identical streams; uniform mean and variance; normal mean, variance and 2σ tail share; distinct sub-stream seeds |
+| `synth` **(built)** | Window analytic conditions (peak 1 at ε, η at tη, zero slope, b = 1.25315); Brune corner (0.1124 Hz at Mw 7), M0^(-1/3) scaling, Madariaga ratio, spreading, amplification table, ω² slope, P/S ratio; realizations reproduce the target spectrum band by band (±25 %), no mean, energy inside the window; station record PGA equals the target, noise floor before P, P projection on Z and the radial component |
+| `eew` STA/LTA **(built)** | Stationary signal ratio 1, analytic ratio across an amplitude step, trigger index |
+| `lib/math/fft` **(built)** | Direct DFT, single cosine, Parseval and inversion |
 
 Map frame logic (`features/map/lib/simulation-frames.ts`, `layer-order.ts`) is unit-tested as pure functions; the imperative `SimulationRenderer` is covered by e2e and screenshot review.
 

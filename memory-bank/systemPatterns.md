@@ -93,6 +93,8 @@ Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `ee
 - **Overlay order.** quakeTrace overlays go before the first label that follows the basemap's last line layer (`layer-order.ts`): above roads and boundaries, below place names. Intensity sits below the reference lines.
 - **Frames outside React.** The map subscribes to the scenario and playback stores with `store.subscribe` and draws through `SimulationRenderer`; React renders only the panels, which select narrow slices (for example the number of districts reached, not the clock).
 - **Simulation in a worker.** `src/workers/simulation.worker.ts` exposes `simulate` through Comlink and transfers the result arrays; `simulation-client.ts` starts the worker lazily. Features call it (`use-run-scenario.ts`), write `state/scenario-store.ts` and reset `state/playback-store.ts`.
+- **Telemetry drawing.** Waveforms are canvases painted outside React by `useCanvasFrame` (resize, visibility, theme and clock subscriptions); records are reduced to 50 ms min/max envelopes with a running peak, and painters draw one stroke per device column up to the playback time, never beyond it. Readouts that change every frame (peak so far) are written to DOM nodes from the same paint. Station rows are in trigger order, so triggered stations are a prefix and React re-renders only when that count changes.
+- **Focused station.** `state/telemetry-store.ts` holds the chosen station id; `resolveFocusedStation` (first trigger when none is chosen) is shared by the telemetry panel and the map ring, because features cannot import each other.
 - **Shared types.** Types used by both the engine and the UI (`GridSpec`, `Scenario`, `SimulationResult`) live in `src/types/`, because features may not import the engine.
 
 ## Critical paths
@@ -120,3 +122,5 @@ Engine modules: `grid`, `velocity`, `rupture`, `gmpe`, `intensity`, `synth`, `ee
 | 2026-10-25 | Engine coefficients only from verifiable sources (OpenQuake hazardlib, USGS esi-shakelib, ObsPy IASP91); W&C94 and Worden 2012 chosen over Leonard 2014 and Bilal & Askan 2014 for that reason | No coefficient is typed from memory |
 | 2026-10-25 | Presets on EFSM20 `TRCF045` defined by longitude ranges | The Main Marmara Fault is one 520 km source without segment names |
 | 2026-10-25 | Intensity raster via MapLibre `image` source + `updateImage(ImageData)` | Canvas sources are not refreshed under terrain |
+| 2026-10-26 | Own canvas waveform painter instead of uPlot | One renderer for list rows and focus view, envelope decimation, no per-frame `setData` copies, theme tokens read from CSS; AGENTS.md prefers platform APIs |
+| 2026-10-26 | Records only for accelerometer stations, scaled to the median | Strong-motion telemetry; map and telemetry stay consistent |

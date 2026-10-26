@@ -31,7 +31,7 @@ Versions are pinned exactly in `package.json`; the lines below were current on n
 | Data prep | Python 3.13 via uv (`uv.lock`) | uv 0.13 | numpy, rasterio (GDAL 3.12 with netCDF), geopandas/shapely/pyogrio, osmium (pyosmium 4), httpx, affine |
 | Pipeline quality | ruff, pyright (strict, root `pyrightconfig.json`), pytest | | Same gates locally and in CI |
 
-Planned for later phases (add a row with the reason when adopted): uPlot (waveforms), seisplotjs (miniSEED, FDSN), lz-string (URL state), jsPDF (reports), obspy (validation scripts).
+Planned for later phases (add a row with the reason when adopted): seisplotjs (miniSEED, FDSN), lz-string (URL state), jsPDF (reports), obspy (validation scripts).
 
 Bundle (phase 2): shell chunk about 190 KB gzipped (React, Radix, i18next, zod, TanStack Query); the lazy map chunk about 480 KB gzipped (MapLibre, deck.gl); the simulation worker is a separate chunk.
 
@@ -40,6 +40,7 @@ Not adopted:
 - `eslint-plugin-jsx-a11y`: no ESLint 10 support; accessibility is enforced with axe in e2e instead.
 - `vaul`: forced a modal dialog (page `aria-hidden`) for persistent sheets and has had no release since 2024-12.
 - `react-map-gl`: a thin in-house wrapper around MapLibre and `MapLibreOverlay` is enough.
+- `uPlot`: waveforms are drawn by an in-house canvas painter over min/max envelopes (phase 3); last uPlot release 2025-03.
 
 ## Development setup
 

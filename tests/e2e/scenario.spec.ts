@@ -68,6 +68,39 @@ test('runs a preset scenario and plays it back', async ({ page }) => {
   await expect(page.getByText('Fatih')).toBeVisible();
 });
 
+/** Shows the telemetry tab in the current layout. */
+async function openTelemetryPanel(page: Page) {
+  if (isPhone()) {
+    await page
+      .getByRole('region', { name: 'Kontrol paneli' })
+      .getByRole('tab', { name: 'Telemetri' })
+      .click();
+    return;
+  }
+  if (project() === 'tablet') await page.getByRole('button', { name: 'Bilgi panelini aç' }).click();
+  await page.getByRole('tab', { name: 'Telemetri' }).click();
+}
+
+test('streams station records and focuses a station', async ({ page }) => {
+  test.skip(project() === 'phone-ios', 'covered by the other phone profile');
+  await runNorthMarmara(page);
+  await pauseAndJump(page, 2);
+  await openTelemetryPanel(page);
+
+  const focus = page.getByTestId('telemetry-focus');
+  await expect(focus.getByText('Sentetik kayıt')).toBeVisible();
+  await expect(focus.getByText(/T\+\d+,\d s/)).toBeVisible();
+  await expect(page.getByTestId('telemetry-triggered')).toHaveText(/^\d+ \/ 50 tetiklendi$/);
+
+  const rows = page.getByRole('list').last().getByRole('button');
+  await expect(rows).toHaveCount(50);
+  const second = rows.nth(1);
+  const id = (await second.locator('.truncate').innerText()).trim();
+  await second.click();
+  await expect(second).toHaveAttribute('aria-pressed', 'true');
+  await expect(focus.getByRole('heading', { name: id })).toBeVisible();
+});
+
 test('stays accessible with a scenario loaded', async ({ page }) => {
   test.skip(project() !== 'desktop', 'desktop layout');
   await page.emulateMedia({ reducedMotion: 'reduce' });
