@@ -15,7 +15,14 @@
     "openRight": "Bilgi panelini aç",
     "computing": "Hesaplanıyor…",
     "failed": "Hesaplama başarısız",
-    "simulation": "Simülasyon · Mw {{mw}}"
+    "simulation": "Simülasyon · Mw {{mw}}",
+    "about": "Hakkında ve yöntem",
+    "simulationFrom": "Simülasyon · {{source}} · Mw {{mw}}",
+    "sources": {
+      "custom": "Editör",
+      "replay": "Tarihsel",
+      "event": "Canlı olay"
+    }
   },
   "panels": {
     "scenario": {
@@ -352,7 +359,7 @@
       "bridgeClosed_one": "Köprü kapandı · toplam {{count}}",
       "bridgeClosed_other": "Köprüler kapanıyor · toplam {{count}}",
       "networkCongested": "Baz istasyonları tıkanmaya başladı · {{formatted}} istasyon",
-      "tsunami": "Tsunami ilk kıyıya ulaştı · {{district}}, {{height}} m",
+      "tsunami": "Tsunami ilk kıyıya ulaştı · {{district}}, bu kıyıda en yüksek {{height}} m",
       "aftershock": "Artçı deprem · M {{magnitude}}"
     },
     "export": {
@@ -386,6 +393,102 @@
     },
     "methods": {
       "shaking": "Sonlu fay kırılması (Wells ve Coppersmith 1994), IASP91 seyahat süreleri, Akkar-Sandıkkaya-Bommer (2014) yer hareketi medyanı ve USGS Vs30 zemin terimi, Worden vd. (2012) şiddet dönüşümü. Fay geometrisi EFSM20."
+    }
+  },
+  "about": {
+    "title": "quakeTrace hakkında",
+    "description": "Marmara için tarayıcıda çalışan deprem simülasyonu ve gerçek zamanlı deprem izleme ekranı.",
+    "sections": {
+      "overview": "Genel",
+      "methods": "Yöntem",
+      "data": "Veri",
+      "shortcuts": "Kısayollar"
+    },
+    "overview": {
+      "disclaimerTitle": "Simülasyondur, resmi uyarı sistemi değildir",
+      "disclaimer": "Senaryolar model tahminleridir; gerçek deprem uyarısı, hasar tespiti ya da tahmin değildir. Resmi bilgi için AFAD ve Kandilli Rasathanesi duyurularını izleyin. Gerçek veriler (canlı depremler, gözlenen kayıtlar) her zaman kaynağıyla etiketlenir.",
+      "what": "Bir fay üzerinde kırılma başlatıldığında P ve S dalgalarının ilçelere saniye saniye yayılmasını, istasyon kayıtlarını, erken uyarıyı, hasarı, şebeke ve müdahale durumunu, tsunamiyi ve artçıları tek bir zaman çizelgesinde gösterir. Tüm fizik tarayıcıda çalışır; sunucu ya da hesap gerekmez.",
+      "modesTitle": "Senaryo kaynakları",
+      "modes": {
+        "presets": "Hazır: Ana Marmara Fayı üzerindeki beklenen deprem senaryoları.",
+        "editor": "Editör: herhangi bir haritalı fay üzerinde büyüklük, hiposantr, derinlik ve seed seçerek kendi senaryonuz.",
+        "replay": "Tarihsel: 1999, 2019 ve 2025 depremleri USGS parametreleriyle; KOERI kaydı olan istasyonlarda gerçek ivme kayıtları.",
+        "live": "Canlı: AFAD, Kandilli, EMSC ve USGS kataloglarından son 7 günün depremleri; M 4 ve üstü simüle edilebilir."
+      },
+      "shareTitle": "Paylaşım ve çıktı",
+      "share": "Adres çubuğu her zaman çalışan senaryoyu taşır; bağlantıyı paylaşan herkes aynı sonucu görür. Olaylar panelinden rapor (PDF), GeoJSON ve CSV alınabilir.",
+      "source": "Kaynak kodu ve belgeler"
+    },
+    "methods": {
+      "intro": "Her model yayımlanmış bir kaynağa dayanır; katsayılar referans uygulamalara karşı test edilir. Aşağıdakiler medyan (ortalama) tahminlerdir.",
+      "items": {
+        "rupture": {
+          "title": "Kırılma",
+          "body": "Fay izinin altında düzlemsel sonlu fay; büyüklük ile kırılma alanı Wells ve Coppersmith (1994). Kırılma cephesi hiposantrdan 0,8 Vs hızla yayılır (Heaton, 1990). Fay geometrisi EFSM20 (Basili vd., 2024)."
+        },
+        "waves": {
+          "title": "Dalga varışları",
+          "body": "IASP91 kabuk modeli (Kennett ve Engdahl, 1991) ile doğrudan ve kırılmış dalgaların ilk varışı; her alt faydan kırılma zamanı eklenerek."
+        },
+        "groundMotion": {
+          "title": "Yer hareketi ve şiddet",
+          "body": "Akkar, Sandıkkaya ve Bommer (2014) PGA, PGV ve spektral ivme; USGS Vs30 zemin terimi. Şiddet (MMI) Worden vd. (2012) dönüşümüyle."
+        },
+        "records": {
+          "title": "İstasyon kayıtları",
+          "body": "Boore (2003) stokastik yöntemiyle üç bileşenli sentetik ivme kayıtları; tepe değerleri haritayla tutarlı olsun diye ASB14 medyanına ölçeklenir. Tetiklemeler STA/LTA (Trnkoczy, 2012)."
+        },
+        "eew": {
+          "title": "Erken uyarı",
+          "body": "İlk dört istasyonla ızgara aramasıyla konum; P dalgasının ilk 3 saniyesindeki Pd ile büyüklük (Wu ve Zhao, 2006). İletim ve işlem gecikmeleri yok."
+        },
+        "damage": {
+          "title": "Hasar ve kayıp",
+          "body": "GEM 2025 Türkiye zarar görebilirlik fonksiyonları, yer hareketi belirsizliği üzerinden beklenen değer; gece senaryosu. İBB 2019 senaryosuyla ilçe sıralaması karşılaştırıldı."
+        },
+        "network": {
+          "title": "Hücresel şebeke",
+          "body": "Nüfusa göre ITU-R M.2135 aralıklarıyla sentetik baz istasyonları; 2011 Tōhoku sonrası arama talebi (NTT DOCOMO) ve sönüm (Bagrow vd., 2011)."
+        },
+        "routing": {
+          "title": "Müdahale",
+          "body": "OpenStreetMap ana yolları, yasal hız sınırları; köprüler Hazus kırılganlığıyla, sokaklar beklenen bina hasarıyla (varsayım). İtfaiye ve hastanelerden en kısa güzergâhlar."
+        },
+        "tsunami": {
+          "title": "Tsunami",
+          "body": "Okada (1985) deniz tabanı yer değiştirmesi, EMODnet batimetrisinde doğrusal sığ su dalgaları. Karaya tırmanma ve heyelan kaynakları yok; eğitim amaçlıdır."
+        },
+        "aftershocks": {
+          "title": "Artçılar",
+          "body": "Reasenberg ve Jones (1989) genel Kaliforniya parametreleriyle 72 saatlik sentetik dizi ve 24 saatlik olasılıklar."
+        }
+      },
+      "validationTitle": "Gözlemle karşılaştırma",
+      "validation": "Model PGA, KOERI kuvvetli yer hareketi istasyonlarında gözlenen değerlerle karşılaştırıldı (yatay bileşenlerin geometrik ortalaması). Ortalama ln artık ln(gözlenen/model): 2019 Silivri Mw 5,7 için 12 istasyonda +0,10, 2025 Marmara Ereğlisi Mw 6,2 için 43 istasyonda +0,09; istasyonlar arası saçılım yaklaşık 0,5. Hedef ±0,3.",
+      "limitsTitle": "Sınırlar",
+      "limits": "Tüm sonuçlar medyandır, belirsizlik bantları gösterilmez. İstanbul dışındaki bina stoku tahminidir. Elektrik kesintisi, trafik ve deniz ulaşımı modellenmez. Artçı parametreleri Marmara için uyarlanmamıştır."
+    },
+    "data": {
+      "intro": "Hazırlanmış veri kümeleri (uygulamayla birlikte gelir):",
+      "liveTitle": "Canlı servisler ve harita",
+      "live": {
+        "afad": "AFAD Deprem Dairesi Başkanlığı, deprem kataloğu",
+        "kandilli": "Boğaziçi Üniversitesi Kandilli Rasathanesi (KOERI), son depremler ve EIDA dalga formları",
+        "emsc": "EMSC-CSEM, seismicportal.eu",
+        "usgs": "USGS Earthquake Hazards Program, ComCat",
+        "basemap": "Altlık harita: OpenFreeMap, © OpenMapTiles, © OpenStreetMap katkıcıları; arazi: AWS Terrain Tiles (Mapzen)"
+      },
+      "license": "Lisans: {{license}}"
+    },
+    "shortcuts": {
+      "intro": "Bir giriş alanı ya da düğme odaktayken kısayollar o denetime bırakılır.",
+      "items": {
+        "play": "Oynat / duraklat",
+        "step": "Bir adım geri / ileri (ölçeğe göre 1 s, 10 s ya da 10 dk)",
+        "jump": "Büyük adım geri / ileri (10 s, 1 dk ya da 1 sa)",
+        "help": "Bu pencereyi kısayollarla aç",
+        "print": "Senaryo raporunu yazdır / PDF kaydet"
+      }
     }
   }
 }

@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **10 (scenario editor, share links, event log, exports) complete** on branch `feat/phase-10-editor-export` (from phase 9, `8f949f2`). Phase 3–9 branches are pushed to GitHub with upstream. `main` is at phase 2 (`5aec3bf`). Next: phase 11 (polish).
+Phase: **11 (polish) complete** on branch `feat/phase-11-polish` (from phase 10, `a6de0ee`). Phase 3–10 branches are pushed to GitHub with upstream. `main` is at phase 2 (`5aec3bf`). All planned phases are done; merging and deploying are the user's next steps.
 
 ## What works
 
@@ -14,6 +14,7 @@ Phase: **10 (scenario editor, share links, event log, exports) complete** on bra
 - Simulation worker (Comlink), scenario and playback stores, four Main Marmara Fault presets.
 - Telemetry (phase 3): synthetic three-component accelerograms (100 Hz) at the 50 accelerometer stations, scaled to the ASB14 median; STA/LTA triggers; focused station with Z/N/E traces, picks, playhead and peak-so-far readouts; record-section station list in trigger order; stations flash on the map when they trigger; clicking a station on the map focuses it. Scenario compute about 0.5–0.9 s per preset in Node.
 - Damage (phase 5): expected structural loss and night fatalities per district (GEM 2025 Türkiye vulnerability, averaged over ground-motion σ), revealed as the S wave arrives; damage summary and per-district line in the impact panel; 1,388 critical facilities assessed and coloured on the map when reached. North Marmara: ≈ 100,000 complete-loss-equivalent buildings, ≈ 6,400 fatalities (İstanbul ≈ 6,000; İBB 2019: 14,145).
+- Polish (phase 11): About dialog (overview and disclaimer, methods with sources, validation, data sources from the manifest, shortcuts, `?`); status bar names the scenario source; phone opening view on the northern Marmara coast and phone header fitting 360 px; README with features, science, validation and screenshots. Scientific validation: modelled median PGA vs KOERI observations, mean ln residual +0.10 (2019, 12 stations) and +0.09 (2025, 43 stations), within the ±0.3 success criterion.
 - Editor, sharing and exports (phase 10): scenario editor on any of the 27 EFSM20 faults (Mw 5 to the fault's p95 maximum, hypocentre by slider or by clicking a fault on the map, depth, seed) with a map preview; every run is in the address bar as readable query parameters (`?preset=`, `?replay=`, `?fault=&mw=&hypo=&depth=&seed=`, `?event=…`), validated with zod and run on load, with a copy-link button; event log of the scenario (rupture, detection, alert, S wave per province, strongest shaking, facilities out, bridges, network congestion, tsunami, M ≥ 5 aftershocks) revealed with the clock, each entry seeks there; exports: district CSV and GeoJSON, printable report (PDF via the print dialog, light, three A4 pages for the presets).
 - Live mode and replay (phase 9): live list of the last 7 days from AFAD, Kandilli, EMSC and USGS (merged, refreshed every minute, catalog status shown) with map markers; any event from M 4 can be simulated on the nearest fault. Historical replays of 1999 Kocaeli, 2019 Silivri and 2025 Marmara Ereğlisi with USGS parameters; observed KOERI strong-motion records replace synthetic ones in telemetry where available (2025: 10 stations).
 - Aftershocks (phase 8): 72-hour synthetic M ≥ 3 sequence (Reasenberg–Jones generic California) appearing on the map at their times, sized by magnitude; impact summary with count, largest so far and the model's 24-hour M ≥ 5/6 probabilities; Response timeline scale with hour steps and a largest-aftershock marker. North Marmara: 714 aftershocks by 24 h, largest M 6.8 after 6 h.
@@ -21,6 +22,7 @@ Phase: **10 (scenario editor, share links, event log, exports) complete** on bra
 - Cell network and emergency response (phase 6): about 32,750 synthetic cell sites (no OpenCelliD key), call demand up to 55× the busy hour for those who felt the shaking, site and resident counts by state and calls not carried in the impact panel; network raster (calls not carried per km²) selectable in the legend; sites shown from zoom 11. Fire response times before/after per district (KTY speeds, Hazus bridge closures, debris-slowed streets), hospital access after, response corridors weighted by lost buildings drawn as the S wave reaches each district. North Marmara: median fire response 5.8 → 5.9 min, 2,650 km of streets slowed, no bridge closed. Whole scenario about 0.5 s in Node.
 - Early warning (phase 4): location by grid search on the first four triggers (1–2 km error on the presets), Pd magnitude with modelled saturation (first estimates M 6.2–6.5 for Mw 6.9–7.4), alert at T+6–11 s; status-bar alert chip (live region), EEW summary and per-district warning time / countdown / blind zone in the impact panel, blind-zone boundary and estimated epicentre on the map, detection and alert markers on the timeline.
 - First vertical slice: choose a preset, compute in the worker, play back. MMI raster draped on the terrain appears as the S wave arrives; P and S wavefronts as 3D curtains; rupture front and epicentre; legend and "Simulation" watermark; timeline (play/pause, slider, 0.5×–10×, Space and arrow shortcuts); scenario summary; district arrival table (impact tab).
+- Tooling (phase 11): Vitest 299 tests, Playwright 60 passed / 32 skipped (one network blip rerun), pipeline 53 tests.
 - Tooling (phase 10): Vitest 297 tests (3 timing budgets fail on this machine in macOS Low Power Mode, also on the phase 9 commit), Playwright 57 passed / 27 skipped, pipeline 53 tests (unchanged).
 - Tooling (phase 9): Vitest 283 tests, Playwright 48 passed / 20 skipped, pipeline 53 tests.
 - Tooling (phase 8): Vitest 258 tests, Playwright 42 passed / 18 skipped, pipeline 53 tests.
@@ -46,13 +48,12 @@ Each phase ends with CI green and a deployable `main`.
 - [x] **8. Aftershocks and multi-scale timeline** — Reasenberg–Jones sequence (instead of ETAS), aftershock layer and summary, Shaking / Tsunami / Response scales.
 - [x] **9. Live mode and historical replay** — four catalogs merged and polled, replays with USGS parameters, observed KOERI records in telemetry.
 - [x] **10. Scenario editor and URL sharing; event log and PDF/GeoJSON/CSV export.**
-- [ ] **11. Polish** — phone tuning, performance, accessibility audit, About and methodology page, README with screenshots and attribution, scientific validation results published.
+- [x] **11. Polish** — phone tuning, About and methodology dialog, README with screenshots and attribution, scientific validation results published (accessibility: axe in every e2e flow; performance: measured, splitting deferred).
 
 ## Known issues and follow-ups
 
 - Playwright MCP cannot launch: it expects Google Chrome, which is not installed. The user chose to leave it (2026-10-25); visual checks use Playwright screenshots via script.
 - `npm audit`: 4 advisories in `undici` pulled in by `wrangler`/`miniflare` (local dev tooling only, not shipped). Revisit when Wrangler updates its dependency.
-- Phone: the opening view shows much of the Black Sea, and the map legend is large; tune in phase 11.
 - Dark basemap: water and land contrast is low; with the intensity raster the map now reads well, revisit in phase 11.
 - MapLibre has no API to start compact attribution collapsed; on narrow maps the `maplibregl-compact-show` class is removed after load (`map-view.tsx`).
 - Building counts outside İstanbul are estimates (see `dataSources.md`); the UI must show this when damage results are displayed (phase 5).
@@ -70,6 +71,8 @@ Each phase ends with CI green and a deployable `main`.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 
 ## Evolution of decisions
+
+- 2026-10-26: Phase 11: validation in TypeScript against a recorded fixture (not the planned `pipeline/validate`), so it runs with the other tests and reuses the app's miniSEED reader; About is a dialog, not a page (no router); phones open About from the brand mark.
 
 - 2026-10-26: Phase 10: readable query parameters instead of lz-string; PDF through the browser's print dialog instead of jsPDF (Turkish glyphs, no font embedding, no dependency); editor ruptures sized by W&C94 around the hypocentre (no extent control).
 

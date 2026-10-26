@@ -104,3 +104,25 @@ test('meets WCAG 2.2 AA in both themes', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expectNoSeriousA11yViolations(page, '[data-testid="map"]');
 });
+
+test('opens About with methods, data sources and shortcuts', async ({ page }) => {
+  test.skip(isProject('phone-ios') || isProject('tablet'), 'covered by the other profiles');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Hakkında ve yöntem' }).click();
+  const dialog = page.getByRole('dialog', { name: 'quakeTrace hakkında' });
+  await expect(dialog.getByText('Simülasyondur, resmi uyarı sistemi değildir')).toBeVisible();
+  await dialog.getByRole('tab', { name: 'Yöntem' }).click();
+  await expect(dialog.getByText(/Akkar, Sandıkkaya ve Bommer \(2014\)/)).toBeVisible();
+  await dialog.getByRole('tab', { name: 'Veri' }).click();
+  await expect(dialog.getByRole('link', { name: /EFSM20/ })).toBeVisible();
+  await expectNoSeriousA11yViolations(page, '[data-testid="map"]');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+
+  await page.keyboard.press('?');
+  await expect(dialog.getByRole('tab', { name: 'Kısayollar' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(dialog.getByText('Oynat / duraklat')).toBeVisible();
+});

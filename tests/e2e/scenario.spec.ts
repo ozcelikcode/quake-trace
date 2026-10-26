@@ -180,3 +180,18 @@ test('stays accessible with a scenario loaded', async ({ page }) => {
   await pauseAndJump(page, 1);
   await expectNoSeriousA11yViolations(page);
 });
+
+test('fits a 360 px phone without horizontal scrolling once the alert is shown', async ({
+  page,
+}) => {
+  test.skip(project() !== 'phone-android', 'one phone profile');
+  await page.setViewportSize({ width: 360, height: 740 });
+  await runNorthMarmara(page);
+  await pauseAndJump(page, 2);
+  await expect(page.getByTestId('eew-status')).toHaveText(/M \d,\d/);
+  const widths = await page.evaluate(() => [
+    window.innerWidth,
+    document.documentElement.scrollWidth,
+  ]);
+  expect(widths[1]).toBeLessThanOrEqual(widths[0] ?? 0);
+});

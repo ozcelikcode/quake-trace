@@ -15,7 +15,14 @@
     "openRight": "Open information panel",
     "computing": "Computing…",
     "failed": "Computation failed",
-    "simulation": "Simulation · Mw {{mw}}"
+    "simulation": "Simulation · Mw {{mw}}",
+    "about": "About and methods",
+    "simulationFrom": "Simulation · {{source}} · Mw {{mw}}",
+    "sources": {
+      "custom": "Editor",
+      "replay": "Historical",
+      "event": "Live event"
+    }
   },
   "panels": {
     "scenario": {
@@ -352,7 +359,7 @@
       "bridgeClosed_one": "Bridge closed · {{count}} in total",
       "bridgeClosed_other": "Bridges closing · {{count}} in total",
       "networkCongested": "Cell sites congesting · {{formatted}} sites",
-      "tsunami": "Tsunami reached the first coast · {{district}}, {{height}} m",
+      "tsunami": "Tsunami reached the first coast · {{district}}, highest there {{height}} m",
       "aftershock": "Aftershock · M {{magnitude}}"
     },
     "export": {
@@ -386,6 +393,102 @@
     },
     "methods": {
       "shaking": "Finite-fault rupture (Wells and Coppersmith 1994), IASP91 travel times, Akkar-Sandıkkaya-Bommer (2014) median ground motion with the USGS Vs30 site term, Worden et al. (2012) intensity conversion. Fault geometry from EFSM20."
+    }
+  },
+  "about": {
+    "title": "About quakeTrace",
+    "description": "An in-browser earthquake simulation and real-time monitoring screen for the Marmara region.",
+    "sections": {
+      "overview": "Overview",
+      "methods": "Methods",
+      "data": "Data",
+      "shortcuts": "Shortcuts"
+    },
+    "overview": {
+      "disclaimerTitle": "A simulation, not an official warning system",
+      "disclaimer": "Scenarios are model estimates, not real earthquake warnings, damage assessments or forecasts. For official information follow AFAD and the Kandilli Observatory. Real data (live earthquakes, observed records) is always labelled with its source.",
+      "what": "Start a rupture on a fault and watch P and S waves spread across the districts second by second, with station records, early warning, damage, network and response status, tsunami and aftershocks on one timeline. All physics runs in the browser; no server or account is needed.",
+      "modesTitle": "Scenario sources",
+      "modes": {
+        "presets": "Presets: expected-earthquake scenarios on the Main Marmara Fault.",
+        "editor": "Editor: your own scenario on any mapped fault, with magnitude, hypocentre, depth and seed.",
+        "replay": "Historical: the 1999, 2019 and 2025 earthquakes with USGS parameters; real acceleration records where KOERI stations recorded them.",
+        "live": "Live: the last 7 days of earthquakes from the AFAD, Kandilli, EMSC and USGS catalogs; M 4 and above can be simulated."
+      },
+      "shareTitle": "Sharing and output",
+      "share": "The address bar always holds the running scenario; anyone with the link sees the same result. The Events panel exports a report (PDF), GeoJSON and CSV.",
+      "source": "Source code and documentation"
+    },
+    "methods": {
+      "intro": "Every model rests on a published source; coefficients are tested against reference implementations. The values below are median (expected) estimates.",
+      "items": {
+        "rupture": {
+          "title": "Rupture",
+          "body": "Planar finite fault below the fault trace; magnitude and rupture area from Wells and Coppersmith (1994). The rupture front spreads from the hypocentre at 0.8 Vs (Heaton, 1990). Fault geometry from EFSM20 (Basili et al., 2024)."
+        },
+        "waves": {
+          "title": "Wave arrivals",
+          "body": "First arrivals of direct and refracted waves in the IASP91 crust (Kennett and Engdahl, 1991), with the rupture time of each subfault added."
+        },
+        "groundMotion": {
+          "title": "Ground motion and intensity",
+          "body": "Akkar, Sandıkkaya and Bommer (2014) PGA, PGV and spectral acceleration with the USGS Vs30 site term. Intensity (MMI) from Worden et al. (2012)."
+        },
+        "records": {
+          "title": "Station records",
+          "body": "Three-component synthetic accelerograms from the Boore (2003) stochastic method, scaled to the ASB14 median so they agree with the map. Triggers by STA/LTA (Trnkoczy, 2012)."
+        },
+        "eew": {
+          "title": "Early warning",
+          "body": "Location by grid search on the first four stations; magnitude from Pd in the first 3 s of P (Wu and Zhao, 2006). No transmission or processing delays."
+        },
+        "damage": {
+          "title": "Damage and losses",
+          "body": "GEM 2025 vulnerability functions for Türkiye, expected values over the ground-motion uncertainty; night scenario. District ranking compared with the İBB 2019 scenario."
+        },
+        "network": {
+          "title": "Cell network",
+          "body": "Synthetic cell sites at ITU-R M.2135 spacings by population; call demand after the 2011 Tōhoku earthquake (NTT DOCOMO) and its decay (Bagrow et al., 2011)."
+        },
+        "routing": {
+          "title": "Emergency response",
+          "body": "OpenStreetMap major roads at legal speed limits; bridges by Hazus fragility, streets slowed by expected building loss (assumption). Shortest routes from fire stations and to hospitals."
+        },
+        "tsunami": {
+          "title": "Tsunami",
+          "body": "Okada (1985) seafloor displacement and linear shallow-water waves on EMODnet bathymetry. No run-up or landslide sources; educational."
+        },
+        "aftershocks": {
+          "title": "Aftershocks",
+          "body": "A synthetic 72-hour sequence and 24-hour probabilities from the Reasenberg and Jones (1989) generic California parameters."
+        }
+      },
+      "validationTitle": "Comparison with observations",
+      "validation": "Model PGA was compared with values observed at KOERI strong-motion stations (geometric mean of the horizontals). Mean ln residual ln(observed/model): +0.10 at 12 stations for the 2019 Silivri Mw 5.7 earthquake, +0.09 at 43 stations for the 2025 Marmara Ereğlisi Mw 6.2 earthquake; station-to-station scatter about 0.5. Target ±0.3.",
+      "limitsTitle": "Limits",
+      "limits": "All results are medians; uncertainty bands are not shown. Building stock outside İstanbul is estimated. Power cuts, traffic and ferries are not modelled. Aftershock parameters are not fitted to the Marmara region."
+    },
+    "data": {
+      "intro": "Prepared datasets (shipped with the app):",
+      "liveTitle": "Live services and map",
+      "live": {
+        "afad": "AFAD Earthquake Department, earthquake catalog",
+        "kandilli": "Boğaziçi University Kandilli Observatory (KOERI), latest earthquakes and EIDA waveforms",
+        "emsc": "EMSC-CSEM, seismicportal.eu",
+        "usgs": "USGS Earthquake Hazards Program, ComCat",
+        "basemap": "Basemap: OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors; terrain: AWS Terrain Tiles (Mapzen)"
+      },
+      "license": "License: {{license}}"
+    },
+    "shortcuts": {
+      "intro": "While a field or button has focus, the keys go to that control.",
+      "items": {
+        "play": "Play / pause",
+        "step": "Step back / forward (1 s, 10 s or 10 min by scale)",
+        "jump": "Jump back / forward (10 s, 1 min or 1 h)",
+        "help": "Open this window at the shortcuts",
+        "print": "Print the scenario report / save as PDF"
+      }
     }
   }
 }

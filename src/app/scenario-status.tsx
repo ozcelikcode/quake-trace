@@ -8,6 +8,7 @@ export function ScenarioStatus() {
   const { t, i18n } = useTranslation();
   const status = useScenarioStore((state) => state.status);
   const mw = useScenarioStore((state) => state.result?.rupture.mw);
+  const kind = useScenarioStore((state) => state.origin?.kind ?? 'preset');
 
   const label =
     status === 'computing'
@@ -16,7 +17,12 @@ export function ScenarioStatus() {
         ? t('status.failed')
         : mw === undefined
           ? t('status.idle')
-          : t('status.simulation', { mw: formatNumber(mw, i18n.language, 1) });
+          : kind === 'preset'
+            ? t('status.simulation', { mw: formatNumber(mw, i18n.language, 1) })
+            : t('status.simulationFrom', {
+                source: t(`status.sources.${kind}`),
+                mw: formatNumber(mw, i18n.language, 1),
+              });
 
   return (
     <span

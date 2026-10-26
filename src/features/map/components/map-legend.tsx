@@ -90,7 +90,7 @@ export function MapLegend() {
   const scale = scales[shown];
 
   return (
-    <div className="pointer-events-none absolute bottom-16 left-3 z-10 w-60 space-y-2 rounded-panel border border-line bg-surface-1/90 p-3 shadow-float backdrop-blur-sm max-sm:top-14 max-sm:bottom-auto max-sm:w-52 max-sm:p-2">
+    <div className="pointer-events-none absolute bottom-16 left-3 z-10 w-60 space-y-2 rounded-panel border border-line bg-surface-1/90 p-3 shadow-float backdrop-blur-sm max-sm:top-14 max-sm:bottom-auto max-sm:w-44 max-sm:space-y-1.5 max-sm:p-2">
       {available.network && (
         <ToggleGroup
           type="single"

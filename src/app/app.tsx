@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { AboutDialog, useAboutShortcut } from '@/features/about';
 import { ScenarioReport } from '@/features/events';
 import { SharedScenario } from '@/features/scenario';
 import { usePlaybackLoop, usePlaybackShortcuts } from '@/features/timeline';
@@ -17,6 +18,7 @@ export function App() {
   useThemeSync();
   usePlaybackLoop();
   usePlaybackShortcuts();
+  useAboutShortcut();
   const layout = useLayoutMode();
 
   return (
@@ -24,6 +26,7 @@ export function App() {
       <TooltipProvider>
         <SharedScenario />
         <ScenarioReport />
+        <AboutDialog />
         {layout === 'desktop' && <DesktopLayout />}
         {layout === 'tablet' && <TabletLayout />}
         {layout === 'phone' && <PhoneLayout />}

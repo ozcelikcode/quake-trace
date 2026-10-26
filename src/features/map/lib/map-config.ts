@@ -33,6 +33,19 @@ export const MAX_BOUNDS: LngLatBoundsLike = [
   [33.5, 43.2],
 ];
 
+/**
+ * Narrow (portrait phone) maps frame the northern Marmara coast, İstanbul between Tekirdağ and
+ * İzmit, with a lower pitch so less of the horizon shows.
+ */
+export const COMPACT_VIEW = {
+  maxWidth: 640,
+  bounds: [
+    [27.6, 40.45],
+    [29.95, 41.25],
+  ],
+  pitch: 30,
+} as const satisfies { maxWidth: number; bounds: LngLatBoundsLike; pitch: number };
+
 export const INITIAL_PITCH = 45;
 export const INITIAL_BEARING = -12;
 export const MAX_PITCH = 75;

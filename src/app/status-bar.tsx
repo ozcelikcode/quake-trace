@@ -1,4 +1,4 @@
-import { Moon, PanelLeft, PanelRight, Sun } from 'lucide-react';
+import { Info, Moon, PanelLeft, PanelRight, Sun } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -44,11 +44,12 @@ export function StatusBar({ layout }: { layout: LayoutMode }) {
   const theme = useUiStore((state) => state.theme);
   const toggleTheme = useUiStore((state) => state.toggleTheme);
   const setOpenDrawer = useUiStore((state) => state.setOpenDrawer);
+  const setAbout = useUiStore((state) => state.setAbout);
   const language = toLanguage(i18n.resolvedLanguage);
   const themeLabel = theme === 'dark' ? t('status.theme.toLight') : t('status.theme.toDark');
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-2 sm:px-3">
+    <header className="flex h-12 shrink-0 items-center gap-2 border-b border-line bg-surface-1 px-2 sm:gap-3 sm:px-3">
       {layout === 'tablet' && (
         <IconButton
           label={t('status.openLeft')}
@@ -61,7 +62,21 @@ export function StatusBar({ layout }: { layout: LayoutMode }) {
       )}
 
       <div className="flex items-center gap-2">
-        <BrandMark className="text-signal" />
+        {layout === 'phone' ? (
+          // Phones have no room for an About button; the mark opens it.
+          <button
+            type="button"
+            aria-label={t('status.about')}
+            onClick={() => {
+              setAbout('overview');
+            }}
+            className="-mx-1.5 grid size-11 place-items-center rounded-control text-signal"
+          >
+            <BrandMark />
+          </button>
+        ) : (
+          <BrandMark className="text-signal" />
+        )}
         {/* Phones keep the mark only, leaving room for the clock and the alert. */}
         <h1
           className={
@@ -72,7 +87,7 @@ export function StatusBar({ layout }: { layout: LayoutMode }) {
         </h1>
       </div>
 
-      <Divider />
+      {layout !== 'phone' && <Divider />}
 
       <div className="flex shrink-0 items-baseline gap-2" aria-live="off">
         {layout !== 'phone' && <span className="label-micro">{t('status.clock')}</span>}
@@ -106,6 +121,17 @@ export function StatusBar({ layout }: { layout: LayoutMode }) {
         <IconButton label={themeLabel} onClick={toggleTheme}>
           {theme === 'dark' ? <Sun /> : <Moon />}
         </IconButton>
+
+        {layout !== 'phone' && (
+          <IconButton
+            label={t('status.about')}
+            onClick={() => {
+              setAbout('overview');
+            }}
+          >
+            <Info />
+          </IconButton>
+        )}
 
         {layout === 'tablet' && (
           <IconButton

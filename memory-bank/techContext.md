@@ -33,6 +33,8 @@ Versions are pinned exactly in `package.json`; the lines below were current on n
 
 Planned for later phases (add a row with the reason when adopted): obspy (validation scripts; used once via `uv run --with obspy` to produce the miniSEED test reference).
 
+Bundle (phase 11): shell chunk 245 KB gzipped (all panels and features), map chunk 486 KB gzipped (lazy), workers separate. Splitting the panels by route or lazy-loading rarely used ones (About, report, live) is the next step if first load matters.
+
 Bundle (phase 2): shell chunk about 190 KB gzipped (React, Radix, i18next, zod, TanStack Query); the lazy map chunk about 480 KB gzipped (MapLibre, deck.gl); the simulation worker is a separate chunk.
 
 Not adopted:

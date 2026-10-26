@@ -46,7 +46,9 @@ test('runs the scenario of a shared link and rejects a broken one', async ({ pag
   await page.goto('/?fault=TRCF045&mw=6.5&hypo=200&depth=10&seed=3');
   await waitForPlayback(page);
   if (!isPhone()) {
-    await expect(page.getByRole('status').filter({ hasText: 'Simülasyon · Mw 6,5' })).toBeVisible();
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Simülasyon · Editör · Mw 6,5' }),
+    ).toBeVisible();
   }
   await openScenarioPanel(page);
   const editor = page.getByRole('form', { name: 'Senaryo editörü' });

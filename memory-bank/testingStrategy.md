@@ -25,7 +25,7 @@ tests/
 | Integration | Worker round-trips with transferables, asset loading against fixture manifests, proxy Worker against stubbed upstreams | Every change, `npm run test` |
 | E2E | Main flows on desktop and phone viewports, both locales | UI changes and CI, `npm run test:e2e` |
 | Pipeline | Dataset transforms on tiny inputs | Pipeline changes, `uv run pytest ../tests/pipeline` |
-| Scientific validation | Model versus observed ground motion | When models change, `uv run quaketrace-pipeline validate` |
+| Scientific validation | Model versus observed ground motion (`tests/integration/engine/ground-motion-validation.test.ts`, recorded KOERI PGA) | Every change, `npm run test` |
 
 ## Engine references
 

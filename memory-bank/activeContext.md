@@ -2,9 +2,16 @@
 
 ## Current focus
 
-Phase 10 (scenario editor, share links, event log, exports) is complete on branch `feat/phase-10-editor-export` (from phase 9). Next is phase 11: polish.
+Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). All planned phases are done; next steps are the user's: review, merge to `main`, deploy.
 
-## Recent changes (2026-10-26, phase 10)
+## Recent changes (2026-10-26, phase 11)
+
+- Validation: `tests/fixtures/validation/observed-pga.json` (KOERI KO HN? records of 2019 and 2025, geometric-mean horizontal PGA, procedure in its README) and `tests/integration/engine/ground-motion-validation.test.ts`: mean ln(observed/model) +0.10 (2019, 12 stations) and +0.09 (2025, 43 stations), scatter about 0.5; criterion ±0.3 met.
+- App: feature `about` (`AboutDialog`: overview with the disclaimer, methods with sources and the validation result, data sources from the manifest plus live services, keyboard shortcuts; `?` opens it at the shortcuts); `components/ui/dialog.tsx` (full screen on phones); `useManifest`; `ui-store.about`. Status bar: About button (desktop/tablet), brand mark opens About on phones, scenario source in the status ("Simulation · Historical · Mw 6.2"), phone header without the divider and with tighter gaps (fits 360 px with the alert chip; an About button there had pushed the page to 415 px and hidden the sheet tabs). Phone opening view frames the northern Marmara coast (`COMPACT_VIEW`), narrower phone legend. Tsunami log line says the height is the coast's highest.
+- README rewritten (features, science, validation table) with screenshots in `docs/screenshots/`.
+- Tests: About dialog e2e (axe included), 360 px no-overflow e2e.
+
+## Changes (2026-10-26, phase 10)
 
 - Data: `data/fault-source.ts` (moved from the scenario presets; shared with the map).
 - App: scenario tab Editor (`scenario-editor.tsx`: fault, Mw up to the EFSM20 p95 maximum, hypocentre along the trace, depth in the seismogenic layer, seed; `lib/custom-scenario.ts` with `normalizeDraft`); `state/editor-store.ts`; map preview and click-to-place (`map/lib/editor-layers.ts`, wide transparent hit line over the faults). Share links: `lib/run-request.ts` encodes every run as readable query parameters (zod on decode), `publishRequest` writes it with `history.replaceState`, `SharedScenario` in the app shell runs a link once data loads (`scenario.error` now `'compute' | 'link'`), `ShareLinkButton` copies the URL.
@@ -62,7 +69,8 @@ Phase 10 (scenario editor, share links, event log, exports) is complete on branc
 
 ## Next steps
 
-1. Phase 11: polish (phone tuning, performance, accessibility audit, About/methodology page, README with screenshots, validation results).
+1. User: review the phase branches, merge to `main`, deploy to Cloudflare (`npx wrangler login`, `npm run deploy`).
+2. Optional: lazy-load rarely used panels to shrink the 245 KB shell chunk; OpenCelliD key for real cell sites; ASB14 σ sampling for uncertainty bands.
 2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.
 

@@ -6,9 +6,36 @@ Everything runs in the browser. There is no server to operate and no paid servic
 
 > **Simulation, not a warning system.** quakeTrace is an educational and portfolio project. Simulated output is always labeled as simulation; real earthquake data is always labeled with its source. It is not an official early-warning or alerting service.
 
-## Status
+![North Marmara scenario 22 seconds after the origin: P and S wavefronts, the intensity map, the early-warning alert and live station records](docs/screenshots/desktop-shaking.jpg)
 
-Phases 0–5 are in place. Pick a Main Marmara Fault scenario and watch it in the browser: the rupture spreads along the fault, P and S wavefronts cross the region as curtains of light over the 3D terrain, and the intensity map (MMI) fills in as the S wave arrives. A timeline plays it back or scrubs it at any speed, and a table lists when the S wave reaches each district. Ground motion uses the Akkar–Sandıkkaya–Bommer (2014) model, verified against OpenQuake's reference values. The telemetry panel streams synthetic three-component accelerograms from the 50 strong-motion stations (stochastic method, Boore 2003), with STA/LTA triggers that flash on the map. A simulated early-warning system locates the event from the first four stations, issues an alert with a first magnitude estimate, and counts down to S-wave arrival in every district, marking the blind zone. Expected building damage and night-time fatalities per district (GEM 2025 vulnerability model for Türkiye, validated against the İBB 2019 scenario) and the state of hospitals, fire stations and police appear as the S wave arrives. Cell tower load, corridors and the other modules follow; see [`memory-bank/progress.md`](memory-bank/progress.md).
+## What it does
+
+- **Scenarios.** Four expected-earthquake presets on the Main Marmara Fault, an editor for any of the 27 mapped EFSM20 faults (magnitude, hypocentre, depth, seed), and historical replays of 1999 Kocaeli, 2019 Silivri and 2025 Marmara Ereğlisi with USGS parameters.
+- **Shaking, second by second.** A finite-fault rupture, P and S wavefronts as curtains of light over 3D terrain, intensity (MMI) filling in as the S wave arrives, and a timeline that plays or scrubs at any speed over three scales: shaking (seconds), tsunami (one hour) and response (72 hours).
+- **Telemetry.** Three-component accelerograms at 50 strong-motion stations with STA/LTA triggers; real KOERI records replace the synthetic ones in replays where they exist.
+- **Early warning.** Location from the first four stations, a first magnitude estimate, a countdown to S-wave arrival in every district and the blind zone.
+- **Impact.** Building damage and night-time fatalities per district, hospitals, fire and police stations, cell-network congestion, fire and hospital response times with emergency corridors, tsunami propagation and a 72-hour aftershock sequence.
+- **Live mode.** The last seven days of earthquakes from AFAD, Kandilli, EMSC and USGS, merged and refreshed every minute; any event from M 4 can be simulated.
+- **Share and export.** The address bar always holds the running scenario as a readable link. The event log lists every milestone; the results export as GeoJSON, CSV and a printable PDF report.
+- **Everywhere.** Desktop, tablet and phone layouts, Turkish and English, dark and light themes, keyboard shortcuts (`?` lists them).
+
+|                                                                                                      |                                                                                                         |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| ![Tsunami scale with the sea-surface raster and the event log](docs/screenshots/desktop-tsunami.jpg) | ![Damage, network and response summaries in the light theme](docs/screenshots/desktop-impact-light.jpg) |
+| ![A scenario built in the editor on the Main Marmara Fault](docs/screenshots/desktop-editor.jpg)     | <img src="docs/screenshots/phone-telemetry.jpg" alt="Phone layout with the telemetry tab" width="260">  |
+
+## Science
+
+Every model cites a published source, and the tests check coefficients against reference implementations (OpenQuake, USGS ShakeMap, ObsPy, GeoClaw, Okada's tables). In short: Wells and Coppersmith (1994) rupture scaling, IASP91 travel times, Akkar, Sandıkkaya and Bommer (2014) ground motion with the USGS Vs30 site term, Worden et al. (2012) intensity, the Boore (2003) stochastic method for records, Wu and Zhao (2006) Pd magnitudes, GEM 2025 vulnerability for Türkiye, Hazus bridge fragility, Okada (1985) and linear shallow-water waves, and Reasenberg and Jones (1989) aftershocks. The in-app About dialog and [`memory-bank/simulationModels.md`](memory-bank/simulationModels.md) give the details and the limits.
+
+**Validation against observations.** The modelled median PGA is compared with PGA recorded at KOERI strong-motion stations (geometric mean of the horizontals; [`tests/fixtures/validation`](tests/fixtures/validation)):
+
+| Earthquake                    | Stations | Mean ln(observed / model) | Scatter (σ of ln) |
+| ----------------------------- | -------- | ------------------------- | ----------------- |
+| 2019 Silivri, Mw 5.7          | 12       | +0.10                     | 0.51              |
+| 2025 Marmara Ereğlisi, Mw 6.2 | 43       | +0.09                     | 0.50              |
+
+The target is a mean within ±0.3; the scatter is of the same order as the model's own aleatory variability. Damage is compared with the İBB 2019 İstanbul scenario (district fatality rank correlation 0.77); the model's İstanbul total is about 2.4× lower (the two scenarios assume different ruptures, and the model uses median building-stock assumptions).
 
 ## Quick start
 

@@ -6,6 +6,15 @@ import type { GridDatasetId, JsonDatasetId } from './repository';
 // Prepared datasets never change while the app runs.
 const datasetQuery = { staleTime: Number.POSITIVE_INFINITY, gcTime: Number.POSITIVE_INFINITY };
 
+/** The prepared-data manifest (versions and sources of every dataset). */
+export function useManifest() {
+  return useQuery({
+    ...datasetQuery,
+    queryKey: ['data', 'manifest'],
+    queryFn: () => dataRepository.manifest(),
+  });
+}
+
 export function useJsonDataset<K extends JsonDatasetId>(id: K) {
   return useQuery({
     ...datasetQuery,

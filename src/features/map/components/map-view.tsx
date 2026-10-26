@@ -22,6 +22,7 @@ import { useReferenceData } from '../hooks/use-reference-data';
 import {
   basemapStyleUrl,
   COMPACT_ATTRIBUTION_MAX_WIDTH,
+  COMPACT_VIEW,
   DATA_ATTRIBUTION,
   INITIAL_BEARING,
   INITIAL_PITCH,
@@ -103,10 +104,13 @@ export function MapView() {
 
     // Fitting bounds with pitch shifts the center towards the horizon, so the zoom is taken
     // from a flat fit and the pitch is applied around the region's center.
-    const flatCamera = map.cameraForBounds(INITIAL_VIEW_BOUNDS, { padding: 24 });
+    const compact = container.clientWidth < COMPACT_VIEW.maxWidth;
+    const flatCamera = compact
+      ? map.cameraForBounds(COMPACT_VIEW.bounds, { padding: 16 })
+      : map.cameraForBounds(INITIAL_VIEW_BOUNDS, { padding: 24 });
     map.jumpTo({
-      center: INITIAL_VIEW_CENTER,
-      pitch: INITIAL_PITCH,
+      center: compact ? (flatCamera?.center ?? INITIAL_VIEW_CENTER) : INITIAL_VIEW_CENTER,
+      pitch: compact ? COMPACT_VIEW.pitch : INITIAL_PITCH,
       bearing: INITIAL_BEARING,
       ...(flatCamera?.zoom === undefined ? {} : { zoom: flatCamera.zoom }),
     });
