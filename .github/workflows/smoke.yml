@@ -23,6 +23,19 @@ jobs:
           curl -fsS "$BASE/" | grep -q '<div id="root">'
           curl -fsS "$BASE/data/manifest.json" | grep -q '"datasets"'
           curl -fsS -o /dev/null "$BASE/data/faults.geojson"
+      - name: Caching and compression
+        run: |
+          headers() {
+            echo "== $1"
+            curl -fsS -o /dev/null -D - -H 'Accept-Encoding: gzip, br' "$BASE$1" \
+              | grep -iE '^(content-type|content-encoding|cache-control|content-length):'
+          }
+          script=$(curl -fsS "$BASE/" | grep -o '/assets/[^"]*\.js' | head -1)
+          headers "$script"
+          headers "/data/manifest.json"
+          headers "/data/vs30.f32.gz"
+          headers "$script" | grep -qi 'immutable'
+          headers "/data/vs30.f32.gz" | grep -qi 'application/gzip'
       - name: Proxy routes
         run: |
           day=$(date -u +%Y-%m-%d)

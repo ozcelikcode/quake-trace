@@ -93,7 +93,7 @@ Budget (acceptance for the whole phase):
     - A run fetches only the inputs it needs.
     - Presets are enabled once the small inputs are ready.
     - An e2e test asserts that the first load does not request `roads.bin`, `bathymetry.f32` or `infra.geojson`.
-- [ ] **13.2 Caching and compression.**
+- [x] **13.2 Caching and compression.** (Int16 grid quantization not done: gzip already halves the grids; revisit only if transfer is still over budget.)
   - Files: `public/_headers` (new), `src/data/browser.ts`, `pipeline/` (grid encoding), `.github/workflows/smoke.yml`.
   - Done when:
     - `/assets/*` is served `immutable` for one year, and `/data/*` is versioned by the manifest sha256.

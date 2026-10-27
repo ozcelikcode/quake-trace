@@ -86,7 +86,7 @@ The system Python is 3.9; uv manages the 3.13 interpreter for the pipeline. A fu
 - No paid services, no Docker, no long-running server.
 - Cloudflare Workers free plan: 100,000 Worker requests per day (static asset requests are free), 25 MiB per asset, 20,000 assets.
 - The Workers Cache API is a no-op on `*.workers.dev` hosts; responses therefore carry `Cache-Control` so browsers do not repeat requests.
-- Initial download: shell chunk about 146 KB gzipped; MapLibre and deck.gl load lazily (about 400 KB gzipped). Heavy datasets load lazily.
+- Initial download: shell chunk about 146 KB gzipped; MapLibre and deck.gl load lazily (about 400 KB gzipped). Scenario datasets load on the first run, as gzip copies (`<file>.gz?v=<sha256>`) emitted by the build; caching rules live in `public/_headers`.
 - Scenario computation under 2 s on a mid-range laptop (tsunami runs in the background).
 - Playback at 60 fps desktop, 30 fps phones; device pixel ratio capped at 1.5 on phones.
 - Basemap and terrain are keyless: OpenFreeMap styles (`dark`, `positron`), AWS Terrain Tiles (Terrarium encoding).

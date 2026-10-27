@@ -16,8 +16,11 @@ import {
   vulnerabilitySchema,
 } from './schemas';
 
-/** Reads a file from public/data by its manifest path. */
-export type DataFetcher = (path: string) => Promise<ArrayBuffer>;
+/**
+ * Reads a file from public/data by its manifest path; `version` (the dataset's sha256) lets the
+ * fetcher address an immutable copy.
+ */
+export type DataFetcher = (path: string, version?: string) => Promise<ArrayBuffer>;
 
 export const jsonDatasets = {
   faults: faultsSchema,
@@ -80,7 +83,7 @@ export class DataRepository {
   async json<K extends JsonDatasetId>(id: K): Promise<JsonDataset<K>> {
     const entry = await this.#require(id);
     const parse = parsers[id];
-    return parse(parseJson(await this.#fetcher(entry.path)));
+    return parse(parseJson(await this.#fetcher(entry.path, entry.sha256)));
   }
 
   async grid(id: GridDatasetId): Promise<Grid> {
@@ -89,13 +92,13 @@ export class DataRepository {
     if (entry.format !== 'float32-grid') throw new DataError(`dataset ${id} is not a grid`);
     const spec = manifest.grids[entry.grid];
     if (!spec) throw new DataError(`grid ${entry.grid} is not in the manifest`);
-    return decodeGrid(await this.#fetcher(entry.path), spec);
+    return decodeGrid(await this.#fetcher(entry.path, entry.sha256), spec);
   }
 
   async roads(): Promise<RoadGraph> {
     const entry = await this.#require('roads');
     if (entry.format !== 'csr-graph') throw new DataError('roads is not a graph');
-    return decodeRoadGraph(await this.#fetcher(entry.path), entry);
+    return decodeRoadGraph(await this.#fetcher(entry.path, entry.sha256), entry);
   }
 
   /** Cell sites are optional: they need an OpenCelliD key at build time. */
@@ -103,6 +106,6 @@ export class DataRepository {
     const entry = await this.entry('cells');
     if (!entry) return undefined;
     if (entry.format !== 'binary-table') throw new DataError('cells is not a binary table');
-    return decodeCellSites(await this.#fetcher(entry.path), entry);
+    return decodeCellSites(await this.#fetcher(entry.path, entry.sha256), entry);
   }
 }

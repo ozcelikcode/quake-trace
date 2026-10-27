@@ -2,9 +2,11 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1 done, next 13.2 (caching and compression). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1–13.2 done, next 13.3 (map cost). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
 ## Recent changes (2026-10-27, phase 13)
+
+- 13.2: `public/_headers` (hashed assets immutable for a year, data one day, manifest `no-cache`); the build emits `data/<file>.gz` for every manifest dataset (`compressData` in `vite.config.ts`) and production fetches `<file>.gz?v=<sha256>` and inflates it with `DecompressionStream` (Cloudflare does not compress octet-stream; roads 5.9 → 3.1 MB, infra 0.8 → 0.13 MB). The smoke workflow prints and checks the headers.
 
 - 13.1: the page opens with only the manifest, faults, districts and stations. `useRunScenario` fetches the simulation inputs on the first run (`queryClient.query` with the shared query options in `data/use-dataset.ts`), the tsunami fetches the bathymetry itself, `SharedScenario` mounts its runner only when the address bar holds a request, and the map, event log and facility layer load roads, elevation and infra once a result exists. e2e asserts that the first load does not request them.
 
