@@ -51,6 +51,8 @@ export function planStations(
     if (!Number.isFinite(siteVs30)) continue;
 
     arrivals.locate(site.lon, site.lat);
+    // Beyond the travel-time tables (another continent) a station records nothing.
+    if (!Number.isFinite(arrivals.sArrivalS)) continue;
     const rjbKm = surface.distanceKm(site.lon, site.lat);
     const distanceKm = arrivals.ruptureDistanceKm();
     const pgaCmS2 = Math.exp(asb14LnMedian('PGA', { mw, rjbKm, vs30: siteVs30, rakeDeg })) * G_CMS2;

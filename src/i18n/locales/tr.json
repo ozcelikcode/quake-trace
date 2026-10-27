@@ -207,7 +207,8 @@
     "stateWaiting": "bekliyor",
     "scaleNote": "Her iz kendi tepe değerine ölçeklidir.",
     "observed": "Gerçek kayıt · KOERI",
-    "observedMethod": "KOERI EIDA düğümünden ivme kaydı; sayımlar olay öncesi ortalama çıkarılıp alet hassasiyetiyle cm/s²’ye çevrildi."
+    "observedMethod": "KOERI EIDA düğümünden ivme kaydı; sayımlar olay öncesi ortalama çıkarılıp alet hassasiyetiyle cm/s²’ye çevrildi.",
+    "virtual": "Sanal istasyon (orada cihaz yok), 100 Hz"
   },
   "eew": {
     "title": "Erken uyarı (simülasyon)",

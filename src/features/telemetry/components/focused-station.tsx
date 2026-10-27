@@ -6,6 +6,7 @@ import { cn } from '@/lib/cn';
 import type { ObservedComponents } from '@/state/observed-store';
 import { usePlaybackStore } from '@/state/playback-store';
 import { RECORD_COMPONENTS, type StationRecords } from '@/types/simulation';
+import { isVirtualStation } from '@/features/scenario';
 
 import { buildEnvelope, ENVELOPE_BIN_S, recordPeak } from '../lib/envelope';
 import { formatPeak } from '../lib/format-peak';
@@ -67,7 +68,9 @@ export function FocusedStation({ records, index, durationS, observed }: FocusedS
           <h3 id="telemetry-focus-title" className="num text-title font-semibold text-fg">
             {station.id}
           </h3>
-          <p className="text-micro text-fg-muted">{t('telemetry.instrument')}</p>
+          <p className="text-micro text-fg-muted">
+            {isVirtualStation(station.id) ? t('telemetry.virtual') : t('telemetry.instrument')}
+          </p>
         </div>
         <span
           title={observed ? t('telemetry.observedMethod') : t('telemetry.method')}

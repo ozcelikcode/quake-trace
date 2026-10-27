@@ -174,8 +174,14 @@ Budget (acceptance for the whole phase):
   - Done when:
     - `LIVE_REGION` is removed: USGS and EMSC are global (M ≥ 4.5 at world zoom), AFAD and Kandilli cover Türkiye.
     - Any event can become a scenario, falling back to `epicentreSource` when it is off-fault.
-- [ ] **14.7 Editor anywhere.**
-  - Done when: a click on any fault or point sets the source, and stations outside Marmara come from the FDSN station service through the proxy (virtual stations labelled "synthetic" if none).
+- [x] **14.7a Stations anywhere.**
+  - Where fewer than 8 real accelerometers lie within 150 km of the epicentre, 12 virtual stations (`VS.V01`–`VS.V12`) ring the epicentre at 20, 50 and 100 km (`features/scenario/lib/virtual-stations.ts`). Telemetry labels them "virtual station (no instrument there)".
+  - Real stations beyond 1000 km are dropped, and the engine skips stations beyond its travel-time tables.
+  - Not done: FDSN station queries for real stations outside Marmara.
+- [ ] **14.7b Editor anywhere.**
+  - Goal: the editor can use any fault, not only the 27 regional EFSM20 faults.
+  - Approach: one fault catalogue (regional plus world `FaultSource`s with a magnitude limit). For world faults, use the W&C94 magnitude of the full trace, since they have no EFSM20 `mwMax`. It replaces `Faults` in `custom-scenario.ts`, `editor-layers.ts`, the editor select, `SharedScenario` link validation and the map's `FAULT_HIT_LAYER`, which needs to cover the world fault layer.
+  - Done when: clicking any fault on the map fills the editor, and `?fault=GEM-…` links work.
 - [ ] **14.8 Türkiye exposure.**
   - Done when: population per MMI class is shown by province and district (geoBoundaries ADM1/ADM2 + TÜİK ADNKS); no damage or fatality numbers are given outside Marmara.
 

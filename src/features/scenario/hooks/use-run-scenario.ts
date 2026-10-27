@@ -23,6 +23,7 @@ import { damageInputs } from '../lib/damage-inputs';
 import { scenarioFromEvent } from '../lib/event-scenario';
 import { resolvePreset, SCENARIO_PRESETS } from '../lib/presets';
 import { encodeRunRequest, type RunRequest } from '../lib/run-request';
+import { recordingSites } from '../lib/virtual-stations';
 
 /**
  * Observed records are looked for at the accelerometer stations within this distance; waveforms
@@ -197,10 +198,14 @@ export function useRunScenario() {
         vs30: vs30.values,
         maxEventCells: eventCellBudget(),
         districtCells: districtCells.values,
-        // Strong-motion records come from the stations with accelerometers.
-        stations: stations.stations
-          .filter((station) => station.accelerometer)
-          .map(({ id, lon, lat }) => ({ id, lon, lat })),
+        // Strong-motion records come from the stations with accelerometers, and from virtual
+        // stations where the regional network does not reach.
+        stations: recordingSites(
+          scenario,
+          stations.stations
+            .filter((station) => station.accelerometer)
+            .map(({ id, lon, lat }) => ({ id, lon, lat })),
+        ),
         damage: damageInputs(districtStats, vulnerability, population.values, infra),
         // Without OpenCelliD data the engine places synthetic sites.
         network: { siteLonLat: cells?.siteLonLat ?? null },

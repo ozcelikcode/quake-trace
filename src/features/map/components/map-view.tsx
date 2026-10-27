@@ -333,7 +333,11 @@ export function MapView() {
   // Frames are drawn outside React: the clock changes up to 60 times a second.
   useEffect(() => {
     if (!renderer) return;
-    renderer.setResult(useScenarioStore.getState().result);
+    // A shared link can finish computing before the map exists; fly to it once it does.
+    const initial = useScenarioStore.getState().result;
+    const map = mapRef.current;
+    if (map && initial) focusScenario(map, initial);
+    renderer.setResult(initial);
     renderer.setFocusedStation(focusedStationIndex());
     renderer.render(currentTime());
     const unsubscribeResult = useScenarioStore.subscribe((state, previous) => {

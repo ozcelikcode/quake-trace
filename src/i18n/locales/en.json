@@ -207,7 +207,8 @@
     "stateWaiting": "waiting",
     "scaleNote": "Each trace is scaled to its own peak.",
     "observed": "Observed · KOERI",
-    "observedMethod": "Acceleration record from the KOERI EIDA node; counts converted to cm/s² with the instrument sensitivity after removing the pre-event mean."
+    "observedMethod": "Acceleration record from the KOERI EIDA node; counts converted to cm/s² with the instrument sensitivity after removing the pre-event mean.",
+    "virtual": "Virtual station (no instrument there), 100 Hz"
   },
   "eew": {
     "title": "Early warning (simulated)",
