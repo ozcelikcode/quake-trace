@@ -2,9 +2,14 @@
 
 ## Current focus
 
-Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). All planned phases are done and merged into `main`, and the app is deployed at https://quake-trace.ozcelikcode.workers.dev (verified by `.github/workflows/smoke.yml`, run by hand after each deploy).
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 (roadmap and agent-neutral docs) is done; next is phase 13 (performance), task 13.1. Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
-## Recent changes (2026-10-26, review after phase 11)
+## Recent changes (2026-10-27, phase 12)
+
+- `memory-bank/roadmap.md`: v2 phases 12–17 with root causes, decisions and acceptance criteria.
+- `AGENTS.md` is agent-neutral (task pick-up, command table, reporting rules); Claude Code tools moved to `CLAUDE.md`; stale facts fixed.
+
+## Changes (2026-10-26, review after phase 11)
 
 - Observed records: `fetchObservedRecords` reads the station metadata first and requests waveforms only from the nearest 24 stations operating at the origin time, among all accelerometers within 200 km (before: the 12 nearest stations of today, none of which recorded 2019; now 2019 shows 6 stations, 2025 shows 22).
 - Catalog events farther than 15 km (`ON_FAULT_KM`) from every mapped trace rupture at the epicentre on a straight trace with the nearest fault's strike, dip, rake and depths (`placement: 'epicentre'`); before, they were moved onto the nearest fault however far it was. Summary row "Rupture placement".
@@ -78,14 +83,14 @@ Phase 11 (polish) is complete on branch `feat/phase-11-polish` (from phase 10). 
 
 ## Next steps
 
-1. After each deploy: `gh workflow run smoke.yml` (the developer's network cannot reach `*.workers.dev`).
-2. Optional: lazy-load rarely used panels to shrink the 245 KB shell chunk; OpenCelliD key for real cell sites; ASB14 σ sampling for uncertainty bands.
-2. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
-3. User (optional): review, push/PR on request; deploy to Cloudflare when ready.
+1. Roadmap phase 13 (performance), starting with 13.1 lazy data; then phases 14–17 in order.
+2. After each deploy: `gh workflow run smoke.yml` (the developer's network cannot reach `*.workers.dev`).
+3. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 
 ## Active decisions and considerations
 
-- Dark theme is the default; light theme is supported through tokens.
+- Theme: dark is the current default; v2 (roadmap 16.1) switches to the system preference with a cream light theme.
+- Coverage (v2): world shaking simulation and live events, Türkiye exposure, full modules only in Marmara; modules outside their data show "no data for this region".
 - Documentation and code in English; user-facing text in TR and EN catalogs; conversation with the user in Turkish.
 - Every progress report to the user ends with a phase status block.
 - Static map context uses MapLibre native layers; dynamic rasters use an image source; dynamic 3D geometry uses deck.gl lifted with the elevation grid.

@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **11 (polish) complete** on branch `feat/phase-11-polish` (from phase 10, `a6de0ee`). Phase 3–10 branches are pushed to GitHub with upstream. `main` contains every phase. All planned phases are done and `main` is fast-forwarded to this branch; deploying needs the user's Cloudflare login.
+Phase: **12 (roadmap and agent-neutral docs) complete; next is phase 13 (performance).** Phases 0–11 are merged into `main` and deployed at https://quake-trace.ozcelikcode.workers.dev. The v2 plan (phases 12–17) with tasks and acceptance criteria is in `roadmap.md`.
 
 ## What works
 
@@ -49,15 +49,22 @@ Each phase ends with CI green and a deployable `main`.
 - [x] **9. Live mode and historical replay** — four catalogs merged and polled, replays with USGS parameters, observed KOERI records in telemetry.
 - [x] **10. Scenario editor and URL sharing; event log and PDF/GeoJSON/CSV export.**
 - [x] **11. Polish** — phone tuning, About and methodology dialog, README with screenshots and attribution, scientific validation results published (accessibility: axe in every e2e flow; performance: measured, splitting deferred).
+- [x] **12. Roadmap and agent-neutral docs** — `roadmap.md`, `AGENTS.md` with task pick-up and commands, assistant-specific tools only in `CLAUDE.md`.
+- [ ] **13. Performance** — lazy data, caching and compression, map cost, GPU playback, React updates, worker scheduling, bundle.
+- [ ] **14. Event-centred grid and world map** — no rectangle clipping, global Vs30 and faults, world live feeds, Türkiye exposure, modules by coverage.
+- [ ] **15. Intensity and tsunami correctness** — legend matches layer, tsunami amplitude without static uplift, Kajiura filter, validation.
+- [ ] **16. Design system v2** — Geist, cream light and warm dark themes, floating layout, tinted basemap, command palette.
+- [ ] **17. Sweep and release** — audits, merge, deploy, smoke test.
 
 ## Known issues and follow-ups
 
-- Playwright MCP cannot launch: it expects Google Chrome, which is not installed. The user chose to leave it (2026-10-25); visual checks use Playwright screenshots via script.
 - `npm audit`: 4 advisories in `undici` pulled in by `wrangler`/`miniflare` (local dev tooling only, not shipped). Revisit when Wrangler updates its dependency.
 - Dark basemap: water and land contrast is low; with the intensity raster the map reads well.
 - MapLibre has no API to start compact attribution collapsed; on narrow maps the `maplibregl-compact-show` class is removed after load (`map-view.tsx`).
 - Building counts outside İstanbul are estimates (see `dataSources.md`); the impact panel marks those districts "(estimated stock)".
-- Wavefronts are cut where they leave the engine grid (for example north of 41.8° N).
+- Wavefronts and intensity are cut into a rectangle where they leave the fixed Marmara engine grid (large Mw); fixed by the event-centred grid (roadmap 14.1).
+- First load takes 1–2 minutes on slow links and playback heats phones (all datasets fetched at start, per-frame CPU repaint, terrain on phones); see roadmap phase 13.
+- Legends do not match layer opacity ramps; tsunami peak includes static uplift (roadmap 15.1, 15.2).
 - Median-only ground motion and records: map and telemetry stay consistent; aleatory variability (ASB14 σ, τ) is not sampled, so no uncertainty bands are shown.
 - Damage: GEM data is CC BY-NC-SA 4.0 (non-commercial); time of day fixed at night (residents at home); facility state thresholds are assumptions; underestimates İBB 2019 fatalities by about 2.4× (different magnitude/rupture, median-centred stock assumptions).
 - EEW: no telemetry or processing latency; depth fixed at 10 km.
@@ -74,6 +81,8 @@ Each phase ends with CI green and a deployable `main`.
 - The IDE's pyright language server may show stale "import could not be resolved" diagnostics until it restarts; the CLI run is authoritative.
 
 ## Evolution of decisions
+
+- 2026-10-27: v2 plan after the first public deploy (`roadmap.md`): layered coverage (world shaking, Türkiye exposure, full modules in Marmara); theme follows the system preference; agent-neutral `AGENTS.md` because several AI agents work on the project.
 
 - 2026-10-26: Phase 11: validation in TypeScript against a recorded fixture (not the planned `pipeline/validate`), so it runs with the other tests and reuses the app's miniSEED reader; About is a dialog, not a page (no router); phones open About from the brand mark.
 

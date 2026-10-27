@@ -1,12 +1,46 @@
 # quakeTrace — Engineering Rules
 
-quakeTrace is a real-time seismology and disaster-response command screen for the Marmara region, running entirely in the browser. It is a user interface first: every engineering decision serves what the operator sees, reads and controls.
+quakeTrace is a real-time seismology and disaster-response command screen that runs entirely in the browser: ground-shaking simulation and live earthquakes worldwide, population exposure for Türkiye, and the full impact chain (damage, cell network, routing, tsunami) for the Marmara region. It is a user interface first: every engineering decision serves what the operator sees, reads and controls.
+
+These rules apply to every contributor, human or AI agent, whatever tools it has. Assistant-specific tool notes live in that assistant's own file (for example `CLAUDE.md`); nothing in this file depends on them.
 
 ## Start of every task
 
 1. Read every file in `memory-bank/` (core files first, then `workingPrinciples.md`, `designSystem.md`, `testingStrategy.md`, `dataSources.md`, `simulationModels.md`). Not optional.
-2. Check `activeContext.md` for the current focus and `progress.md` for the current phase before touching code.
-3. Before using any library API, fetch its current documentation (Context7 or the official docs). Do not code from memory against fast-moving libraries.
+2. Check `activeContext.md` for the current focus, `progress.md` for the current status and `roadmap.md` for the open tasks before touching code.
+3. Before using any library API, read its current documentation (official docs, changelog or the installed package's types). Do not code from memory against fast-moving libraries.
+4. Check the git branch (`git status`). Other tooling on the developer's machine has switched branches between commands before.
+
+## Picking up a task
+
+1. Take the first unchecked task of the lowest open phase in `memory-bank/roadmap.md`, unless the user names another.
+2. Work on a branch `feat/phase-NN-<topic>` created from `main`.
+3. Implement it within the rules below; keep the change to that task.
+4. Run the definition of done. Report failures as they are; never mark a task done on assumption.
+5. In the same commit: tick the task in `roadmap.md`, update `activeContext.md` and `progress.md`.
+6. Commit with Conventional Commits in English (`feat(map): …`, `fix(engine): …`, `docs: …`). Push or merge only when the user asks.
+
+## Commands
+
+| Purpose                                                              | Command (from the repository root unless noted)                                                     |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Install                                                              | `npm install`                                                                                       |
+| Dev server (scenario mode works offline)                             | `npm run dev`                                                                                       |
+| Type check                                                           | `npm run typecheck`                                                                                 |
+| Lint / format check                                                  | `npm run lint` / `npm run format:check`                                                             |
+| Unit + integration tests (Vitest, `tests/unit`, `tests/integration`) | `npm run test`                                                                                      |
+| End-to-end tests (Playwright, `tests/e2e`)                           | `npm run test:e2e`                                                                                  |
+| Production build                                                     | `npm run build`                                                                                     |
+| Deploy (Cloudflare Workers, needs the owner's login)                 | `npm run deploy`                                                                                    |
+| Smoke test of the deployed app                                       | `gh workflow run smoke.yml`                                                                         |
+| Data pipeline (from `pipeline/`, Python via uv)                      | `uv run quaketrace-pipeline list`, `uv run quaketrace-pipeline build <dataset>`                     |
+| Pipeline tests and checks (from `pipeline/`)                         | `uv run pytest`, `uv run ruff check . ../tests/pipeline`, `uv run pyright -p ../pyrightconfig.json` |
+
+## Reporting to the user
+
+- The user writes in Turkish; answer in Turkish. Code, comments, commits and documentation stay in English.
+- Be brief and factual. End every progress report with a "Faz durumu" table that matches `progress.md` and `roadmap.md`.
+- The user delegates technical choices: pick the recommended option and say why in one line. Ask only when a decision changes product scope.
 
 ## Non-negotiables
 
@@ -29,11 +63,11 @@ A change is done only when all of these pass and the result is reported faithful
 2. `npm run test:e2e` when a user flow, layout or interaction changed.
 3. Visual check of affected screens at desktop (1440×900) and mobile (390×844), in both locales and both themes when styling changed.
 4. Engine changes: tests against reference values or analytic solutions, with sources cited in the test.
-5. `memory-bank/activeContext.md` and `progress.md` updated; other memory bank files updated when patterns, decisions or dependencies changed.
+5. `memory-bank/activeContext.md`, `progress.md` and `roadmap.md` updated; other memory bank files updated when patterns, decisions or dependencies changed.
 
 # Memory Bank
 
-My memory resets completely between sessions. I rely entirely on the Memory Bank to understand the project and continue work effectively, so I read all memory bank files at the start of every task and keep them precise.
+Agents have no memory between sessions, and several different agents work on this project. The Memory Bank is the only shared, reliable context: read all of it at the start of every task and keep it precise. Write it for a reader who has never seen the project.
 
 ## Structure
 
@@ -59,6 +93,7 @@ Additional context files in this project:
 - `testingStrategy.md` — test layout, tooling, levels, fixtures, coverage, scientific validation.
 - `dataSources.md` — every dataset and feed, its license, attribution and refresh procedure.
 - `simulationModels.md` — scientific approach per engine module, timeline, map layers, presets.
+- `roadmap.md` — open phases and tasks with acceptance criteria; the task list to pick up from.
 
 Create further files or folders inside `memory-bank/` when a feature, integration or procedure needs its own document.
 

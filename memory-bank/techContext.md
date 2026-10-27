@@ -80,7 +80,6 @@ uv run pyright -p ../pyrightconfig.json
 
 The system Python is 3.9; uv manages the 3.13 interpreter for the pipeline. A full build downloads about 1.3 GB into `pipeline/.cache/` (OSM extract 651 MB, Vs30 grid 610 MB) and needs about 4 GB of RAM for the road graph. `cells` needs `OPENCELLID_API_KEY` in `pipeline/.env` (see `.env.example`) and is skipped without it.
 
-Shell note: the context-mode hook blocks shell commands that contain URLs; put one-off download snippets in a scratchpad script instead.
 
 ## Constraints
 
@@ -95,10 +94,9 @@ Shell note: the context-mode hook blocks shell commands that contain URLs; put o
 
 ## Tool usage
 
-- Context7 MCP for library documentation before using an API.
-- Visual checks: Playwright screenshots via script (Playwright MCP needs Google Chrome, which is not installed); `@playwright/test` for automated e2e.
-- MemPalace wing `quake_trace` for recall across sessions.
-- RTK compresses shell output transparently; context-mode for large outputs.
+- Library documentation: read the current official docs or the installed package's types before using an API.
+- Visual checks: Playwright screenshots via a script (Chromium from `npx playwright install`); `@playwright/test` for automated e2e.
+- Assistant-specific tools are listed in that assistant's own file (for example `CLAUDE.md`), not here.
 - pyright for Python type checking: the pipeline dev dependency for CLI and CI, the global 1.1.414 install for the IDE plugin; both read `pyrightconfig.json`.
 
 ## Dependency policy

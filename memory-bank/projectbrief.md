@@ -2,7 +2,7 @@
 
 ## What
 
-quakeTrace is a browser-based command screen that simulates and monitors earthquakes in the Marmara region (İstanbul and surrounding provinces). A 3D topographic map sits at the center. When an earthquake is triggered on a fault, P and S wavefronts spread across districts second by second. Seismograph stations stream acceleration records in a side panel. A timeline can be scrubbed forward and backward to see which areas are affected at each moment, how cell towers are loaded and which emergency corridors remain usable.
+quakeTrace is a browser-based command screen that simulates and monitors earthquakes. Coverage is layered (decided 2026-10-27): ground-shaking simulation and live earthquakes worldwide, population exposure for Türkiye, and the full impact chain for the Marmara region (İstanbul and surrounding provinces). A 3D topographic map sits at the center. When an earthquake is triggered on a fault, P and S wavefronts spread across districts second by second. Seismograph stations stream acceleration records in a side panel. A timeline can be scrubbed forward and backward to see which areas are affected at each moment, how cell towers are loaded and which emergency corridors remain usable.
 
 ## Goals
 
@@ -19,7 +19,8 @@ In scope (all confirmed by the user on 2026-10-25):
 - **Physics:** finite-fault rupture, layered velocity model, GMPE (Akkar-Sandıkkaya-Bommer 2014), Vs30 site effects, MMI.
 - **Impact:** earthquake early warning (EEW), building damage and casualty estimates, critical infrastructure, tsunami.
 - **Operations:** emergency routes and corridors, aftershock sequences (ETAS), event log and reports (PDF, GeoJSON, CSV), scenario editor with URL sharing.
-- **Interface:** fully responsive (desktop to phone), Turkish and English, dark and light themes.
+- **Interface:** fully responsive (desktop to phone), Turkish and English, dark and cream light themes following the system preference.
+- **Coverage:** world (live events, active faults, shaking), Türkiye (plus exposure), Marmara (every module). Outside a module's data it says so instead of estimating.
 
 Out of scope:
 

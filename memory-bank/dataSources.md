@@ -1,6 +1,6 @@
 # Data Sources
 
-Every dataset and feed used by quakeTrace, with license and handling. Add a row before using anything new. `public/data/ATTRIBUTION.md` is generated from the manifest by the pipeline; the in-app About page (phase 11) reads the same sources.
+Every dataset and feed used by quakeTrace, with license and handling. Add a row before using anything new. `public/data/ATTRIBUTION.md` is generated from the manifest by the pipeline; the in-app About dialog (Data tab) reads the same sources.
 
 ## Prepared datasets (`pipeline/` → `public/data/`)
 

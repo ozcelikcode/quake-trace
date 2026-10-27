@@ -82,7 +82,7 @@ Viewports: 1440×900 desktop, 1024×768 tablet, 390×844 phone (iPhone class), 4
 - Every e2e run includes an axe scan (WCAG 2.0–2.2 A/AA tags) in both themes; serious and critical violations fail the test and list their target selectors. The map canvas is excluded. The scan runs with `reducedMotion: 'reduce'` so it never measures colors mid-transition.
 - Playwright runs with 2 workers and a 60 s timeout locally (CI: 1 worker, 120 s, expect 15 s): headless browsers render the 3D map with software WebGL, and more workers starve the main thread.
 - E2E specs pin `locale: 'tr-TR'` so language detection is deterministic.
-- Visual checks during development: screenshots via a Playwright script (the Playwright MCP is unavailable on this machine because it expects Google Chrome).
+- Visual checks during development: screenshots via a Playwright script against `npm run dev` or `npm run preview`.
 
 ## External services
 
