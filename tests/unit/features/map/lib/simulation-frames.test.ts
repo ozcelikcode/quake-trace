@@ -7,6 +7,7 @@ import {
   loadIndex,
   loadLookupTable,
   mercatorRowMap,
+  MIN_DRAWN_MMI,
   mmiLookupTable,
   paintIntensity,
   paintNetwork,
@@ -19,6 +20,7 @@ import {
   SHAKING_FADE_S,
   wavefrontCurtain,
 } from '@/features/map/lib/simulation-frames';
+import { EDGE_MMI } from '@/engine/grid/event-grid';
 import type { GridSpec } from '@/types/grid';
 import type { NetworkResult } from '@/types/network';
 import type { TsunamiResult } from '@/types/tsunami';
@@ -38,6 +40,9 @@ describe('simulation frames', () => {
   it('keeps weak shaking transparent', () => {
     const table = mmiLookupTable();
     expect((table[10] ?? 0) >>> 24).toBe(0);
+    // The event grid ends where intensity falls below the drawn range, so no edge shows.
+    expect(MIN_DRAWN_MMI).toBe(EDGE_MMI);
+    expect((table[MIN_DRAWN_MMI * 10] ?? 0) >>> 24).toBe(0);
     expect((table[80] ?? 0) >>> 24).toBeGreaterThan(200);
   });
 

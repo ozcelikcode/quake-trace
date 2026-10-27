@@ -33,14 +33,21 @@ export function mercatorRowMap(spec: GridSpec): Int32Array {
   return rows;
 }
 
+/** Lowest intensity drawn, and the intensity from which the colour is fully opaque. */
+export const MIN_DRAWN_MMI = 3;
+const FULL_MMI = 4.5;
+
 /** MMI in tenths (0–100) → packed RGBA (little-endian, as an ImageData Uint32 view expects). */
 export function mmiLookupTable(maxAlpha = 0.85): Uint32Array {
   const table = new Uint32Array(101);
   for (let i = 0; i <= 100; i++) {
     const mmi = i / 10;
     const [r, g, b] = mmiColor(mmi);
-    // Barely felt shaking stays transparent; the colour is fully established by intensity IV–V.
-    const alpha = Math.round(Math.min(1, Math.max(0, (mmi - 2) / 2.5)) * maxAlpha * 255);
+    // Below weak shaking the map stays clear (the event grid ends there, EDGE_MMI in
+    // engine/grid/event-grid.ts); the colour is fully established by intensity IV–V.
+    const alpha = Math.round(
+      Math.min(1, Math.max(0, (mmi - MIN_DRAWN_MMI) / (FULL_MMI - MIN_DRAWN_MMI))) * maxAlpha * 255,
+    );
     table[i] = ((alpha << 24) | (b << 16) | (g << 8) | r) >>> 0;
   }
   return table;
