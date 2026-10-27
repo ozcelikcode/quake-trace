@@ -148,7 +148,7 @@ Budget (acceptance for the whole phase):
     - Longitude spacing is scaled by cos(latitude).
     - `MAX_DISTANCE_KM` follows R.
   - Done when: in an Mw 7.8 test, every edge cell is below the display threshold, and the existing preset results stay within tolerance.
-- [ ] **14.2 Vs30 everywhere.**
+- [x] **14.2 Vs30 everywhere.** (Done as one worldwide tile set at 0.05°; no separate Türkiye 0.01° set, because the event grid is 1.7–4 km for large events and the regional 1 km grid covers Marmara. The 760 m/s default remains only where no tile exists. Labelling of default-Vs30 cells is folded into 14.3.)
   - Files: `pipeline/`, `src/data/`.
   - Done when:
     - USGS global Vs30 is served as on-demand tiles: 0.01° for Türkiye, 0.05° for the world.

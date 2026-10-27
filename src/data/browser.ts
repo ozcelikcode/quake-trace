@@ -20,10 +20,10 @@ async function inflate(buffer: ArrayBuffer): Promise<ArrayBuffer> {
 }
 
 const fetchData: DataFetcher = async (path, version) => {
-  const compressed = PRECOMPRESSED && version !== undefined;
-  const url = compressed
-    ? `${DATA_BASE_URL}${path}.gz?v=${version.slice(0, 16)}`
-    : `${DATA_BASE_URL}${path}`;
+  // Files stored gzipped in the repository (Vs30 tiles) have no copy; their decoder inflates them.
+  const compressed = PRECOMPRESSED && version !== undefined && !path.endsWith('.gz');
+  const query = version === undefined ? '' : `?v=${version.slice(0, 16)}`;
+  const url = compressed ? `${DATA_BASE_URL}${path}.gz${query}` : `${DATA_BASE_URL}${path}${query}`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new DataError(`failed to load ${path}: HTTP ${String(response.status)}`);

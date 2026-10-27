@@ -1,11 +1,23 @@
 import { expose, transfer } from 'comlink';
 
-import { simulate, type SimulationInput } from '@/engine/sim/simulate';
+import { dataRepository } from '@/data/browser';
+import { planEventGrid, simulate, type SimulationInput } from '@/engine/sim/simulate';
 import type { SimulationResult } from '@/types/simulation';
 
 const api = {
-  simulate(input: SimulationInput): SimulationResult {
-    const result = simulate(input);
+  /**
+   * Plans the event grid, fetches the worldwide Vs30 tiles it covers (cached by the browser),
+   * then simulates.
+   */
+  async simulate(input: SimulationInput): Promise<SimulationResult> {
+    const eventGrid = planEventGrid(input.scenario, input.maxEventCells);
+    const siteGrids = await dataRepository.vs30Tiles({
+      west: eventGrid.west,
+      east: eventGrid.west + eventGrid.nx * eventGrid.dLon,
+      south: eventGrid.north - eventGrid.ny * eventGrid.dLat,
+      north: eventGrid.north,
+    });
+    const result = simulate({ ...input, eventGrid, siteGrids });
     // Hand the large fields over without copying.
     return transfer(result, [
       result.tP.buffer,

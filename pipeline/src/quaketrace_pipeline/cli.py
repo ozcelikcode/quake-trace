@@ -23,6 +23,7 @@ from .datasets import (
     roads,
     stations,
     vs30,
+    vs30_world,
     vulnerability,
 )
 
@@ -35,6 +36,7 @@ DATASETS: dict[str, Builder] = {
     "population": population.build,
     "districtStats": district_stats.build,
     "vs30": vs30.build,
+    "vs30World": vs30_world.build,
     "elevation": elevation.build,
     "stations": stations.build,
     "bathymetry": bathymetry.build,

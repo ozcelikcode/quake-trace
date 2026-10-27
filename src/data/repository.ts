@@ -8,6 +8,13 @@ import { decodeGrid, type Grid } from './grid';
 import { manifestSchema, type DatasetEntry, type Manifest } from './manifest';
 import { decodeRoadGraph } from './road-graph';
 import {
+  decodeVs30Tile,
+  tilesCovering,
+  vs30TileIndexSchema,
+  type LonLatBounds,
+  type Vs30TileIndex,
+} from './vs30-tiles';
+import {
   districtStatsSchema,
   districtsSchema,
   faultsSchema,
@@ -58,6 +65,9 @@ function parseJson(buffer: ArrayBuffer): unknown {
 export class DataRepository {
   readonly #fetcher: DataFetcher;
   #manifest: Promise<Manifest> | undefined;
+  #vs30Index: Promise<{ index: Vs30TileIndex; directory: string; version: string }> | undefined;
+  /** Decoded tiles, kept for the next scenario nearby. */
+  readonly #vs30Tiles = new Map<string, Promise<Grid>>();
 
   constructor(fetcher: DataFetcher) {
     this.#fetcher = fetcher;
@@ -99,6 +109,33 @@ export class DataRepository {
     const entry = await this.#require('roads');
     if (entry.format !== 'csr-graph') throw new DataError('roads is not a graph');
     return decodeRoadGraph(await this.#fetcher(entry.path, entry.sha256), entry);
+  }
+
+  /**
+   * Worldwide Vs30 tiles covering a box, as grids. Tiles are stored gzipped in the repository
+   * and decoded here.
+   */
+  async vs30Tiles(bounds: LonLatBounds): Promise<Grid[]> {
+    this.#vs30Index ??= this.#require('vs30World').then(async (entry) => {
+      if (entry.format !== 'vs30-tiles') throw new DataError('vs30World is not a tile set');
+      const index = vs30TileIndexSchema.parse(
+        parseJson(await this.#fetcher(entry.path, entry.sha256)),
+      );
+      return { index, directory: entry.path.replace(/[^/]+$/, ''), version: entry.sha256 };
+    });
+    const { index, directory, version } = await this.#vs30Index;
+    return Promise.all(
+      tilesCovering(index, bounds).map((name) => {
+        let tile = this.#vs30Tiles.get(name);
+        if (!tile) {
+          tile = this.#fetcher(`${directory}${name}.u8.gz`, version).then((buffer) =>
+            decodeVs30Tile(name, buffer, index),
+          );
+          this.#vs30Tiles.set(name, tile);
+        }
+        return tile;
+      }),
+    );
   }
 
   /** Cell sites are optional: they need an OpenCelliD key at build time. */

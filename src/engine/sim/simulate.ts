@@ -37,6 +37,10 @@ export interface SimulationInput {
   grid: GridSpec;
   /** Vs30 per regional grid cell, m/s. */
   vs30: Float32Array;
+  /** Further Vs30 grids (worldwide tiles), used where the regional grid has no value. */
+  siteGrids?: readonly { spec: GridSpec; values: Float32Array }[];
+  /** The event-centred grid, when the caller already planned it (`planEventGrid`). */
+  eventGrid?: GridSpec;
   /** Most cells of the event-centred grid (fewer on phones); default `MAX_EVENT_CELLS`. */
   maxEventCells?: number;
   /** District index per regional grid cell (NaN outside districts), for per-district impact. */
@@ -67,8 +71,8 @@ const DURATION_PADDING_S = 5;
 /** Cells of the event grid on desktops: Mw 7.4 near İstanbul gets cells of about 1.7 km. */
 export const MAX_EVENT_CELLS = 250_000;
 /**
- * Vs30 where no site data exist: the NEHRP B/C boundary, the usual reference rock (BSSC, 2020).
- * It underestimates shaking on soft soils, so results outside the data are labelled.
+ * Vs30 where neither the regional grid nor the worldwide tiles have a value (polar regions):
+ * the NEHRP B/C boundary, the usual reference rock (BSSC, 2020).
  */
 export const DEFAULT_VS30 = 760;
 /** Travel-time tables reach this far beyond the farthest grid corner. */
@@ -79,6 +83,31 @@ const DISTANCE_MARGIN_KM = 50;
  * (wide enough that its edges fall below the drawn intensity), synthetic records at the
  * stations, and, where the shaking reaches the regional grid, the impact estimates there.
  */
+function scenarioRupture(scenario: Scenario, model: readonly VelocityLayer[]) {
+  const hypocentreLayer = model[layerIndexAt(model, scenario.rupture.hypocenterDepthKm)];
+  if (!hypocentreLayer) throw new RangeError('the velocity model has no layers');
+  return buildRupture(scenario.rupture, {
+    ruptureVelocityKmS: RUPTURE_VELOCITY_FRACTION * hypocentreLayer.vsKmS,
+  });
+}
+
+/**
+ * The event-centred grid of a scenario, so a caller can fetch the site data it covers before
+ * simulating.
+ */
+export function planEventGrid(
+  scenario: Scenario,
+  maxCells = MAX_EVENT_CELLS,
+  model: readonly VelocityLayer[] = IASP91_CRUST,
+): GridSpec {
+  const rupture = scenarioRupture(scenario, model);
+  return eventGrid(
+    rupture.surfaceProjection,
+    shakingRadiusKm(rupture.mw, scenario.rupture.fault.rakeDeg),
+    maxCells,
+  );
+}
+
 export function simulate(input: SimulationInput): SimulationResult {
   const started = performance.now();
   const { scenario, vs30 } = input;
@@ -87,17 +116,9 @@ export function simulate(input: SimulationInput): SimulationResult {
   if (vs30.length !== region.nx * region.ny) throw new RangeError('vs30 does not match the grid');
 
   const spec = scenario.rupture;
-  const hypocentreLayer = model[layerIndexAt(model, spec.hypocenterDepthKm)];
-  if (!hypocentreLayer) throw new RangeError('the velocity model has no layers');
-  const rupture = buildRupture(spec, {
-    ruptureVelocityKmS: RUPTURE_VELOCITY_FRACTION * hypocentreLayer.vsKmS,
-  });
+  const rupture = scenarioRupture(scenario, model);
   const rakeDeg = spec.fault.rakeDeg;
-  const grid = eventGrid(
-    rupture.surfaceProjection,
-    shakingRadiusKm(rupture.mw, rakeDeg),
-    input.maxEventCells ?? MAX_EVENT_CELLS,
-  );
+  const grid = input.eventGrid ?? planEventGrid(scenario, input.maxEventCells, model);
   const { lon: hypoLon, lat: hypoLat } = rupture.hypocenter;
   const reachKm =
     Math.max(farthestCornerKm(grid, hypoLon, hypoLat), farthestCornerKm(region, hypoLon, hypoLat)) +
@@ -107,10 +128,16 @@ export function simulate(input: SimulationInput): SimulationResult {
   const projection = new LocalProjection(hypoLon, hypoLat);
   const surface = new PolygonDistance(rupture.surfaceProjection, projection);
 
+  const siteGrids = [{ spec: region, values: vs30 }, ...(input.siteGrids ?? [])];
+  // Regional data first, then the worldwide tiles (longitudes wrapped), then the default.
   const vs30At = (lon: number, lat: number) => {
-    const cell = cellIndex(region, lon, lat);
-    const value = cell < 0 ? Number.NaN : (vs30[cell] ?? Number.NaN);
-    return Number.isFinite(value) ? value : DEFAULT_VS30;
+    const wrapped = ((((lon + 180) % 360) + 360) % 360) - 180;
+    for (const site of siteGrids) {
+      const cell = cellIndex(site.spec, wrapped, lat);
+      const value = cell < 0 ? Number.NaN : (site.values[cell] ?? Number.NaN);
+      if (Number.isFinite(value)) return value;
+    }
+    return DEFAULT_VS30;
   };
   const eventVs30 = sampleOnGrid(grid, vs30At);
   const shaking = shakingField(grid, eventVs30, { arrivals, surface, mw: rupture.mw, rakeDeg });

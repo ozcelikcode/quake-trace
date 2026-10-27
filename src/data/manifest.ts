@@ -41,6 +41,7 @@ const entryFields = {
 export const datasetEntrySchema = z.discriminatedUnion('format', [
   z.object({ ...entryFields, format: z.literal('geojson') }),
   z.object({ ...entryFields, format: z.literal('json') }),
+  z.object({ ...entryFields, format: z.literal('vs30-tiles') }),
   z.object({ ...entryFields, format: z.literal('float32-grid'), grid: z.string() }),
   z.object({
     ...entryFields,

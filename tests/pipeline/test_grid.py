@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from quaketrace_pipeline.datasets.vs30_world import decode, encode, tile_name
 from quaketrace_pipeline.grid import (
     GRID_1KM,
     GRID_500M,
@@ -55,3 +56,12 @@ def test_float32_grid_round_trip(tmp_path: Path) -> None:
 def test_write_rejects_wrong_shape(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="expected shape"):
         write_float32_grid(tmp_path / "bad.f32", SMALL, np.zeros((4, 2)))
+
+
+def test_vs30_world_encoding_round_trips_within_one_step() -> None:
+    values = np.array([150.0, 360.0, 760.0, 1500.0, np.nan], dtype=np.float32)
+    restored = decode(encode(values))
+    assert np.allclose(restored[:4], values[:4], rtol=0.013)
+    assert np.isnan(restored[4])
+    assert tile_name(40, 20) == "N40E020"
+    assert tile_name(-10, -80) == "S10W080"
