@@ -158,13 +158,13 @@ Budget (acceptance for the whole phase):
   - Done when:
     - Damage, network, routing, tsunami and telemetry map dynamic cells to the Marmara grid by lon/lat and run only inside it.
     - Elsewhere they show the "no data for this region" state.
-- [ ] **14.4 Global faults.**
+- [x] **14.4 Global faults.** (Served as one GeoJSON, `faults-world.geojson`, 0.45 MB gzip, loaded 1.5 s after start, not as PMTiles: no tiling tool or new dependency is needed and MapLibre tiles GeoJSON itself. Visibility by zoom comes from slip-rate opacity ramps: plate-boundary faults ≥ 5 mm/yr from zoom 2, ≥ 1 mm/yr from zoom 4, all from zoom 7.)
   - Files: `pipeline/src/quaketrace_pipeline/datasets/faults.py`, `reference-layers.ts`.
   - Done when:
     - GEM Global Active Faults (CC BY-SA 4.0) is merged with EFSM20 and served as PMTiles (`pmtiles` protocol).
     - Major faults (by slip rate) show at low zoom and detail grows with zoom.
     - Licenses are recorded in `dataSources.md`.
-- [ ] **14.5 World map.**
+- [x] **14.5 World map.** (The globe is used below zoom 3.5 and Mercator above it, switched on `zoomend`: deck.gl does not draw the 3D curtains on the globe and does not accept MapLibre's zoom-interpolated projection. Stations are hidden below zoom 5. A new scenario flies the camera to its rupture.)
   - Files: `map-config.ts`, `map-view.tsx`.
   - Done when:
     - There is no `MAX_BOUNDS`, `minZoom` is 1, and globe projection is used at low zoom.

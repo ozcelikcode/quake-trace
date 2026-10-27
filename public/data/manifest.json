@@ -369,6 +369,31 @@
       "stats": {
         "functions": 10
       }
+    },
+    "worldFaults": {
+      "path": "faults-world.geojson",
+      "format": "geojson",
+      "bytes": 4161125,
+      "sha256": "3f753df013025baa9754daf1c042370908ec06c519a00a70ab29612542eb4f41",
+      "generatedAt": "2026-10-27T06:58:28Z",
+      "sources": [
+        {
+          "name": "European Fault-Source Model 2020 (EFSM20), crustal faults",
+          "url": "https://doi.org/10.13127/efsm20",
+          "license": "CC-BY-4.0",
+          "attribution": "Basili et al. (2024), EFSM20, EFEHR"
+        },
+        {
+          "name": "GEM Global Active Faults Database (harmonized)",
+          "url": "https://github.com/GEMScienceTools/gem-global-active-faults",
+          "license": "CC-BY-SA-4.0",
+          "attribution": "Styron and Pagani (2020), GEM Global Active Faults Database"
+        }
+      ],
+      "notes": "Top traces by the right-hand rule, simplified to 0.005 deg; GEM SHARE/EMME traces near EFSM20 dropped; missing GEM parameters take typical values per slip type.",
+      "stats": {
+        "features": 13520
+      }
     }
   }
 }

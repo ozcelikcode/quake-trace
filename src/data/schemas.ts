@@ -44,6 +44,22 @@ export const faultsSchema = featureCollection(
   }),
 );
 
+/** Active faults worldwide (pipeline `world_faults.py`): EFSM20 and the GEM database. */
+export const worldFaultsSchema = featureCollection(
+  lineString,
+  z.object({
+    id: z.string(),
+    name: z.string().optional(),
+    kind: z.enum(['normal', 'reverse', 'right-lateral', 'left-lateral']),
+    dipDeg: z.number(),
+    rakeDeg: z.number(),
+    upperDepthKm: z.number(),
+    lowerDepthKm: z.number(),
+    slipRateMmYr: z.number(),
+    catalog: z.string(),
+  }),
+);
+
 export const districtsSchema = featureCollection(
   z.discriminatedUnion('type', [polygon, multiPolygon]),
   z.object({
@@ -141,6 +157,8 @@ export const infraSchema = featureCollection(
 );
 
 export type Faults = z.infer<typeof faultsSchema>;
+export type WorldFaults = z.infer<typeof worldFaultsSchema>;
+export type WorldFault = WorldFaults['features'][number];
 export type Districts = z.infer<typeof districtsSchema>;
 export type District = Districts['features'][number];
 export type Fault = Faults['features'][number];

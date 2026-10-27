@@ -6,10 +6,10 @@ import type {
 
 import type { Theme } from '@/state/ui-store';
 
-/** Sea of Marmara with İstanbul and Kocaeli; the opening camera frames this box. */
+/** Türkiye; the opening camera frames this box. Scenarios then fly to their rupture. */
 export const INITIAL_VIEW_BOUNDS = [
-  [26.9, 40.2],
-  [30.3, 41.3],
+  [25.6, 35.8],
+  [44.8, 42.2],
 ] as const satisfies LngLatBoundsLike;
 
 export const INITIAL_VIEW_CENTER: [number, number] = [
@@ -19,7 +19,7 @@ export const INITIAL_VIEW_CENTER: [number, number] = [
 
 /** Credits for the prepared datasets drawn on the map (full list: public/data/ATTRIBUTION.md). */
 export const DATA_ATTRIBUTION = [
-  'Faults: EFSM20 (CC BY 4.0)',
+  'Faults: EFSM20 (CC BY 4.0), GEM Global Active Faults (CC BY-SA 4.0)',
   'Districts: geoBoundaries',
   'Stations: KOERI, EIDA',
 ];
@@ -29,22 +29,26 @@ export const COMPACT_ATTRIBUTION_MAX_WIDTH = 640;
 
 /** The whole world can be reached; zoom 1 shows it in one view. */
 export const MIN_ZOOM = 1;
+/** Below this zoom the map is a globe; above it, Mercator (where the 3D layers draw). */
+export const GLOBE_BELOW_ZOOM = 3.5;
 
 /**
- * Narrow (portrait phone) maps frame the northern Marmara coast, İstanbul between Tekirdağ and
- * İzmit, seen from straight above: a pitched view loads tiles up to the horizon.
+ * Narrow (portrait phone) maps frame Türkiye from straight above: a pitched view loads tiles
+ * up to the horizon.
  */
 export const COMPACT_VIEW = {
   maxWidth: 640,
-  bounds: [
-    [27.6, 40.45],
-    [29.95, 41.25],
-  ],
+  bounds: INITIAL_VIEW_BOUNDS,
   pitch: 0,
 } as const satisfies { maxWidth: number; bounds: LngLatBoundsLike; pitch: number };
 
-export const INITIAL_PITCH = 45;
-export const INITIAL_BEARING = -12;
+export const INITIAL_PITCH = 20;
+export const INITIAL_BEARING = 0;
+
+/** Degrees of latitude shown around a rupture when the camera flies to a scenario. */
+export const SCENARIO_VIEW_MARGIN_DEG = 1.2;
+/** Pitch of the scenario view on wide maps: the 3D wavefront curtains read best at an angle. */
+export const SCENARIO_PITCH = 45;
 export const MAX_PITCH = 75;
 export const TERRAIN_EXAGGERATION = 1.5;
 

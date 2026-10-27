@@ -21,6 +21,7 @@ import {
   infraSchema,
   stationsSchema,
   vulnerabilitySchema,
+  worldFaultsSchema,
 } from './schemas';
 
 /**
@@ -36,6 +37,7 @@ export const jsonDatasets = {
   stations: stationsSchema,
   infra: infraSchema,
   vulnerability: vulnerabilitySchema,
+  worldFaults: worldFaultsSchema,
 } as const;
 
 export type JsonDatasetId = keyof typeof jsonDatasets;
@@ -49,6 +51,7 @@ const parsers: { [K in JsonDatasetId]: (value: unknown) => JsonDataset<K> } = {
   stations: (value) => jsonDatasets.stations.parse(value),
   infra: (value) => jsonDatasets.infra.parse(value),
   vulnerability: (value) => jsonDatasets.vulnerability.parse(value),
+  worldFaults: (value) => jsonDatasets.worldFaults.parse(value),
 };
 export type GridDatasetId = 'population' | 'vs30' | 'bathymetry' | 'districtCells' | 'elevation';
 

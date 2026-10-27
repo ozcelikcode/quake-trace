@@ -25,6 +25,7 @@ from .datasets import (
     vs30,
     vs30_world,
     vulnerability,
+    world_faults,
 )
 
 Builder = Callable[[Path], None]
@@ -44,6 +45,7 @@ DATASETS: dict[str, Builder] = {
     "roads": roads.build,
     "cells": cells.build,
     "vulnerability": vulnerability.build,
+    "worldFaults": world_faults.build,
 }
 
 

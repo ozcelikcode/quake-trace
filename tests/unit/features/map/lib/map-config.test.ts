@@ -23,10 +23,10 @@ describe('map configuration', () => {
     expect(source.attribution).toContain('Mapzen');
   });
 
-  it('centers the opening view on the Sea of Marmara', () => {
+  it('centers the opening view on Türkiye', () => {
     const [lon, lat] = INITIAL_VIEW_CENTER;
-    expect(lon).toBeCloseTo(28.6, 5);
-    expect(lat).toBeCloseTo(40.75, 5);
+    expect(lon).toBeCloseTo(35.2, 5);
+    expect(lat).toBeCloseTo(39, 5);
   });
 
   it('builds a hillshade layer per theme on its own source', () => {

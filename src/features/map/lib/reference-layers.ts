@@ -5,7 +5,7 @@ import type {
   StyleImageMetadata,
 } from 'maplibre-gl';
 
-import type { Districts, Faults, Infra, Station } from '@/data/schemas';
+import type { Districts, Faults, Infra, Station, WorldFaults } from '@/data/schemas';
 import type { Theme } from '@/state/ui-store';
 import { CRITICAL_FACILITY_KINDS } from '@/types/damage';
 
@@ -19,6 +19,8 @@ import { REFERENCE_PALETTE } from './layer-palette';
 export interface ReferenceData {
   districts?: Districts | undefined;
   faults?: Faults | undefined;
+  /** Active faults worldwide; the regional catalogue above draws its own faults. */
+  worldFaults?: WorldFaults | undefined;
   stations?: Station[] | undefined;
   infra?: Infra | undefined;
 }
@@ -26,6 +28,7 @@ export interface ReferenceData {
 export const REFERENCE_SOURCES = {
   districts: 'quaketrace-districts',
   faults: 'quaketrace-faults',
+  worldFaults: 'quaketrace-world-faults',
   stations: 'quaketrace-stations',
   facilities: 'quaketrace-facilities',
 } as const;
@@ -86,6 +89,43 @@ export function referenceLayerSpecs(theme: Theme): LayerSpecification[] {
       paint: { 'line-color': palette.districtLine, 'line-width': 0.8 },
     },
     {
+      id: 'quaketrace-world-fault-lines',
+      type: 'line',
+      source: REFERENCE_SOURCES.worldFaults,
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': palette.fault,
+        // Seen from afar only the fast plate-boundary faults show; slower ones fade in by zoom 7.
+        'line-opacity': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          2,
+          ['case', ['>=', ['get', 'slipRateMmYr'], 5], 0.8, 0],
+          4,
+          [
+            'case',
+            ['>=', ['get', 'slipRateMmYr'], 5],
+            0.85,
+            ['>=', ['get', 'slipRateMmYr'], 1],
+            0.5,
+            0,
+          ],
+          7,
+          0.85,
+        ],
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          2,
+          ['interpolate', ['linear'], ['get', 'slipRateMmYr'], 0, 0.5, 20, 1.5],
+          8,
+          ['interpolate', ['linear'], ['get', 'slipRateMmYr'], 0, 1, 20, 3.5],
+        ],
+      },
+    },
+    {
       id: 'quaketrace-fault-lines',
       type: 'line',
       source: REFERENCE_SOURCES.faults,
@@ -108,6 +148,8 @@ export function referenceLayerSpecs(theme: Theme): LayerSpecification[] {
       id: STATION_LAYER,
       type: 'symbol',
       source: REFERENCE_SOURCES.stations,
+      // Stations cluster into one blot below regional zoom.
+      minzoom: 5,
       layout: {
         'icon-image': STATION_ICON,
         'icon-size': ['case', ['get', 'accelerometer'], 0.42, 0.32],
@@ -184,6 +226,17 @@ function upsertSource(
   else map.addSource(id, { type: 'geojson', data, ...(promoteId ? { promoteId } : {}) });
 }
 
+/** World faults without the ones the regional catalogue already draws (same EFSM20 ids). */
+function outsideRegion(world: WorldFaults, regional: Faults): WorldFaults {
+  const drawn = new Set(regional.features.map((fault) => fault.properties.id));
+  return {
+    ...world,
+    features: world.features.filter(
+      (fault) => !drawn.has(fault.properties.id.replace(/-\d+$/, '')),
+    ),
+  };
+}
+
 /** Adds or refreshes reference sources and layers. Safe to call after every style load. */
 export function applyReferenceLayers(map: MapLibreMap, data: ReferenceData, theme: Theme): void {
   if (!map.hasImage(STATION_ICON)) {
@@ -192,6 +245,9 @@ export function applyReferenceLayers(map: MapLibreMap, data: ReferenceData, them
   }
   if (data.districts) upsertSource(map, REFERENCE_SOURCES.districts, data.districts);
   if (data.faults) upsertSource(map, REFERENCE_SOURCES.faults, data.faults);
+  if (data.worldFaults && data.faults) {
+    upsertSource(map, REFERENCE_SOURCES.worldFaults, outsideRegion(data.worldFaults, data.faults));
+  }
   if (data.stations)
     upsertSource(map, REFERENCE_SOURCES.stations, stationsToGeoJson(data.stations));
   if (data.infra) {

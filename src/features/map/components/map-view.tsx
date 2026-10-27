@@ -17,6 +17,7 @@ import { resolveFocusedStation, useTelemetryStore } from '@/state/telemetry-stor
 import { useLiveStore } from '@/state/live-store';
 import { useTsunamiStore } from '@/state/tsunami-store';
 import { useUiStore } from '@/state/ui-store';
+import type { SimulationResult } from '@/types/simulation';
 
 import { useReferenceData } from '../hooks/use-reference-data';
 import {
@@ -29,7 +30,10 @@ import {
   INITIAL_VIEW_BOUNDS,
   INITIAL_VIEW_CENTER,
   mapPixelRatio,
+  GLOBE_BELOW_ZOOM,
   MIN_ZOOM,
+  SCENARIO_PITCH,
+  SCENARIO_VIEW_MARGIN_DEG,
   MAX_PITCH,
   TERRAIN_EXAGGERATION,
   TERRAIN_SOURCE_ID,
@@ -68,6 +72,40 @@ function focusedStationIndex(): number {
 function hasRecord(id: unknown): id is string {
   const records = useScenarioStore.getState().result?.records;
   return typeof id === 'string' && Boolean(records?.stations.some((station) => station.id === id));
+}
+
+/**
+ * A globe at world zoom, Mercator from regional zoom on. deck.gl draws the 3D wavefront
+ * curtains only in Mercator, and MapLibre's zoom-interpolated projection is not supported by
+ * deck.gl, so the switch is made here, with a little hysteresis.
+ */
+function applyProjection(map: MapLibreMap): void {
+  // A style without a projection (every basemap here) is Mercator.
+  const globe = map.getStyle().projection?.type === 'globe';
+  const zoom = map.getZoom();
+  if (!globe && zoom < GLOBE_BELOW_ZOOM) map.setProjection({ type: 'globe' });
+  else if (globe && zoom > GLOBE_BELOW_ZOOM + 0.5) map.setProjection({ type: 'mercator' });
+}
+
+/** Flies to a new scenario's rupture, wherever on the globe it is. */
+function focusScenario(map: MapLibreMap, result: SimulationResult): void {
+  const lons = result.rupture.trace.map(([lon]) => lon);
+  const lats = result.rupture.trace.map(([, lat]) => lat);
+  const margin = SCENARIO_VIEW_MARGIN_DEG;
+  const compact = map.getContainer().clientWidth < COMPACT_VIEW.maxWidth;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  map.fitBounds(
+    [
+      [Math.min(...lons) - margin, Math.min(...lats) - margin],
+      [Math.max(...lons) + margin, Math.max(...lats) + margin],
+    ],
+    {
+      padding: compact ? 16 : 48,
+      pitch: compact ? COMPACT_VIEW.pitch : SCENARIO_PITCH,
+      bearing: 0,
+      duration: reducedMotion ? 0 : 1500,
+    },
+  );
 }
 
 export function MapView() {
@@ -127,6 +165,9 @@ export function MapView() {
       new TerrainControl({ source: TERRAIN_SOURCE_ID, exaggeration: TERRAIN_EXAGGERATION }),
       'top-right',
     );
+    map.on('zoomend', () => {
+      applyProjection(map);
+    });
     // The terrain button switches terrain directly; the choice is kept for the next visit.
     // A style swap (theme change) also drops terrain; that is not the user's choice.
     map.on('terrain', () => {
@@ -135,6 +176,7 @@ export function MapView() {
     // Every style swap (theme change) drops custom sources and layers, so they are re-applied.
     map.on('style.load', () => {
       styleReadyRef.current = true;
+      applyProjection(map);
       const currentTheme = useUiStore.getState().theme;
       applyTerrain(map, currentTheme, useUiStore.getState().terrain);
       applyReferenceLayers(map, referenceRef.current, currentTheme);
@@ -296,6 +338,8 @@ export function MapView() {
     renderer.render(currentTime());
     const unsubscribeResult = useScenarioStore.subscribe((state, previous) => {
       if (state.result === previous.result) return;
+      const map = mapRef.current;
+      if (map && state.result) focusScenario(map, state.result);
       renderer.setResult(state.result);
       renderer.setFocusedStation(focusedStationIndex());
       renderer.render(currentTime());

@@ -30,11 +30,12 @@ describe('reference layers', () => {
     expect(collection.features[0]?.properties).toEqual({ id: 'KO.ARMT', accelerometer: true });
   });
 
-  it('draws districts, faults, stations, then facilities, each on its own source', () => {
+  it('draws districts, world and regional faults, stations, then facilities', () => {
     const specs = referenceLayerSpecs('dark');
-    expect(specs.map((spec) => spec.type)).toEqual(['line', 'line', 'symbol', 'circle']);
+    expect(specs.map((spec) => spec.type)).toEqual(['line', 'line', 'line', 'symbol', 'circle']);
     expect(specs.map((spec) => ('source' in spec ? spec.source : undefined))).toEqual([
       REFERENCE_SOURCES.districts,
+      REFERENCE_SOURCES.worldFaults,
       REFERENCE_SOURCES.faults,
       REFERENCE_SOURCES.stations,
       REFERENCE_SOURCES.facilities,
