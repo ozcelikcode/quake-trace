@@ -20,6 +20,19 @@ test('renders the shell and the 3D map without errors', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test('opens without downloading the scenario datasets', async ({ page }) => {
+  const requested: string[] = [];
+  page.on('request', (request) => requested.push(new URL(request.url()).pathname));
+
+  await page.goto('/');
+  await expect(page.getByTestId('map').locator('canvas')).toBeVisible({ timeout: 20_000 });
+  await page.waitForLoadState('networkidle');
+  // Heavy inputs load with the first run (roads 5.9 MB, bathymetry 1.6 MB, facilities 780 KB).
+  for (const file of ['roads.bin', 'bathymetry.f32', 'infra.geojson', 'population.f32']) {
+    expect(requested.filter((path) => path.endsWith(`/data/${file}`))).toEqual([]);
+  }
+});
+
 test('switches language between Turkish and English', async ({ page }) => {
   await page.goto('/');
   const html = page.locator('html');

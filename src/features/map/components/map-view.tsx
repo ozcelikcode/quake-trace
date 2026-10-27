@@ -71,8 +71,10 @@ export function MapView() {
   const { t } = useTranslation();
   const theme = useUiStore((state) => state.theme);
   const reference = useReferenceData();
-  const elevation = useGridDataset('elevation').data;
-  const roads = useRoadGraph().data;
+  // The renderer needs the terrain heights and the road graph only once a scenario has run.
+  const hasResult = useScenarioStore((state) => state.result !== null);
+  const elevation = useGridDataset('elevation', hasResult).data;
+  const roads = useRoadGraph(hasResult).data;
   const mapRaster = useUiStore((state) => state.mapRaster);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);

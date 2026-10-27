@@ -85,7 +85,7 @@ Budget (acceptance for the whole phase):
 - There are no long tasks over 50 ms during playback.
 - Playback runs at 60 fps on desktop and 30 fps on phones without heating the phone.
 
-- [ ] **13.1 Lazy data.**
+- [x] **13.1 Lazy data.**
   - Goal: nothing heavy loads until it is needed.
   - Files: `src/features/scenario/components/shared-scenario.tsx`, `src/features/scenario/hooks/use-run-scenario.ts`, `src/data/use-dataset.ts`, `src/features/map/components/map-view.tsx`.
   - Done when:

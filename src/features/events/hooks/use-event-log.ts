@@ -13,7 +13,7 @@ export function useEventLog() {
     state.result?.scenarioId === result?.scenarioId ? state.result : null,
   );
   const districts = useJsonDataset('districts').data;
-  const roads = useRoadGraph().data;
+  const roads = useRoadGraph(result !== null).data;
   const entries = useMemo(
     () => (result && districts ? eventLog(result, tsunami, districts, roads) : []),
     [result, tsunami, districts, roads],

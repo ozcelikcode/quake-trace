@@ -2,9 +2,13 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 (roadmap and agent-neutral docs) is done; next is phase 13 (performance), task 13.1. Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1 done, next 13.2 (caching and compression). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
-## Recent changes (2026-10-27, phase 12)
+## Recent changes (2026-10-27, phase 13)
+
+- 13.1: the page opens with only the manifest, faults, districts and stations. `useRunScenario` fetches the simulation inputs on the first run (`queryClient.query` with the shared query options in `data/use-dataset.ts`), the tsunami fetches the bathymetry itself, `SharedScenario` mounts its runner only when the address bar holds a request, and the map, event log and facility layer load roads, elevation and infra once a result exists. e2e asserts that the first load does not request them.
+
+## Changes (2026-10-27, phase 12)
 
 - `memory-bank/roadmap.md`: v2 phases 12–17 with root causes, decisions and acceptance criteria.
 - `AGENTS.md` is agent-neutral (task pick-up, command table, reporting rules); Claude Code tools moved to `CLAUDE.md`; stale facts fixed.
