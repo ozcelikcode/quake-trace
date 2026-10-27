@@ -130,17 +130,18 @@ test('shows network load and emergency response, and switches the map shading', 
   await expect(page.getByText('Şiddet (MMI)')).toBeVisible();
 });
 
-test('computes the tsunami in the background and opens its timeline scale', async ({ page }) => {
+test('computes the tsunami on request and opens its timeline scale', async ({ page }) => {
   test.skip(project() === 'phone-ios', 'covered by the other phone profile');
   // Waiting for the tsunami worker next to software WebGL can exceed the shared 60 s budget.
   test.setTimeout(120_000);
   await runNorthMarmara(page);
   const scale = page.getByRole('radiogroup', { name: 'Zaman ölçeği' });
   const tsunami = scale.getByRole('radio', { name: 'Tsunami' });
-  // The hour of wave propagation takes a few seconds in its own worker.
-  await expect(tsunami).toBeEnabled({ timeout: 45_000 });
+  // The tsunami waits until it is asked for; the hour of wave propagation then takes a few
+  // seconds in its own worker, and the scale opens when it is done.
+  await expect(tsunami).toBeEnabled();
   await tsunami.click();
-  await expect(tsunami).toHaveAttribute('aria-checked', 'true');
+  await expect(tsunami).toHaveAttribute('aria-checked', 'true', { timeout: 45_000 });
   // The compact phone timeline has no speed control.
   if (!isPhone()) {
     await expect(page.getByRole('radio', { name: '30×' })).toHaveAttribute('aria-checked', 'true');

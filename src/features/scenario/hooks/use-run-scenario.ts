@@ -72,6 +72,7 @@ async function loadObserved(
 /**
  * Propagates the scenario's tsunami in its own worker and opens the tsunami timeline scale when
  * it is done; a result for an older scenario is dropped. The bathymetry is fetched only here.
+ * Runs are scheduled (`useTsunamiStore.schedule`) and started by `useTsunamiTrigger` or the UI.
  */
 async function runTsunami(queryClient: QueryClient, scenario: Scenario) {
   const token = useTsunamiStore.getState().start();
@@ -82,7 +83,9 @@ async function runTsunami(queryClient: QueryClient, scenario: Scenario) {
     ]);
     const result = await tsunamiWorker().simulate({ scenario, bathymetry, districtCells });
     if (useTsunamiStore.getState().succeed(token, result)) {
-      usePlaybackStore.getState().setExtent('tsunami', result.durationS);
+      const playback = usePlaybackStore.getState();
+      playback.setExtent('tsunami', result.durationS);
+      if (useTsunamiStore.getState().openWhenReady) playback.setScale('tsunami');
     }
   } catch (error) {
     console.error(error);
@@ -118,7 +121,7 @@ function publishRequest(request: RunRequest) {
 
 /**
  * Runs a preset, an editor draft, a replay or a live event in the simulation worker, starts
- * playback, then computes its tsunami and, for real earthquakes, fetches the observed records.
+ * playback, schedules its tsunami and, for real earthquakes, fetches the observed records.
  */
 export function useRunScenario() {
   const queryClient = useQueryClient();
@@ -191,7 +194,9 @@ export function useRunScenario() {
       });
       scenarioStore.succeed(result);
       usePlaybackStore.getState().load(result.durationS, result.aftershocks.durationS);
-      void runTsunami(queryClient, scenario);
+      useTsunamiStore.getState().schedule(() => {
+        void runTsunami(queryClient, scenario);
+      });
       if (request.kind === 'replay' || request.kind === 'event') {
         void loadObserved(
           scenario.id,

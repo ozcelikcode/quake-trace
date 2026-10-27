@@ -123,12 +123,14 @@ Budget (acceptance for the whole phase):
     - The clock and slider update the DOM through refs.
     - Selectors on `timeS` are rounded.
     - Telemetry canvases repaint at most 20 times per second, and only visible rows.
-- [ ] **13.6 Worker scheduling.**
-  - Files: `use-run-scenario.ts`, `src/workers/*.ts`, `simulation-renderer.ts`.
-  - Done when:
-    - The tsunami runs only when its tab or timeline scale is opened, with 1800 s on phones.
-    - The road graph loads once inside the worker.
-    - Response corridors are built in the worker.
+- [x] **13.6 Worker scheduling.**
+  - The tsunami is scheduled with each run and starts only when it is needed:
+    - when the shaking playback reaches its end (`useTsunamiTrigger`);
+    - when the Tsunami timeline scale is chosen (the scale opens when the result arrives);
+    - when the tsunami summary is shown.
+  - Not done, with reasons:
+    - **Phone 1800 s tsunami duration:** results must stay identical across devices for a given scenario.
+    - **Road graph loaded once in the worker, and corridors built in the worker:** a CPU profile of a preset run (8 s) shows map rendering dominating. The structured clone and `#buildResponse` were not hotspots.
 - [ ] **13.7 Bundle.**
   - Files: `vite.config.ts`, `src/app/*`.
   - Done when:

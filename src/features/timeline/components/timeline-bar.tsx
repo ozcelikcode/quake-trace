@@ -165,7 +165,13 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
             value={scale}
             aria-label={t('timeline.scale')}
             onValueChange={(value) => {
-              if (isTimelineScale(value)) setScale(value);
+              if (!isTimelineScale(value)) return;
+              // The tsunami is computed on request; its scale opens when the result arrives.
+              if (value === 'tsunami' && extents.tsunami <= 0) {
+                useTsunamiStore.getState().request({ openScale: true });
+              } else {
+                setScale(value);
+              }
             }}
           >
             {timelineScales.map((option) => (
@@ -173,7 +179,13 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
                 key={option}
                 value={option}
                 className={cn(compact && 'px-1.5')}
-                disabled={extents[option] <= 0}
+                disabled={
+                  extents[option] <= 0 &&
+                  !(
+                    option === 'tsunami' &&
+                    (tsunamiStatus === 'pending' || tsunamiStatus === 'computing')
+                  )
+                }
                 title={
                   option === 'tsunami' && tsunamiStatus === 'computing'
                     ? t('timeline.tsunamiComputing')

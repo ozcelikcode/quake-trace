@@ -2,9 +2,11 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1–13.5 done, next 13.6 (worker scheduling). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1–13.6 done, next 13.7 (bundle). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
 ## Recent changes (2026-10-27, phase 13)
+
+- 13.6: tsunami runs are scheduled (`useTsunamiStore.schedule`, status `pending`) and start at the end of the shaking playback (`useTsunamiTrigger` in the app shell), on the Tsunami scale button (opens the scale when ready, `openWhenReady`) or when the tsunami summary mounts.
 
 - 13.4–13.5: `SimulationRenderer` throttles the raster upload and isolines to 15 Hz (trailing update), stops repainting a settled raster, caches static positions and draws at most 30 frames a second on compact maps (constructor option `compact`). The clock and the timeline select formatted or slider-rounded time instead of raw `timeS`; telemetry canvases repaint at most 20 times a second, at a pixel ratio of at most 2, with the box size from the resize observer. Before and after numbers are in `roadmap.md` 13.4. Measuring script pattern: Playwright + CDP `Performance.getMetrics` (`TaskDuration`) over a 10 s playback window against `vite preview`, with `Emulation.setCPUThrottlingRate` 4 for the phone viewport.
 

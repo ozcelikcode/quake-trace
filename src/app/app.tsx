@@ -5,6 +5,7 @@ import { AboutDialog, useAboutShortcut } from '@/features/about';
 import { ScenarioReport } from '@/features/events';
 import { SharedScenario } from '@/features/scenario';
 import { usePlaybackLoop, usePlaybackShortcuts } from '@/features/timeline';
+import { useTsunamiTrigger } from '@/features/tsunami';
 
 import { DesktopLayout } from './desktop-layout';
 import { PhoneLayout } from './phone-layout';
@@ -19,6 +20,7 @@ export function App() {
   usePlaybackLoop();
   usePlaybackShortcuts();
   useAboutShortcut();
+  useTsunamiTrigger();
   const layout = useLayoutMode();
 
   return (

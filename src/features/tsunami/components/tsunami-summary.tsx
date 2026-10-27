@@ -1,4 +1,5 @@
 import { Waves } from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,10 @@ export function TsunamiSummary() {
   const second = usePlaybackStore((state) => Math.floor(state.timeS));
   const scale = usePlaybackStore((state) => state.scale);
   const setScale = usePlaybackStore((state) => state.setScale);
+  // Opening the summary is asking for the tsunami.
+  useEffect(() => {
+    if (status === 'pending') useTsunamiStore.getState().request();
+  }, [status]);
   if (status === 'idle') return null;
 
   const number = (value: number, digits = 0) => formatNumber(value, i18n.language, digits);
