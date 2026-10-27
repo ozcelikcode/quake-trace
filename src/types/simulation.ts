@@ -83,10 +83,15 @@ export interface EarlyWarning {
   locationErrorKm: number;
 }
 
-/** Everything a scenario produces, indexed like the grid (row-major, north-up). */
+/**
+ * Everything a scenario produces. The shaking fields are indexed like `grid` (row-major,
+ * north-up), an event-centred grid; districts, damage, network and routing refer to
+ * `regionGrid`, the grid of the regional data.
+ */
 export interface SimulationResult {
   scenarioId: string;
   grid: GridSpec;
+  regionGrid: GridSpec;
   /** First P-wave arrival per cell, seconds after origin. */
   tP: Float32Array<ArrayBuffer>;
   /** First S-wave arrival per cell, seconds after origin. */

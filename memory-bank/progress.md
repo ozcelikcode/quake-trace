@@ -62,7 +62,7 @@ Each phase ends with CI green and a deployable `main`.
 - Dark basemap: water and land contrast is low; with the intensity raster the map reads well.
 - MapLibre has no API to start compact attribution collapsed; on narrow maps the `maplibregl-compact-show` class is removed after load (`map-view.tsx`).
 - Building counts outside İstanbul are estimates (see `dataSources.md`); the impact panel marks those districts "(estimated stock)".
-- Wavefronts and intensity are cut into a rectangle where they leave the fixed Marmara engine grid (large Mw); fixed by the event-centred grid (roadmap 14.1).
+- Far-field intensity: ASB14 (no anelastic term) is extrapolated beyond 200 km on the event grid, so MMI III–IV can cover very large areas for Mw ≥ 7.4 (roadmap 15).
 - Legends do not match layer opacity ramps; tsunami peak includes static uplift (roadmap 15.1, 15.2).
 - Median-only ground motion and records: map and telemetry stay consistent; aleatory variability (ASB14 σ, τ) is not sampled, so no uncertainty bands are shown.
 - Damage: GEM data is CC BY-NC-SA 4.0 (non-commercial); time of day fixed at night (residents at home); facility state thresholds are assumptions; underestimates İBB 2019 fatalities by about 2.4× (different magnitude/rupture, median-centred stock assumptions).

@@ -139,7 +139,7 @@ Budget (acceptance for the whole phase):
 
 ## Phase 14 — Event-centred grid and world map
 
-- [ ] **14.1 Event grid.**
+- [x] **14.1 Event grid.** (Sized on stiff soil, Vs30 360 m/s, to MMI III, not on rock to MMI II: MMI II would need grids over 1,000 km wide for Mw 7. Desktop budget 250k cells, phones 100k. Measured: Mw 7.8 computes in 1.5 s on desktop and its footprint is circular.)
   - Goal: fix the rectangle clipping.
   - Files: `src/engine/grid/event-grid.ts` (new), `src/engine/sim/simulate.ts`, `use-run-scenario.ts`.
   - Grid:

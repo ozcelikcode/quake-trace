@@ -2,9 +2,13 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phases 12 and 13 are done; next is phase 14 (event-centred grid and world map), task 14.1. Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phases 12 and 13 are done; phase 14 is in progress on `feat/phase-14-world` (from the phase 12–13 branch): 14.1 done, next 14.2 (Vs30 everywhere). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
-## Recent changes (2026-10-27, phase 13)
+## Recent changes (2026-10-27, phase 14)
+
+- 14.1: event-centred shaking grid (`engine/grid/event-grid.ts`, see `simulationModels.md`); `SimulationResult.grid` is the event grid and `regionGrid` the regional one (network raster); the renderer keeps one image source per raster grid and samples elevation by lon/lat; stations take Vs30 by lon/lat with the 760 m/s default; `MAX_BOUNDS` replaced by `MIN_ZOOM` 1; phones send `maxEventCells` 100k.
+
+## Changes (2026-10-27, phase 13)
 
 - 13.7: telemetry, impact and events panels lazy (`app/panels.ts`, Suspense in the tab layouts), About dialog lazy in `features/about/index.ts` and mounted only while open, report mounted only with a result.
 

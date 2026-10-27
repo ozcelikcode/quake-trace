@@ -27,11 +27,8 @@ export const DATA_ATTRIBUTION = [
 /** Below this map width MapLibre shows compact attribution; it starts collapsed there. */
 export const COMPACT_ATTRIBUTION_MAX_WIDTH = 640;
 
-/** Panning limit: the region plus a margin. */
-export const MAX_BOUNDS: LngLatBoundsLike = [
-  [23.5, 38.4],
-  [33.5, 43.2],
-];
+/** The whole world can be reached; zoom 1 shows it in one view. */
+export const MIN_ZOOM = 1;
 
 /**
  * Narrow (portrait phone) maps frame the northern Marmara coast, İstanbul between Tekirdağ and

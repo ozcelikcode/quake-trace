@@ -4,7 +4,14 @@ Scientific approach per engine module and how results reach the screen. Each imp
 
 ## Grid
 
-Marmara bounding box 26.0–31.0° E, 39.8–41.8° N. Engine grid `marmara-1km`: 0.01° cells, 500 × 200 (100,000 cells); phones may downsample by 2. Tsunami grid `marmara-500m`: 0.005°, 1000 × 400. Grids are north-up (row 0 = 41.8° N), row-major, little-endian `Float32Array`, NaN for no data; specs live in `manifest.json`, `src/types/grid.ts` is the shared type and `src/data/grid.ts` decodes them. Prepared inputs on these grids: population, Vs30, elevation, district index (1 km), bathymetry (500 m). Waves that leave the grid (for example north of 41.8° N over the Black Sea) are not drawn beyond it.
+Marmara bounding box 26.0–31.0° E, 39.8–41.8° N. Engine grid `marmara-1km`: 0.01° cells, 500 × 200 (100,000 cells); phones may downsample by 2. Tsunami grid `marmara-500m`: 0.005°, 1000 × 400. Grids are north-up (row 0 = 41.8° N), row-major, little-endian `Float32Array`, NaN for no data; specs live in `manifest.json`, `src/types/grid.ts` is the shared type and `src/data/grid.ts` decodes them. Prepared inputs on these grids: population, Vs30, elevation, district index (1 km), bathymetry (500 m). **Event grid (since 2026-10-27):** shaking (arrivals, PGA, PGV, MMI) is computed on an event-centred grid, `engine/grid/event-grid.ts`.
+- Size: the rupture's surface projection widened on every side by the distance where the ASB14 median on stiff soil (Vs30 360 m/s) falls to MMI III (`EDGE_MMI`, the lowest intensity the map draws).
+- Radii: Mw 6 → 142 km, Mw 7 → 408 km, Mw 7.4 → 612 km, Mw 7.8 → 990 km (capped at 1,500 km).
+- Cells: square, about 250k on desktops and 100k on phones, never finer than 1 km. Mw 7.4 gets about 1.7 km cells, Mw 7.8 about 4 km. Travel-time tables reach the farthest grid corner.
+- Vs30 inside the regional grid comes from the data; outside it is 760 m/s (`DEFAULT_VS30`).
+- The regional grid (`marmara-1km`) still carries the impact modules. Districts, damage, network and routing are computed on a second shaking pass over it, only when the event grid overlaps it.
+- Stations take Vs30 from the regional data or the default, wherever they are.
+- Caveat: ASB14 has no anelastic term, so far-field intensities (beyond its 200 km range) are extrapolated and probably high.
 
 ## Modules
 

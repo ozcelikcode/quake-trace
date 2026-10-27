@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { districtImpacts, simulate, type SimulationInput } from '@/engine/sim/simulate';
+import { EDGE_MMI } from '@/engine/grid/event-grid';
+import {
+  DEFAULT_VS30,
+  districtImpacts,
+  simulate,
+  type SimulationInput,
+} from '@/engine/sim/simulate';
 import type { GridSpec } from '@/types/grid';
 
 // A small grid (0.05° cells) around a straight east-west fault.
@@ -34,25 +40,39 @@ const input: SimulationInput = {
   stations: [
     { id: 'XX.NEAR', lon: 29.0, lat: 40.85 },
     { id: 'XX.FAR', lon: 29.9, lat: 41.15 },
-    { id: 'XX.OUT', lon: 31.5, lat: 41.0 },
+    { id: 'XX.OFFSHORE', lon: 28.5, lat: 40.0 },
   ],
 };
 
 describe('scenario simulation', () => {
   const result = simulate(input);
 
-  it('produces fields for every cell, S after P', () => {
-    expect(result.tP).toHaveLength(cells);
-    for (let i = 0; i < cells; i++) {
+  it('produces fields for every cell of the event grid, S after P', () => {
+    const eventCells = result.grid.nx * result.grid.ny;
+    expect(result.tP).toHaveLength(eventCells);
+    for (let i = 0; i < eventCells; i++) {
       expect(result.tS[i]).toBeGreaterThan(result.tP[i] ?? Number.NaN);
       expect(result.mmi[i]).toBeGreaterThanOrEqual(1);
       expect(result.mmi[i]).toBeLessThanOrEqual(10);
     }
-    expect(result.durationS).toBeGreaterThan(Math.max(...result.tS));
+    expect(result.durationS).toBeGreaterThan(result.tS.reduce((a, b) => Math.max(a, b)));
+  });
+
+  it('extends the grid until the intensity falls below the drawn range on every edge', () => {
+    const { nx, ny } = result.grid;
+    for (let col = 0; col < nx; col++) {
+      expect(result.mmi[col]).toBeLessThan(EDGE_MMI);
+      expect(result.mmi[(ny - 1) * nx + col]).toBeLessThan(EDGE_MMI);
+    }
+    for (let row = 0; row < ny; row++) {
+      expect(result.mmi[row * nx]).toBeLessThan(EDGE_MMI);
+      expect(result.mmi[row * nx + nx - 1]).toBeLessThan(EDGE_MMI);
+    }
+    expect(result.regionGrid).toEqual(grid);
   });
 
   it('reaches the epicentre first, about one vertical travel time after origin', () => {
-    const minP = Math.min(...result.tP);
+    const minP = result.tP.reduce((a, b) => Math.min(a, b));
     // Vertical P travel time from 12 km depth: 12 / 5.8 ≈ 2.07 s.
     expect(minP).toBeGreaterThan(1.5);
     expect(minP).toBeLessThan(2.6);
@@ -60,9 +80,10 @@ describe('scenario simulation', () => {
 
   it('shakes hardest along the rupture', () => {
     const at = (lon: number, lat: number) => {
-      const col = Math.floor((lon - grid.west) / grid.dLon);
-      const row = Math.floor((grid.north - lat) / grid.dLat);
-      return result.mmi[row * grid.nx + col] ?? Number.NaN;
+      const { west, north, dLon, dLat, nx } = result.grid;
+      const col = Math.floor((lon - west) / dLon);
+      const row = Math.floor((north - lat) / dLat);
+      return result.mmi[row * nx + col] ?? Number.NaN;
     };
     expect(at(29, 40.81)).toBeGreaterThan(at(29, 41.15));
     expect(at(29, 40.81)).toBeGreaterThan(7);
@@ -89,10 +110,11 @@ describe('station records', () => {
     );
   const peak = (values: Float32Array) => values.reduce((max, v) => Math.max(max, Math.abs(v)), 0);
 
-  it('covers the stations inside the grid for the whole scenario at 100 Hz', () => {
-    expect(records.stations.map((s) => s.id)).toEqual(['XX.NEAR', 'XX.FAR']);
+  it('covers every station for the whole scenario at 100 Hz, rock Vs30 outside the data', () => {
+    expect(records.stations.map((s) => s.id)).toEqual(['XX.NEAR', 'XX.FAR', 'XX.OFFSHORE']);
+    expect(records.stations[2]?.vs30).toBe(DEFAULT_VS30);
     expect(rate).toBe(100);
-    expect(records.accelCmS2).toHaveLength(2 * 3 * records.samples);
+    expect(records.accelCmS2).toHaveLength(3 * 3 * records.samples);
     const result = simulate(input);
     expect(records.samples).toBe(Math.floor(result.durationS * rate) + 1);
   });

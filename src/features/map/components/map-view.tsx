@@ -29,7 +29,7 @@ import {
   INITIAL_VIEW_BOUNDS,
   INITIAL_VIEW_CENTER,
   mapPixelRatio,
-  MAX_BOUNDS,
+  MIN_ZOOM,
   MAX_PITCH,
   TERRAIN_EXAGGERATION,
   TERRAIN_SOURCE_ID,
@@ -103,7 +103,7 @@ export function MapView() {
       pixelRatio: mapPixelRatio(compact),
       style: styleUrl,
       center: INITIAL_VIEW_CENTER,
-      maxBounds: MAX_BOUNDS,
+      minZoom: MIN_ZOOM,
       maxPitch: MAX_PITCH,
       attributionControl: { compact: true, customAttribution: DATA_ATTRIBUTION },
     });
@@ -229,7 +229,7 @@ export function MapView() {
   useEffect(() => {
     if (!renderer) return;
     // Without terrain the 3D elements stand on the flat map.
-    renderer.setElevation(terrain ? elevation?.values : undefined);
+    renderer.setElevation(terrain ? elevation : undefined);
     renderer.render(currentTime());
   }, [renderer, elevation, terrain]);
 

@@ -109,6 +109,14 @@ function loadSimulationInputs(queryClient: QueryClient) {
   ]);
 }
 
+/**
+ * Cells of the event-centred shaking grid: phones get fewer (coarser cells, about half the
+ * compute time and memory).
+ */
+function eventCellBudget(): number {
+  return window.innerWidth < 640 ? 100_000 : 250_000;
+}
+
 /** Puts the request in the address bar, so the page URL always shares the running scenario. */
 function publishRequest(request: RunRequest) {
   const { pathname, hash } = window.location;
@@ -182,6 +190,7 @@ export function useRunScenario() {
         scenario,
         grid: vs30.spec,
         vs30: vs30.values,
+        maxEventCells: eventCellBudget(),
         districtCells: districtCells.values,
         // Strong-motion records come from the stations with accelerometers.
         stations: stations.stations

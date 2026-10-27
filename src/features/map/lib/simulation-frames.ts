@@ -244,7 +244,8 @@ export function wavefrontCurtain(
   arrival: Float32Array,
   spec: GridSpec,
   timeS: number,
-  elevationM: Float32Array | undefined,
+  /** Ground elevation at a point, m (before exaggeration); none on the flat map. */
+  elevationAt: ((lon: number, lat: number) => number) | undefined,
   style: CurtainStyle,
 ): CurtainBuffers {
   const segments = isolineSegments(arrival, spec.nx, spec.ny, timeS);
@@ -255,12 +256,8 @@ export function wavefrontCurtain(
   const targetPositions = new Float32Array(length * 3);
   const colors = new Uint8Array(length * 4);
 
-  const ground = (x: number, y: number) => {
-    if (!elevationM) return 0;
-    const col = Math.min(spec.nx - 1, Math.max(0, Math.floor(x)));
-    const row = Math.min(spec.ny - 1, Math.max(0, Math.floor(y)));
-    return Math.max(0, elevationM[row * spec.nx + col] ?? 0) * style.terrainExaggeration;
-  };
+  const ground = (lon: number, lat: number) =>
+    elevationAt ? Math.max(0, elevationAt(lon, lat)) * style.terrainExaggeration : 0;
 
   let item = 0;
   for (let s = 0; s < segmentCount; s++) {
@@ -272,8 +269,8 @@ export function wavefrontCurtain(
     const lat0 = spec.north - y0 * spec.dLat;
     const lon1 = spec.west + x1 * spec.dLon;
     const lat1 = spec.north - y1 * spec.dLat;
-    const z0 = ground(x0, y0);
-    const z1 = ground(x1, y1);
+    const z0 = ground(lon0, lat0);
+    const z1 = ground(lon1, lat1);
     for (let level = 0; level < levels; level++) {
       const height = style.levelsM[level] ?? 0;
       sourcePositions.set([lon0, lat0, z0 + height], item * 3);

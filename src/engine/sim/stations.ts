@@ -1,6 +1,4 @@
 import { bearingDeg, haversineKm } from '@/lib/math/geo';
-import { cellIndex } from '@/lib/math/grid';
-import type { GridSpec } from '@/types/grid';
 import type { StationRecord, StationRecords, StationSite } from '@/types/simulation';
 
 import { firstTriggerIndex, LTA_S, STA_S, staLtaRatio } from '../eew/sta-lta';
@@ -25,8 +23,8 @@ export interface StationContext {
   rupture: Rupture;
   arrivals: RuptureArrivals;
   surface: PolygonDistance;
-  grid: GridSpec;
-  vs30: Float32Array;
+  /** Vs30 at a point, m/s; NaN where none is known. */
+  vs30At: (lon: number, lat: number) => number;
   rakeDeg: number;
 }
 
@@ -38,19 +36,18 @@ export interface StationPlan {
 }
 
 /**
- * Arrivals, distances, site and target PGA for each station. Stations outside the grid or
- * without a Vs30 value are skipped.
+ * Arrivals, distances, site and target PGA for each station. Stations without a Vs30 value
+ * are skipped.
  */
 export function planStations(
   sites: readonly StationSite[],
   context: StationContext,
 ): StationPlan[] {
-  const { rupture, arrivals, surface, grid, vs30, rakeDeg } = context;
+  const { rupture, arrivals, surface, vs30At, rakeDeg } = context;
   const { hypocenter, mw } = rupture;
   const plans: StationPlan[] = [];
   for (const site of sites) {
-    const cell = cellIndex(grid, site.lon, site.lat);
-    const siteVs30 = cell < 0 ? Number.NaN : (vs30[cell] ?? Number.NaN);
+    const siteVs30 = vs30At(site.lon, site.lat);
     if (!Number.isFinite(siteVs30)) continue;
 
     arrivals.locate(site.lon, site.lat);

@@ -6,6 +6,7 @@ import type { GeoJSONSource, ImageSource, Map as MapLibreMap } from 'maplibre-gl
 import { siteState } from '@/features/cells';
 import { facilityStatus } from '@/features/infra';
 import type { MapRaster, Theme } from '@/state/ui-store';
+import { cellIndex } from '@/lib/math/grid';
 import type { GridSpec } from '@/types/grid';
 import type { RoadGraph } from '@/types/roads';
 import type { SimulationResult, StationRecord } from '@/types/simulation';
@@ -100,6 +101,13 @@ interface StationPoint {
   position: [number, number, number];
 }
 
+interface RasterCanvas {
+  grid: GridSpec;
+  image: ImageData;
+  pixels: Uint32Array;
+  rowMap: Int32Array;
+}
+
 interface StaticPositions {
   extent: [number, number, number][];
   stations: StationPoint[];
@@ -145,10 +153,13 @@ export class SimulationRenderer {
   #response: Partial<
     Record<ResponseSource, { data: GeoJSON.FeatureCollection; reveal: TimedReveal }>
   > = {};
-  #elevation: Float32Array | undefined;
-  #image: ImageData | null = null;
-  #pixels: Uint32Array | null = null;
-  #rowMap: Int32Array | null = null;
+  /** Ground elevation (m) at a point, for curtains; undefined on the flat map. */
+  #elevationAt: ((lon: number, lat: number) => number) | undefined;
+  /**
+   * The raster image and the grid it covers: intensity on the event grid, the network on the
+   * regional grid, the sea surface on the tsunami grid. The image source follows the grid.
+   */
+  #canvas: RasterCanvas | null = null;
   #lastTimeS = Number.NaN;
   /** Raster time last painted, and when (performance.now()); NaN forces the next paint. */
   #rasterTimeS = Number.NaN;
@@ -178,9 +189,14 @@ export class SimulationRenderer {
     this.#frameIntervalMs = compact ? 1000 / 30 - 2 : 0;
   }
 
-  /** Ground elevation on the result's grid (m), used to lift 3D elements onto the terrain. */
-  setElevation(values: Float32Array | undefined): void {
-    this.#elevation = values;
+  /** Ground elevation grid (m), used to lift 3D elements onto the terrain. */
+  setElevation(elevation: { spec: GridSpec; values: Float32Array } | undefined): void {
+    this.#elevationAt = elevation
+      ? (lon, lat) => {
+          const cell = cellIndex(elevation.spec, lon, lat);
+          return cell < 0 ? 0 : (elevation.values[cell] ?? 0);
+        }
+      : undefined;
     this.#blindZone = null;
     this.#static = null;
     this.#invalidate();
@@ -227,16 +243,11 @@ export class SimulationRenderer {
     this.#removeRaster();
     this.#buildResponse();
     if (!result) {
-      this.#image = null;
-      this.#pixels = null;
+      this.#canvas = null;
       this.#overlay.setProps({ layers: [] });
       return;
     }
     this.#lastArrival = { s: lastFinite(result.tS), p: lastFinite(result.tP) };
-    const image = new ImageData(result.grid.nx, result.grid.ny);
-    this.#image = image;
-    this.#pixels = new Uint32Array(image.data.buffer);
-    this.#rowMap = mercatorRowMap(result.grid);
     this.attach();
   }
 
@@ -247,9 +258,11 @@ export class SimulationRenderer {
    */
   attach(): void {
     const result = this.#result;
-    if (!result || !this.#image) return;
+    if (!result) return;
     this.#removeRaster();
-    this.#map.addSource(INTENSITY_SOURCE, { type: 'image', coordinates: corners(result.grid) });
+    const grid = this.#rasterGrid(result);
+    this.#canvas = this.#canvasFor(grid);
+    this.#map.addSource(INTENSITY_SOURCE, { type: 'image', coordinates: corners(grid) });
     const below = this.#map.getLayer(RASTER_BELOW)
       ? RASTER_BELOW
       : overlayAnchorLayerId(this.#map.getStyle().layers);
@@ -265,6 +278,24 @@ export class SimulationRenderer {
     );
     this.#attachResponse();
     this.#invalidate();
+  }
+
+  /** The grid of the raster currently shown. */
+  #rasterGrid(result: SimulationResult): GridSpec {
+    if (this.#raster === 'tsunami' && this.#tsunami) return this.#tsunami.result.grid;
+    if (this.#raster === 'network' && result.network) return result.regionGrid;
+    return result.grid;
+  }
+
+  #canvasFor(grid: GridSpec): RasterCanvas {
+    if (this.#canvas?.grid === grid) return this.#canvas;
+    const image = new ImageData(grid.nx, grid.ny);
+    return {
+      grid,
+      image,
+      pixels: new Uint32Array(image.data.buffer),
+      rowMap: mercatorRowMap(grid),
+    };
   }
 
   /** Forces the next `render` to redraw everything, raster included. */
@@ -396,7 +427,7 @@ export class SimulationRenderer {
     const lift = (point: readonly [number, number]): [number, number, number] => [
       point[0],
       point[1],
-      this.#groundAt(result.grid, point[0], point[1]) + RUPTURE_LIFT_M,
+      this.#groundAt(point[0], point[1]) + RUPTURE_LIFT_M,
     ];
     const front = rupturedPath(rupture.trace, rupture.traceTimesS, timeS).map(lift);
     const epicentre = lift([rupture.hypocenter.lon, rupture.hypocenter.lat]);
@@ -451,14 +482,14 @@ export class SimulationRenderer {
     style: CurtainStyle,
   ): CurtainBuffers {
     if (timeS > lastArrival) return EMPTY_CURTAIN;
-    return wavefrontCurtain(arrival, grid, timeS, this.#elevation, style);
+    return wavefrontCurtain(arrival, grid, timeS, this.#elevationAt, style);
   }
 
   #staticPositions(result: SimulationResult): StaticPositions {
     const lift = (point: readonly [number, number]): [number, number, number] => [
       point[0],
       point[1],
-      this.#groundAt(result.grid, point[0], point[1]) + RUPTURE_LIFT_M,
+      this.#groundAt(point[0], point[1]) + RUPTURE_LIFT_M,
     ];
     return {
       extent: result.rupture.trace.map(lift),
@@ -467,22 +498,25 @@ export class SimulationRenderer {
         position: [
           station.lon,
           station.lat,
-          this.#groundAt(result.grid, station.lon, station.lat) + STATION_LIFT_M,
+          this.#groundAt(station.lon, station.lat) + STATION_LIFT_M,
         ],
       })),
     };
   }
 
   #paintRaster(result: SimulationResult, timeS: number): void {
+    // A raster on another grid (network, tsunami) needs its own image source.
+    if (this.#canvas?.grid !== this.#rasterGrid(result)) this.attach();
     const rasterTimeS = this.#rasterTime(result, timeS);
     if (rasterTimeS === this.#rasterTimeS) return;
     this.#rasterTimeS = rasterTimeS;
-    if (this.#pixels && this.#rowMap && this.#image) {
+    const canvas = this.#canvas;
+    if (canvas) {
       const tsunami = this.#tsunami;
       if (this.#raster === 'tsunami' && tsunami) {
         paintTsunami(
-          this.#pixels,
-          this.#rowMap,
+          canvas.pixels,
+          canvas.rowMap,
           tsunami.result,
           tsunami.cellIndex,
           this.#tsunamiLookup,
@@ -490,25 +524,25 @@ export class SimulationRenderer {
         );
       } else if (this.#raster === 'network' && result.network) {
         paintNetwork(
-          this.#pixels,
-          result.grid,
-          this.#rowMap,
+          canvas.pixels,
+          result.regionGrid,
+          canvas.rowMap,
           result.network,
           this.#loadLookup,
           rasterTimeS,
         );
       } else {
         paintIntensity(
-          this.#pixels,
+          canvas.pixels,
           result.grid,
-          this.#rowMap,
+          canvas.rowMap,
           result.tS,
           result.mmi,
           this.#lookup,
           rasterTimeS,
         );
       }
-      this.#map.getSource<ImageSource>(INTENSITY_SOURCE)?.updateImage({ image: this.#image });
+      this.#map.getSource<ImageSource>(INTENSITY_SOURCE)?.updateImage({ image: canvas.image });
     }
   }
 
@@ -542,14 +576,14 @@ export class SimulationRenderer {
       result.tS,
       result.grid,
       warning.alertS,
-      this.#elevation,
+      this.#elevationAt,
       BLIND_ZONE_STYLE,
     );
     const { lon, lat } = warning.epicenter;
     const estimate: [number, number, number] = [
       lon,
       lat,
-      this.#groundAt(result.grid, lon, lat) + RUPTURE_LIFT_M,
+      this.#groundAt(lon, lat) + RUPTURE_LIFT_M,
     ];
     return [
       curtainLayer('scenario-blind-zone', this.#blindZone),
@@ -632,12 +666,8 @@ export class SimulationRenderer {
     this.#result = null;
   }
 
-  #groundAt(spec: GridSpec, lon: number, lat: number): number {
-    const elevation = this.#elevation;
-    if (!elevation) return 0;
-    const col = Math.min(spec.nx - 1, Math.max(0, Math.floor((lon - spec.west) / spec.dLon)));
-    const row = Math.min(spec.ny - 1, Math.max(0, Math.floor((spec.north - lat) / spec.dLat)));
-    return Math.max(0, elevation[row * spec.nx + col] ?? 0) * TERRAIN_EXAGGERATION;
+  #groundAt(lon: number, lat: number): number {
+    return Math.max(0, this.#elevationAt?.(lon, lat) ?? 0) * TERRAIN_EXAGGERATION;
   }
 
   #removeRaster(): void {
