@@ -1,5 +1,6 @@
 import type { AftershockCatalog } from './aftershocks';
 import type { DistrictDamage, FacilityDamage } from './damage';
+import type { PopulationExposure } from './exposure';
 import type { GridSpec } from './grid';
 import type { NetworkResult } from './network';
 import type { RoutingResult } from './routing';
@@ -115,6 +116,8 @@ export interface SimulationResult {
   network: NetworkResult | null;
   /** Road closures, response times and corridors; null without a road network. */
   routing: RoutingResult | null;
+  /** Residents of Türkiye per intensity class; null outside it or without the data. */
+  exposure: PopulationExposure | null;
   /** Synthetic aftershocks of the first three days. */
   aftershocks: AftershockCatalog;
   /** Time by which the S wave has crossed the grid and station shaking has ended, seconds. */

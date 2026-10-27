@@ -132,4 +132,7 @@ test('simulates an earthquake whose shaking does not reach Marmara, shaking only
   await openImpactPanel(page);
   await expect(page.getByRole('heading', { name: 'Ayrıntılı modelin dışında' })).toBeVisible();
   await expect(page.getByTestId('tsunami-summary')).toHaveCount(0);
+  const exposure = page.getByTestId('exposure-summary');
+  await expect(exposure.getByRole('heading', { name: 'Nüfus maruziyeti (Türkiye)' })).toBeVisible();
+  await expect(exposure.getByRole('cell', { name: 'Kahramanmaraş' })).toBeVisible();
 });

@@ -182,7 +182,7 @@ Budget (acceptance for the whole phase):
   - Goal: the editor can use any fault, not only the 27 regional EFSM20 faults.
   - Approach: one fault catalogue (regional plus world `FaultSource`s with a magnitude limit). For world faults, use the W&C94 magnitude of the full trace, since they have no EFSM20 `mwMax`. It replaces `Faults` in `custom-scenario.ts`, `editor-layers.ts`, the editor select, `SharedScenario` link validation and the map's `FAULT_HIT_LAYER`, which needs to cover the world fault layer.
   - Done when: clicking any fault on the map fills the editor, and `?fault=GEM-…` links work.
-- [ ] **14.8 Türkiye exposure.**
+- [x] **14.8 Türkiye exposure.** (WorldPop 2025 on a 2 km grid instead of TÜİK district totals, because the raster is already UN-adjusted and gives the 87.6 M national total. The impact panel shows people per MMI class from IV and the six most strongly shaken provinces, both inside and outside Marmara.)
   - Done when: population per MMI class is shown by province and district (geoBoundaries ADM1/ADM2 + TÜİK ADNKS); no damage or fatality numbers are given outside Marmara.
 
 ## Phase 15 — Intensity and tsunami correctness

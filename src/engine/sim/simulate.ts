@@ -9,6 +9,7 @@ import type { Scenario } from '@/types/scenario';
 import type { DistrictImpact, SimulationResult, StationSite } from '@/types/simulation';
 
 import { aftershockCatalog } from '../aftershocks/catalog';
+import { populationExposure } from '../exposure/population-exposure';
 import { FACILITY_TAXONOMY } from '../damage/building-classes';
 import { districtDamage } from '../damage/district-damage';
 import { facilityDamage } from '../damage/facilities';
@@ -39,6 +40,8 @@ export interface SimulationInput {
   vs30: Float32Array;
   /** Further Vs30 grids (worldwide tiles), used where the regional grid has no value. */
   siteGrids?: readonly { spec: GridSpec; values: Float32Array }[];
+  /** Population and provinces of a wider area (Türkiye) for exposure counts. */
+  exposure?: { grid: GridSpec; population: Float32Array; province: Float32Array };
   /** The event-centred grid, when the caller already planned it (`planEventGrid`). */
   eventGrid?: GridSpec;
   /** Most cells of the event-centred grid (fewer on phones); default `MAX_EVENT_CELLS`. */
@@ -215,6 +218,15 @@ export function simulate(input: SimulationInput): SimulationResult {
       },
       createRandom(deriveSeed(scenario.seed, 'aftershocks')),
     ),
+    exposure: input.exposure
+      ? populationExposure({
+          grid,
+          mmi,
+          populationGrid: input.exposure.grid,
+          population: input.exposure.population,
+          province: input.exposure.province,
+        })
+      : null,
     durationS,
     computeMs: performance.now() - started,
   };

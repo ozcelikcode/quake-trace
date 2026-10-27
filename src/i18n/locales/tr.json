@@ -500,5 +500,13 @@
         "print": "Senaryo raporunu yazdır / PDF kaydet"
       }
     }
+  },
+  "exposure": {
+    "title": "Nüfus maruziyeti (Türkiye)",
+    "provinces": "En şiddetli sarsılan iller",
+    "province": "İl",
+    "maxMmi": "En yüksek MMI",
+    "strong": "MMI VI+",
+    "note": "Medyan şiddet sınıfına göre nüfus (WorldPop 2025), hafif sarsıntıdan (IV) itibaren; kuvvetli (VI) ve üstü sarsıntıda yaklaşık {{total}} kişi. Bu bir maruziyet tahminidir, kayıp değildir."
   }
 }

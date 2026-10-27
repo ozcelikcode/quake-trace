@@ -75,7 +75,9 @@ def _grid(grid_id: str, step: float) -> GridSpec:
 # About 1 km (engine grid) and about 500 m (tsunami grid).
 GRID_1KM = _grid("marmara-1km", 0.01)
 GRID_500M = _grid("marmara-500m", 0.005)
-GRIDS = (GRID_1KM, GRID_500M)
+# About 2 km over Türkiye, for population exposure outside the Marmara grid.
+GRID_TURKEY = GridSpec("turkey-2km", 25.6, 42.2, 0.02, 0.02, 965, 320)
+GRIDS = (GRID_1KM, GRID_500M, GRID_TURKEY)
 
 
 def aggregate_sum(

@@ -500,5 +500,13 @@
         "print": "Print the scenario report / save as PDF"
       }
     }
+  },
+  "exposure": {
+    "title": "Population exposure (Türkiye)",
+    "provinces": "Most strongly shaken provinces",
+    "province": "Province",
+    "maxMmi": "Highest MMI",
+    "strong": "MMI VI+",
+    "note": "Residents (WorldPop 2025) per median intensity class, from light shaking (IV); about {{total}} people in strong shaking (VI) or above. Exposure, not losses."
   }
 }

@@ -21,6 +21,7 @@ import {
   infraSchema,
   stationsSchema,
   vulnerabilitySchema,
+  turkeyProvinceNamesSchema,
   worldFaultsSchema,
 } from './schemas';
 
@@ -38,6 +39,7 @@ export const jsonDatasets = {
   infra: infraSchema,
   vulnerability: vulnerabilitySchema,
   worldFaults: worldFaultsSchema,
+  turkeyProvinceNames: turkeyProvinceNamesSchema,
 } as const;
 
 export type JsonDatasetId = keyof typeof jsonDatasets;
@@ -52,8 +54,16 @@ const parsers: { [K in JsonDatasetId]: (value: unknown) => JsonDataset<K> } = {
   infra: (value) => jsonDatasets.infra.parse(value),
   vulnerability: (value) => jsonDatasets.vulnerability.parse(value),
   worldFaults: (value) => jsonDatasets.worldFaults.parse(value),
+  turkeyProvinceNames: (value) => jsonDatasets.turkeyProvinceNames.parse(value),
 };
-export type GridDatasetId = 'population' | 'vs30' | 'bathymetry' | 'districtCells' | 'elevation';
+export type GridDatasetId =
+  | 'population'
+  | 'vs30'
+  | 'bathymetry'
+  | 'districtCells'
+  | 'elevation'
+  | 'turkeyPopulation'
+  | 'turkeyProvinces';
 
 const decoder = new TextDecoder();
 

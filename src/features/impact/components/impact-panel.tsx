@@ -16,6 +16,7 @@ import { usePlaybackStore } from '@/state/playback-store';
 import { useScenarioStore } from '@/state/scenario-store';
 
 import { DamageSummary } from './damage-summary';
+import { ExposureSummary } from './exposure-summary';
 
 export function ImpactPanel() {
   const { t, i18n } = useTranslation();
@@ -52,6 +53,7 @@ export function ImpactPanel() {
           </h3>
           <p className="text-caption text-fg-secondary">{t('impact.outsideBody')}</p>
         </section>
+        {result.exposure && <ExposureSummary exposure={result.exposure} />}
         <AftershockSummary catalog={result.aftershocks} />
       </div>
     );
@@ -78,6 +80,7 @@ export function ImpactPanel() {
   return (
     <div className="flex flex-col gap-4 p-3">
       <EewSummary result={result} />
+      {result.exposure && <ExposureSummary exposure={result.exposure} />}
       {result.damage && (
         <>
           <DamageSummary reached={reachedDamage} total={impacts.length} />

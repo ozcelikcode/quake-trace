@@ -192,7 +192,20 @@ export function useRunScenario() {
         roads,
         cells,
       ] = await loadSimulationInputs(queryClient);
+      // Exposure counts are optional: without the Türkiye grids the result simply has none.
+      const exposure = await Promise.all([
+        queryClient.query(gridDatasetQuery('turkeyPopulation')),
+        queryClient.query(gridDatasetQuery('turkeyProvinces')),
+      ]).then(
+        ([people, provinces]) => ({
+          grid: people.spec,
+          population: people.values,
+          province: provinces.values,
+        }),
+        () => undefined,
+      );
       const result = await simulationWorker().simulate({
+        ...(exposure ? { exposure } : {}),
         scenario,
         grid: vs30.spec,
         vs30: vs30.values,

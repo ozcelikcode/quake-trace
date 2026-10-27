@@ -60,6 +60,11 @@ export const worldFaultsSchema = featureCollection(
   }),
 );
 
+/** Province names of the Türkiye exposure grid (pipeline `turkey_exposure.py`). */
+export const turkeyProvinceNamesSchema = z.object({
+  provinces: z.array(z.object({ index: z.int().nonnegative(), name: z.string() })),
+});
+
 export const districtsSchema = featureCollection(
   z.discriminatedUnion('type', [polygon, multiPolygon]),
   z.object({

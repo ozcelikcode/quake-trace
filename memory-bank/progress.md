@@ -2,7 +2,7 @@
 
 ## Current status
 
-Phase: **13 (performance) complete; next is phase 14 (event-centred grid and world map).** Phases 0–11 are merged into `main` and deployed at https://quake-trace.ozcelikcode.workers.dev. The v2 plan (phases 12–17) with tasks and acceptance criteria is in `roadmap.md`.
+Phase: **14 (event-centred grid and world map) complete except 14.7b; next is phase 15 (intensity and tsunami correctness).** Phases 0–11 are merged into `main` and deployed at https://quake-trace.ozcelikcode.workers.dev. The v2 plan (phases 12–17) with tasks and acceptance criteria is in `roadmap.md`.
 
 ## What works
 
@@ -51,7 +51,7 @@ Each phase ends with CI green and a deployable `main`.
 - [x] **11. Polish** — phone tuning, About and methodology dialog, README with screenshots and attribution, scientific validation results published (accessibility: axe in every e2e flow; performance: measured, splitting deferred).
 - [x] **12. Roadmap and agent-neutral docs** — `roadmap.md`, `AGENTS.md` with task pick-up and commands, assistant-specific tools only in `CLAUDE.md`.
 - [x] **13. Performance** — lazy data, caching and compression, map cost, throttled playback, React updates, tsunami on demand, lazy panels (details and measurements in `roadmap.md`).
-- [ ] **14. Event-centred grid and world map** — no rectangle clipping, global Vs30 and faults, world live feeds, Türkiye exposure, modules by coverage.
+- [x] **14. Event-centred grid and world map** — event grid without rectangle clipping, worldwide Vs30 tiles and faults, globe, world live feeds with scopes, virtual stations, Türkiye exposure, modules by coverage. Open: 14.7b editor on world faults.
 - [ ] **15. Intensity and tsunami correctness** — legend matches layer, tsunami amplitude without static uplift, Kajiura filter, validation.
 - [ ] **16. Design system v2** — Geist, cream light and warm dark themes, floating layout, tinted basemap, command palette.
 - [ ] **17. Sweep and release** — audits, merge, deploy, smoke test.

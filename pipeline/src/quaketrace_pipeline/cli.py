@@ -22,6 +22,7 @@ from .datasets import (
     population,
     roads,
     stations,
+    turkey_exposure,
     vs30,
     vs30_world,
     vulnerability,
@@ -46,6 +47,7 @@ DATASETS: dict[str, Builder] = {
     "cells": cells.build,
     "vulnerability": vulnerability.build,
     "worldFaults": world_faults.build,
+    "turkeyExposure": turkey_exposure.build,
 }
 
 

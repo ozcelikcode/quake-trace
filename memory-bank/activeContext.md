@@ -2,9 +2,11 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phases 12 and 13 are done; phase 14 is in progress on `feat/phase-14-world` (from the phase 12–13 branch): 14.1–14.7a done; next 14.8 (Türkiye exposure), 14.7b (editor anywhere) left open. Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phases 12 and 13 are done; phase 14 is in progress on `feat/phase-14-world` (from the phase 12–13 branch): 14.1–14.8 done except 14.7b (editor anywhere, open); next is phase 15. Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
 ## Recent changes (2026-10-27, phase 14)
+
+- 14.8: pipeline `turkeyExposure` (`datasets/turkey_exposure.py`, grid `turkey-2km`), `engine/exposure/population-exposure.ts`, `SimulationResult.exposure`, `ExposureSummary` in the impact panel.
 
 - 14.7a: `recordingSites` adds virtual stations outside the network; `planStations` skips stations with no arrival; `focusScenario` also runs when the renderer starts with a result (shared links).
 
@@ -111,7 +113,7 @@ v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback
 
 ## Next steps
 
-1. Roadmap phase 14 (event-centred grid and world map), starting with 14.1; then phases 15–17 in order. Deploy phase 13 when the user asks (`npm run deploy`, then `gh workflow run smoke.yml`).
+1. Roadmap phase 15 (intensity and tsunami correctness), then 16 (design) and 17; 14.7b stays open. Branch `feat/phase-14-world` holds phases 12–14 (not merged or deployed yet). Deploy phase 13 when the user asks (`npm run deploy`, then `gh workflow run smoke.yml`).
 2. After each deploy: `gh workflow run smoke.yml` (the developer's network cannot reach `*.workers.dev`).
 3. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 
