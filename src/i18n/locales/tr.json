@@ -312,11 +312,17 @@
       "success": "güncel"
     },
     "loading": "Kataloglar okunuyor…",
-    "empty": "Son 7 günde bölgede deprem yok.",
+    "empty": "Son 7 günde bu kapsamda deprem yok.",
     "simulateHint": "Bu depremi katalog büyüklüğü ve odağıyla simüle et.",
     "tooSmall": "Simülasyon için M {{magnitude}} ve üstü gerekir.",
     "simulate": "Simüle et",
-    "note": "AFAD, Kandilli (KOERI), EMSC ve USGS’ten son 7 günün Marmara bölgesi depremleri; 30 s ve 30 km içindeki kayıtlar birleştirilir, değerler önce ulusal kurumdan alınır. Dakikada bir yenilenir. Resmî uyarı sistemi değildir."
+    "note": "AFAD, Kandilli (KOERI) ve EMSC’ten Türkiye’nin, USGS’ten dünyanın (M 4,5 ve üstü) son 7 günlük depremleri; 30 s ve 30 km içindeki kayıtlar birleştirilir, değerler önce ulusal kurumdan alınır. Dakikada bir yenilenir. Resmî uyarı sistemi değildir.",
+    "scope": {
+      "label": "Kapsam",
+      "marmara": "Marmara",
+      "turkey": "Türkiye",
+      "world": "Dünya"
+    }
   },
   "editor": {
     "title": "Senaryo editörü",

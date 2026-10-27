@@ -312,11 +312,17 @@
       "success": "updated"
     },
     "loading": "Reading the catalogs…",
-    "empty": "No earthquakes in the region in the last 7 days.",
+    "empty": "No earthquakes in this scope in the last 7 days.",
     "simulateHint": "Simulate this earthquake with its catalog magnitude and hypocentre.",
     "tooSmall": "Simulation needs M {{magnitude}} or larger.",
     "simulate": "Simulate",
-    "note": "Real earthquakes of the last 7 days in the Marmara region from AFAD, Kandilli (KOERI), EMSC and USGS, merged when within 30 s and 30 km; values from the national agency first. Refreshed every minute. Not an official warning system."
+    "note": "The last 7 days of earthquakes in Türkiye from AFAD, Kandilli (KOERI) and EMSC, and worldwide (M 4.5 and above) from USGS; reports within 30 s and 30 km are merged, with values taken first from the national agency. Refreshed every minute. Not an official warning system.",
+    "scope": {
+      "label": "Scope",
+      "marmara": "Marmara",
+      "turkey": "Türkiye",
+      "world": "World"
+    }
   },
   "editor": {
     "title": "Scenario editor",

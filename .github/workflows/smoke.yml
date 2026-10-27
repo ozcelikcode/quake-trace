@@ -47,7 +47,7 @@ jobs:
           }
           check "/api/kandilli/lst0.asp"
           check "/api/koeri/station/1/query?net=KO&sta=SLVT&cha=HN?&level=station&format=text"
-          check "/api/afad/event/filter?start=${day}T00:00:00&end=${day}T23:59:59&minlat=39.8&maxlat=41.8&minlon=26&maxlon=31"
+          check "/api/afad/event/filter?start=${day}T00:00:00&end=${day}T23:59:59&minlat=35.5&maxlat=42.5&minlon=25&maxlon=45"
           exit $failed
       - name: Unknown routes are refused
         run: |

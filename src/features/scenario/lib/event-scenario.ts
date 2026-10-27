@@ -1,5 +1,5 @@
-import { faultSource } from '@/data/fault-source';
-import type { Faults } from '@/data/schemas';
+import { faultSource, worldFaultSource } from '@/data/fault-source';
+import type { Faults, WorldFaults } from '@/data/schemas';
 import { destination } from '@/lib/math/geo';
 import { cumulativeLengthsKm, kmAtLongitude, nearestOnPath, pointAtKm } from '@/lib/math/polyline';
 import type { FaultSource, Scenario, ScenarioEvent } from '@/types/scenario';
@@ -45,24 +45,35 @@ function epicentreSource(event: ScenarioEvent, fault: FaultSource, nearestKm: nu
 }
 
 /**
- * Places a real earthquake on the nearest EFSM20 fault: the hypocentre at the point of the trace
+ * Places a real earthquake on the nearest mapped fault (regional EFSM20, then the world
+ * catalogue when given): the hypocentre at the point of the trace
  * nearest the epicentre, at the catalog depth (clamped to the seismogenic layer by the engine),
  * with the catalog magnitude. The rupture spans the given extent or, by default, the Wells and
  * Coppersmith (1994) median area centred on the hypocentre (`engine/rupture`). An epicentre more
  * than `ON_FAULT_KM` from every trace ruptures where it is, on a trace parallel to the nearest
  * fault (`epicentreSource`); the distance to that fault is reported either way.
  */
-export function scenarioFromEvent(event: ScenarioEvent, faults: Faults): EventScenario {
-  let best: { id: string; km: number; distanceKm: number } | undefined;
-  for (const feature of faults.features) {
-    const fault = faultSource(faults, feature.properties.id);
+export function scenarioFromEvent(
+  event: ScenarioEvent,
+  faults: Faults,
+  worldFaults?: WorldFaults,
+): EventScenario {
+  // The regional catalogue wins; the world catalogue adds every fault it does not hold.
+  const regional = faults.features.map((feature) => faultSource(faults, feature.properties.id));
+  const regionalIds = new Set(regional.map((fault) => fault.id));
+  const sources = [
+    ...regional,
+    ...(worldFaults?.features ?? [])
+      .filter((feature) => !regionalIds.has(feature.properties.id.replace(/-\d+$/, '')))
+      .map(worldFaultSource),
+  ];
+  let best: { fault: FaultSource; km: number; distanceKm: number } | undefined;
+  for (const fault of sources) {
     const near = nearestOnPath(fault.trace, event.lon, event.lat);
-    if (!best || near.distanceKm < best.distanceKm) {
-      best = { id: fault.id, ...near };
-    }
+    if (!best || near.distanceKm < best.distanceKm) best = { fault, ...near };
   }
   if (!best) throw new PresetError('the faults dataset is empty');
-  const nearest = faultSource(faults, best.id);
+  const nearest = best.fault;
 
   if (best.distanceKm > ON_FAULT_KM && !event.extentLon) {
     return {

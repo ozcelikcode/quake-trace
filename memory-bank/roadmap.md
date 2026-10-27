@@ -169,7 +169,7 @@ Budget (acceptance for the whole phase):
   - Done when:
     - There is no `MAX_BOUNDS`, `minZoom` is 1, and globe projection is used at low zoom.
     - The opening view is Türkiye (the phone view is still readable).
-- [ ] **14.6 World live feeds.**
+- [x] **14.6 World live feeds.** (USGS is worldwide from M 4.5; EMSC, AFAD and Kandilli cover Türkiye (25–45° E, 35.5–42.5° N). The live panel has a Marmara / Türkiye / World scope that the map follows, defaulting to Türkiye. Catalog events take the nearest regional or world fault (`scenarioFromEvent(event, faults, worldFaults)`).)
   - Files: `src/data/feeds/client.ts`, `src/features/live/`.
   - Done when:
     - `LIVE_REGION` is removed: USGS and EMSC are global (M ≥ 4.5 at world zoom), AFAD and Kandilli cover Türkiye.

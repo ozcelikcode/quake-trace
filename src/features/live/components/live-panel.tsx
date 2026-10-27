@@ -2,9 +2,10 @@ import { Loader2, Play, Radio } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format';
-import { useLiveStore } from '@/state/live-store';
+import { liveScopes, useLiveStore } from '@/state/live-store';
 import type { ScenarioEvent } from '@/types/scenario';
 
 import { useLiveFeeds } from '../hooks/use-live-feeds';
@@ -21,12 +22,17 @@ interface LivePanelProps {
 const LISTED = 40;
 const STATUS_DOT = { pending: 'bg-fg-muted', error: 'bg-critical', success: 'bg-ok' } as const;
 
-/** Recent earthquakes in the region from AFAD, Kandilli, EMSC and USGS, polled every minute. */
+/**
+ * Recent earthquakes from AFAD, Kandilli, EMSC and USGS, polled every minute, in Marmara,
+ * Türkiye or worldwide (M ≥ 4.5).
+ */
 export function LivePanel({ activeId, computing, disabled, onRun }: LivePanelProps) {
   const { t, i18n } = useTranslation();
   const { events, feeds } = useLiveFeeds(true);
   const selectedId = useLiveStore((state) => state.selectedId);
   const select = useLiveStore((state) => state.select);
+  const scope = useLiveStore((state) => state.scope);
+  const setScope = useLiveStore((state) => state.setScope);
   const time = new Intl.DateTimeFormat(i18n.language, {
     dateStyle: 'short',
     timeStyle: 'medium',
@@ -35,6 +41,22 @@ export function LivePanel({ activeId, computing, disabled, onRun }: LivePanelPro
 
   return (
     <div className="space-y-3">
+      <ToggleGroup
+        type="single"
+        value={scope}
+        onValueChange={(value) => {
+          const next = liveScopes.find((candidate) => candidate === value);
+          if (next) setScope(next);
+        }}
+        aria-label={t('live.scope.label')}
+        className="w-full"
+      >
+        {liveScopes.map((option) => (
+          <ToggleGroupItem key={option} value={option} className="flex-1">
+            {t(`live.scope.${option}`)}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
       <ul aria-label={t('live.feeds')} className="flex flex-wrap gap-x-3 gap-y-1">
         {feeds.map((feed) => (
           <li key={feed.source} className="flex items-center gap-1.5 text-micro text-fg-muted">

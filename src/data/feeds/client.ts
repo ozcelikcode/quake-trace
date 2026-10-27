@@ -8,8 +8,12 @@ import { parseAfad, parseEmsc, parseKandilli, parseUsgs } from './parsers';
  * and Kandilli go through the Worker proxy (`/api/…`, worker/upstreams.ts).
  */
 
-/** The application region (simulationModels.md, "Grid"). */
-const LIVE_REGION: Region = { west: 26, east: 31, south: 39.8, north: 41.8 };
+/**
+ * Türkiye and its margins: AFAD, Kandilli and EMSC report every located shock here. USGS covers
+ * the world from `WORLD_MIN_MAGNITUDE`; smaller shocks elsewhere would flood the list.
+ */
+const TURKEY_REGION: Region = { west: 25, east: 45, south: 35.5, north: 42.5 };
+const WORLD_MIN_MAGNITUDE = 4.5;
 const LIVE_WINDOW_DAYS = 7;
 const DAY_MS = 86_400_000;
 
@@ -20,13 +24,15 @@ function isoSeconds(ms: number): string {
   return new Date(ms).toISOString().slice(0, 19);
 }
 
-export function feedUrl(source: FeedSource, nowMs: number, region: Region = LIVE_REGION): string {
+export function feedUrl(source: FeedSource, nowMs: number): string {
   const start = isoSeconds(nowMs - LIVE_WINDOW_DAYS * DAY_MS);
+  const region = TURKEY_REGION;
   const box = (names: [string, string, string, string]) =>
     `${names[0]}=${String(region.south)}&${names[1]}=${String(region.north)}&${names[2]}=${String(region.west)}&${names[3]}=${String(region.east)}`;
+  const min = String(WORLD_MIN_MAGNITUDE);
   switch (source) {
     case 'usgs':
-      return `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start}&${box(['minlatitude', 'maxlatitude', 'minlongitude', 'maxlongitude'])}`;
+      return `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start}&minmagnitude=${min}`;
     case 'emsc':
       return `https://www.seismicportal.eu/fdsnws/event/1/query?format=json&start=${start}&${box(['minlat', 'maxlat', 'minlon', 'maxlon'])}&limit=500`;
     case 'afad':
@@ -41,7 +47,14 @@ function checked(response: Response): Response {
   return response;
 }
 
-/** Reports of one catalog inside the region and the time window. */
+/** Whether a catalog's report belongs in the list: the world for USGS, Türkiye for the rest. */
+function inCoverage(source: FeedSource, event: FeedEvent): boolean {
+  return source === 'usgs'
+    ? event.magnitude >= WORLD_MIN_MAGNITUDE
+    : inRegion(event, TURKEY_REGION);
+}
+
+/** Reports of one catalog inside its coverage and the time window. */
 export async function fetchFeed(
   source: FeedSource,
   nowMs: number,
@@ -65,5 +78,5 @@ export async function fetchFeed(
       break;
   }
   const since = nowMs - LIVE_WINDOW_DAYS * DAY_MS;
-  return events.filter((event) => event.timeMs >= since && inRegion(event, LIVE_REGION));
+  return events.filter((event) => event.timeMs >= since && inCoverage(source, event));
 }

@@ -153,7 +153,12 @@ export function useRunScenario() {
         scenario = customScenario(request.draft, faults);
         origin = { kind: 'custom', faultId: request.draft.faultId, seed: request.draft.seed };
       } else {
-        const placed = scenarioFromEvent(request.event, faults);
+        // Events anywhere: the world catalogue supplies faults outside the regional one.
+        // Without it (offline), events fall back to the regional faults.
+        const worldFaults = await queryClient
+          .query(jsonDatasetQuery('worldFaults'))
+          .catch(() => undefined);
+        const placed = scenarioFromEvent(request.event, faults, worldFaults);
         scenario = placed.scenario;
         origin = {
           kind: request.kind,

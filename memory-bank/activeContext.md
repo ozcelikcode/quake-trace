@@ -2,9 +2,11 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phases 12 and 13 are done; phase 14 is in progress on `feat/phase-14-world` (from the phase 12–13 branch): 14.1–14.5 done, next 14.6 (world live feeds). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phases 12 and 13 are done; phase 14 is in progress on `feat/phase-14-world` (from the phase 12–13 branch): 14.1–14.6 done, next 14.7 (editor anywhere). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
 ## Recent changes (2026-10-27, phase 14)
+
+- 14.6: `feedUrl` (USGS world M ≥ 4.5; EMSC, AFAD and Kandilli for Türkiye), `liveStore.scope` with `inScope` (Marmara / Türkiye / World), `worldFaultSource` and the world catalogue in `scenarioFromEvent` (regional faults win; world copies of regional ids are skipped); the smoke test asks AFAD for the Türkiye box.
 
 - 14.4–14.5: pipeline `worldFaults` (`datasets/world_faults.py`), `worldFaultsSchema`, map layer `quaketrace-world-fault-lines` under the regional faults. Opening view is Türkiye (pitch 20; phones flat); `applyProjection` switches globe and Mercator at zoom 3.5; `focusScenario` flies to each new result; GEM credited in the map attribution.
 

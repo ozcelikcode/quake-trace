@@ -1,10 +1,12 @@
 import { useQueries, type UseQueryResult } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { fetchFeed } from '@/data/feeds/client';
 import { mergeReports } from '@/data/feeds/merge';
 import { useLiveStore } from '@/state/live-store';
 import { FEED_SOURCES, type FeedEvent, type FeedSource, type LiveEvent } from '@/types/live';
+
+import { inScope } from '../lib/scenario-event';
 
 /** The catalogs update within a minute; the proxy caches for 30 s. */
 const POLL_MS = 60_000;
@@ -46,11 +48,16 @@ export function useLiveFeeds(enabled: boolean): { events: LiveEvent[]; feeds: Fe
     combine,
   });
   const setEvents = useLiveStore((state) => state.setEvents);
+  const scope = useLiveStore((state) => state.scope);
+  const events = useMemo(
+    () => result.events.filter((event) => inScope(event, scope)),
+    [result.events, scope],
+  );
   useEffect(() => {
-    setEvents(enabled ? result.events : []);
+    setEvents(enabled ? events : []);
     return () => {
       setEvents([]);
     };
-  }, [enabled, result.events, setEvents]);
-  return result;
+  }, [enabled, events, setEvents]);
+  return { events, feeds: result.feeds };
 }

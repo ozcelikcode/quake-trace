@@ -70,6 +70,10 @@ test('lists live earthquakes from the merged catalogs', async ({ page }) => {
   test.skip(project() === 'phone-ios', 'covered by the other phone profile');
   await serveFeeds(page);
   await openTab(page, 'Canlı');
+  await page
+    .getByRole('radiogroup', { name: 'Kapsam' })
+    .getByRole('radio', { name: 'Marmara' })
+    .click();
   const list = page.getByTestId('live-events');
   // The fixture holds two Karacabey shocks; the one AFAD and EMSC both reported is merged.
   const karacabey = list
