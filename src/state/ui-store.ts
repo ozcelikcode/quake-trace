@@ -31,6 +31,16 @@ export function isRightPanelId(value: string): value is RightPanelId {
   return (rightPanelIds as readonly string[]).includes(value);
 }
 
+/**
+ * 3D terrain starts on only where it is affordable: wide screens with at least six logical
+ * cores. Phones and small laptops draw the flat map with hillshade (terrain tiles and the draped
+ * raster are the largest GPU cost); the map's terrain button turns it on.
+ */
+function terrainByDefault(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(min-width: 641px)').matches && navigator.hardwareConcurrency >= 6;
+}
+
 /** Storage key read by the inline script in index.html to apply the theme before first paint. */
 export const UI_STORAGE_KEY = 'quaketrace-ui';
 
@@ -40,6 +50,8 @@ interface UiState {
   rightPanel: RightPanelId;
   phonePanel: PanelId;
   mapRaster: MapRaster;
+  /** Whether the map drapes everything on 3D terrain. */
+  terrain: boolean;
   scenarioTab: ScenarioTab;
   /** Open section of the About dialog, null when it is closed. */
   about: AboutSection | null;
@@ -48,6 +60,7 @@ interface UiState {
   setRightPanel: (panel: RightPanelId) => void;
   setPhonePanel: (panel: PanelId) => void;
   setMapRaster: (raster: MapRaster) => void;
+  setTerrain: (terrain: boolean) => void;
   setScenarioTab: (tab: ScenarioTab) => void;
   setAbout: (section: AboutSection | null) => void;
 }
@@ -60,6 +73,7 @@ export const useUiStore = create<UiState>()(
       rightPanel: 'telemetry',
       phonePanel: 'scenario',
       mapRaster: 'intensity',
+      terrain: terrainByDefault(),
       scenarioTab: 'presets',
       about: null,
       toggleTheme: () => {
@@ -77,6 +91,9 @@ export const useUiStore = create<UiState>()(
       setMapRaster: (mapRaster) => {
         set({ mapRaster });
       },
+      setTerrain: (terrain) => {
+        set({ terrain });
+      },
       setScenarioTab: (scenarioTab) => {
         set({ scenarioTab });
       },
@@ -87,7 +104,7 @@ export const useUiStore = create<UiState>()(
     {
       name: UI_STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ theme: state.theme }),
+      partialize: (state) => ({ theme: state.theme, terrain: state.terrain }),
     },
   ),
 );

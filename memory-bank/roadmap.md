@@ -99,7 +99,7 @@ Budget (acceptance for the whole phase):
     - `/assets/*` is served `immutable` for one year, and `/data/*` is versioned by the manifest sha256.
     - The smoke workflow prints `content-encoding` and `cache-control` for a JS chunk and a `.f32` file.
     - Binary data arrives compressed, either at the edge or as `.gz` decoded with `DecompressionStream`.
-- [ ] **13.3 Map cost.**
+- [x] **13.3 Map cost.**
   - Files: `src/features/map/lib/{map-config.ts,terrain.ts}`, `map-view.tsx`.
   - Done when:
     - Terrain is off on phones and devices with `hardwareConcurrency < 6` (hillshade only), and a 3D toggle exists.

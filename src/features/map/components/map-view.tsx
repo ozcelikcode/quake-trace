@@ -2,7 +2,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import './map-view.css';
 
 import { MapLibreOverlay } from '@deck.gl/maplibre';
-import { Map as MapLibreMap, NavigationControl, setWorkerUrl } from 'maplibre-gl';
+import { Map as MapLibreMap, NavigationControl, setWorkerUrl, TerrainControl } from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,8 +28,11 @@ import {
   INITIAL_PITCH,
   INITIAL_VIEW_BOUNDS,
   INITIAL_VIEW_CENTER,
+  mapPixelRatio,
   MAX_BOUNDS,
   MAX_PITCH,
+  TERRAIN_EXAGGERATION,
+  TERRAIN_SOURCE_ID,
 } from '../lib/map-config';
 import { applyEditorLayers, FAULT_HIT_LAYER } from '../lib/editor-layers';
 import { applyLiveLayer, LIVE_LAYER } from '../lib/live-layers';
@@ -73,7 +76,8 @@ export function MapView() {
   const reference = useReferenceData();
   // The renderer needs the terrain heights and the road graph only once a scenario has run.
   const hasResult = useScenarioStore((state) => state.result !== null);
-  const elevation = useGridDataset('elevation', hasResult).data;
+  const terrain = useUiStore((state) => state.terrain);
+  const elevation = useGridDataset('elevation', hasResult && terrain).data;
   const roads = useRoadGraph(hasResult).data;
   const mapRaster = useUiStore((state) => state.mapRaster);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -93,8 +97,10 @@ export function MapView() {
     if (!container) return;
 
     const styleUrl = basemapStyleUrl(useUiStore.getState().theme);
+    const compact = container.clientWidth < COMPACT_VIEW.maxWidth;
     const map = new MapLibreMap({
       container,
+      pixelRatio: mapPixelRatio(compact),
       style: styleUrl,
       center: INITIAL_VIEW_CENTER,
       maxBounds: MAX_BOUNDS,
@@ -106,7 +112,6 @@ export function MapView() {
 
     // Fitting bounds with pitch shifts the center towards the horizon, so the zoom is taken
     // from a flat fit and the pitch is applied around the region's center.
-    const compact = container.clientWidth < COMPACT_VIEW.maxWidth;
     const flatCamera = compact
       ? map.cameraForBounds(COMPACT_VIEW.bounds, { padding: 16 })
       : map.cameraForBounds(INITIAL_VIEW_BOUNDS, { padding: 24 });
@@ -118,11 +123,20 @@ export function MapView() {
     });
 
     map.addControl(new NavigationControl({ visualizePitch: true }), 'top-right');
+    map.addControl(
+      new TerrainControl({ source: TERRAIN_SOURCE_ID, exaggeration: TERRAIN_EXAGGERATION }),
+      'top-right',
+    );
+    // The terrain button switches terrain directly; the choice is kept for the next visit.
+    // A style swap (theme change) also drops terrain; that is not the user's choice.
+    map.on('terrain', () => {
+      if (styleReadyRef.current) useUiStore.getState().setTerrain(Boolean(map.getTerrain()));
+    });
     // Every style swap (theme change) drops custom sources and layers, so they are re-applied.
     map.on('style.load', () => {
       styleReadyRef.current = true;
       const currentTheme = useUiStore.getState().theme;
-      applyTerrain(map, currentTheme);
+      applyTerrain(map, currentTheme, useUiStore.getState().terrain);
       applyReferenceLayers(map, referenceRef.current, currentTheme);
       applyLiveState(map);
       applyEditorState(map, referenceRef.current);
@@ -214,9 +228,10 @@ export function MapView() {
 
   useEffect(() => {
     if (!renderer) return;
-    renderer.setElevation(elevation?.values);
+    // Without terrain the 3D elements stand on the flat map.
+    renderer.setElevation(terrain ? elevation?.values : undefined);
     renderer.render(currentTime());
-  }, [renderer, elevation]);
+  }, [renderer, elevation, terrain]);
 
   useEffect(() => {
     if (!renderer) return;

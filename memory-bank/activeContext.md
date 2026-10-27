@@ -2,9 +2,11 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1–13.2 done, next 13.3 (map cost). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1–13.3 done, next 13.4 (GPU playback). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
 ## Recent changes (2026-10-27, phase 13)
+
+- 13.3: 3D terrain is on by default only on screens wider than 640 px with at least six logical cores (`terrainByDefault` in `ui-store`, persisted); MapLibre's `TerrainControl` switches it and the `terrain` event stores the choice (ignored during a style swap). DEM `maxzoom` 12, map `pixelRatio` capped at 2 (1.5 on compact maps), compact view pitch 0, elevation grid fetched only with terrain on.
 
 - 13.2: `public/_headers` (hashed assets immutable for a year, data one day, manifest `no-cache`); the build emits `data/<file>.gz` for every manifest dataset (`compressData` in `vite.config.ts`) and production fetches `<file>.gz?v=<sha256>` and inflates it with `DecompressionStream` (Cloudflare does not compress octet-stream; roads 5.9 → 3.1 MB, infra 0.8 → 0.13 MB). The smoke workflow prints and checks the headers.
 

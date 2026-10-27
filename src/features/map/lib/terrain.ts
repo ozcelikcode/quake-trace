@@ -11,8 +11,11 @@ import {
   TERRAIN_SOURCE_ID,
 } from './map-config';
 
-/** Adds 3D terrain and hillshade below the first label layer. Safe to call after every style load. */
-export function applyTerrain(map: MapLibreMap, theme: Theme): void {
+/**
+ * Adds hillshade below the first label layer and turns 3D terrain on or off. Safe to call after
+ * every style load.
+ */
+export function applyTerrain(map: MapLibreMap, theme: Theme, terrain: boolean): void {
   if (!map.getSource(TERRAIN_SOURCE_ID)) map.addSource(TERRAIN_SOURCE_ID, demSource());
   if (!map.getSource(HILLSHADE_SOURCE_ID)) map.addSource(HILLSHADE_SOURCE_ID, demSource());
 
@@ -21,5 +24,10 @@ export function applyTerrain(map: MapLibreMap, theme: Theme): void {
     map.addLayer(hillshadeLayer(theme), firstLabelLayer?.id);
   }
 
-  map.setTerrain({ source: TERRAIN_SOURCE_ID, exaggeration: TERRAIN_EXAGGERATION });
+  const on = Boolean(map.getTerrain());
+  if (terrain && !on) {
+    map.setTerrain({ source: TERRAIN_SOURCE_ID, exaggeration: TERRAIN_EXAGGERATION });
+  } else if (!terrain && on) {
+    map.setTerrain(null);
+  }
 }

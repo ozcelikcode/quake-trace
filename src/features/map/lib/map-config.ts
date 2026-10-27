@@ -35,7 +35,7 @@ export const MAX_BOUNDS: LngLatBoundsLike = [
 
 /**
  * Narrow (portrait phone) maps frame the northern Marmara coast, İstanbul between Tekirdağ and
- * İzmit, with a lower pitch so less of the horizon shows.
+ * İzmit, seen from straight above: a pitched view loads tiles up to the horizon.
  */
 export const COMPACT_VIEW = {
   maxWidth: 640,
@@ -43,13 +43,21 @@ export const COMPACT_VIEW = {
     [27.6, 40.45],
     [29.95, 41.25],
   ],
-  pitch: 30,
+  pitch: 0,
 } as const satisfies { maxWidth: number; bounds: LngLatBoundsLike; pitch: number };
 
 export const INITIAL_PITCH = 45;
 export const INITIAL_BEARING = -12;
 export const MAX_PITCH = 75;
 export const TERRAIN_EXAGGERATION = 1.5;
+
+/**
+ * Canvas pixel ratio: retina phones report 3, which renders nine times the pixels of the CSS
+ * size. Two keeps text and lines sharp on desktops; 1.5 is enough on small screens.
+ */
+export function mapPixelRatio(compact: boolean): number {
+  return Math.min(window.devicePixelRatio, compact ? 1.5 : 2);
+}
 
 const BASEMAP_STYLES: Record<Theme, string> = {
   dark: 'https://tiles.openfreemap.org/styles/dark',
@@ -69,8 +77,9 @@ const TERRAIN_ATTRIBUTION =
   '<a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noopener">Terrain © Mapzen, AWS Open Data</a>';
 
 /**
- * Terrain and hillshade use separate sources over the same tiles, as MapLibre recommends,
- * so each can load the zoom levels it needs.
+ * Terrain and hillshade use separate sources over the same tiles, as MapLibre recommends; the
+ * terrain source loads tiles only while terrain is on. Zoom 12 (about 30 m per pixel at 256 px
+ * tiles) is finer than the regional view needs, and each level above it quadruples the tiles.
  */
 export function demSource(): RasterDEMSourceSpecification {
   return {
@@ -78,7 +87,7 @@ export function demSource(): RasterDEMSourceSpecification {
     tiles: [TERRARIUM_TILES],
     encoding: 'terrarium',
     tileSize: 256,
-    maxzoom: 15,
+    maxzoom: 12,
     attribution: TERRAIN_ATTRIBUTION,
   };
 }
