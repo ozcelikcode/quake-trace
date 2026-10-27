@@ -163,6 +163,8 @@
     }
   },
   "impact": {
+    "outsideTitle": "Ayrıntılı modelin dışında",
+    "outsideBody": "Hasar, kritik tesisler, baz istasyonu ağı, acil durum rotaları, ilçe varış süreleri ve tsunami yalnızca Marmara bölgesi için modellenir. Burada simülasyon dalga cephelerini, yer hareketini ve şiddeti gösterir; zemin koşulları USGS küresel Vs30 modelinden alınır.",
     "title": "İlçelere varış",
     "reached": "{{count}} / {{total}} ilçeye ulaştı",
     "district": "İlçe",

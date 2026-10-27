@@ -203,9 +203,14 @@ export function useRunScenario() {
       });
       scenarioStore.succeed(result);
       usePlaybackStore.getState().load(result.durationS, result.aftershocks.durationS);
-      useTsunamiStore.getState().schedule(() => {
-        void runTsunami(queryClient, scenario);
-      });
+      // The tsunami solver covers the Sea of Marmara only.
+      if (result.inRegion) {
+        useTsunamiStore.getState().schedule(() => {
+          void runTsunami(queryClient, scenario);
+        });
+      } else {
+        useTsunamiStore.getState().clear();
+      }
       if (request.kind === 'replay' || request.kind === 'event') {
         void loadObserved(
           scenario.id,

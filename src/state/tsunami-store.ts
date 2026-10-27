@@ -23,6 +23,8 @@ interface TsunamiState {
   openWhenReady: boolean;
   /** Schedules the current scenario's run; a newer schedule replaces an older one. */
   schedule: (run: () => void) => void;
+  /** No tsunami for the current scenario (outside the modelled sea). */
+  clear: () => void;
   /** Starts the scheduled run, if any. */
   request: (options?: { openScale?: boolean }) => void;
   /** Starts a run and returns its token. */
@@ -43,6 +45,15 @@ export const useTsunamiStore = create<TsunamiState>()((set, get) => ({
       token: state.token + 1,
       result: null,
       pending: run,
+      openWhenReady: false,
+    }));
+  },
+  clear: () => {
+    set((state) => ({
+      status: 'idle',
+      token: state.token + 1,
+      result: null,
+      pending: null,
       openWhenReady: false,
     }));
   },

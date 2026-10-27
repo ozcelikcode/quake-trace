@@ -6,6 +6,7 @@ import { expectNoSeriousA11yViolations } from './_helpers/a11y';
 import {
   isPhone,
   openEventsPanel,
+  openImpactPanel,
   openScenarioPanel,
   pauseAndJump,
   project,
@@ -118,4 +119,15 @@ test('prints the scenario report instead of the app', async ({ page }) => {
   await expect(report.getByText('SİMÜLASYON · resmi uyarı sistemi değildir')).toBeVisible();
   await expect(report.getByRole('cell', { name: /Fatih/ })).toBeVisible();
   await expect(page.locator('#root')).toBeHidden();
+});
+
+test('simulates an earthquake whose shaking does not reach Marmara, shaking only', async ({ page }) => {
+  test.skip(project() !== 'desktop', 'desktop layout');
+  await page.goto(
+    '/?event=test-maras&time=2023-02-06T01:17:34Z&lon=37.04&lat=37.17&depth=10&mag=6.0&place=Pazarcik&catalog=USGS',
+  );
+  await waitForPlayback(page);
+  await openImpactPanel(page);
+  await expect(page.getByRole('heading', { name: 'Ayrıntılı modelin dışında' })).toBeVisible();
+  await expect(page.getByTestId('tsunami-summary')).toHaveCount(0);
 });

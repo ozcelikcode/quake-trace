@@ -42,7 +42,7 @@ describe('worldwide Vs30 tiles', () => {
     const buffer = gzipped.buffer.slice(
       gzipped.byteOffset,
       gzipped.byteOffset + gzipped.byteLength,
-    ) as ArrayBuffer;
+    );
     const grid = await decodeVs30Tile('N40E020', buffer, index);
     expect(grid.spec).toEqual({ west: 20, north: 50, dLon: 5, dLat: 5, nx: 2, ny: 2 });
     expect(grid.values[0]).toBeNaN();

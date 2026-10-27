@@ -42,6 +42,21 @@ export function ImpactPanel() {
     );
   }
 
+  if (!result.inRegion) {
+    return (
+      <div className="flex flex-col gap-4 p-3">
+        <EewSummary result={result} />
+        <section aria-labelledby="impact-outside-title" className="space-y-1">
+          <h3 id="impact-outside-title" className="label-micro">
+            {t('impact.outsideTitle')}
+          </h3>
+          <p className="text-caption text-fg-secondary">{t('impact.outsideBody')}</p>
+        </section>
+        <AftershockSummary catalog={result.aftershocks} />
+      </div>
+    );
+  }
+
   const number = (value: number, digits = 0) => formatNumber(value, i18n.language, digits);
   const damageByIndex = new Map(result.damage?.districts.map((d) => [d.index, d]));
   const reachedImpacts = impacts.slice(0, reached);

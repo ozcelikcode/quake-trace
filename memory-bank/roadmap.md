@@ -153,7 +153,7 @@ Budget (acceptance for the whole phase):
   - Done when:
     - USGS global Vs30 is served as on-demand tiles: 0.01° for Türkiye, 0.05° for the world.
     - Without data, Vs30 is 760 and the UI says so.
-- [ ] **14.3 Impact modules by coverage.**
+- [x] **14.3 Impact modules by coverage.** (`SimulationResult.inRegion`: the regional pass runs only when the event grid overlaps the regional grid; otherwise the impact panel shows "Outside the detailed model", naming the global Vs30 model, and no tsunami is scheduled. A distant large event whose shaking reaches Marmara still gets impacts there.)
   - Files: `simulate.ts`, the feature panels.
   - Done when:
     - Damage, network, routing, tsunami and telemetry map dynamic cells to the Marmara grid by lon/lat and run only inside it.

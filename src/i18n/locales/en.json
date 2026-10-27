@@ -163,6 +163,8 @@
     }
   },
   "impact": {
+    "outsideTitle": "Outside the detailed model",
+    "outsideBody": "Damage, critical facilities, cell network, emergency routes, district arrivals and the tsunami are modelled only for the Marmara region. Here the simulation shows the wavefronts, ground motion and intensity, with site conditions from the USGS global Vs30 model.",
     "title": "Arrival by district",
     "reached": "{{count}} of {{total}} districts reached",
     "district": "District",

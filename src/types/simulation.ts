@@ -92,6 +92,8 @@ export interface SimulationResult {
   scenarioId: string;
   grid: GridSpec;
   regionGrid: GridSpec;
+  /** Whether the shaking reaches the regional grid, where the impact modules run. */
+  inRegion: boolean;
   /** First P-wave arrival per cell, seconds after origin. */
   tP: Float32Array<ArrayBuffer>;
   /** First S-wave arrival per cell, seconds after origin. */

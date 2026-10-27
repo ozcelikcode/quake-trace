@@ -170,6 +170,7 @@ export function simulate(input: SimulationInput): SimulationResult {
     scenarioId: scenario.id,
     grid,
     regionGrid: region,
+    inRegion: regional !== null,
     tP,
     tS,
     pgaG,

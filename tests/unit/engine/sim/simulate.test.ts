@@ -89,6 +89,21 @@ describe('scenario simulation', () => {
     expect(at(29, 40.81)).toBeGreaterThan(7);
   });
 
+  it('runs the impact modules only where the shaking reaches the regional grid', () => {
+    expect(simulate({ ...input, districtCells: new Float32Array(cells).fill(0) }).inRegion).toBe(
+      true,
+    );
+    const far: GridSpec = { ...grid, west: 100 };
+    const outside = simulate({
+      ...input,
+      grid: far,
+      districtCells: new Float32Array(cells).fill(0),
+    });
+    expect(outside.inRegion).toBe(false);
+    expect(outside.districts).toEqual([]);
+    expect(outside.damage).toBeNull();
+  });
+
   it('is deterministic for a scenario and seed', () => {
     const again = simulate(input);
     expect(again.tS).toEqual(result.tS);
