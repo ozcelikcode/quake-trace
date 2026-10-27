@@ -185,7 +185,7 @@ export function MapView() {
     void map.once('load').then(() => {
       const overlay = new MapLibreOverlay({ interleaved: true, layers: [] });
       map.addControl(overlay);
-      const simulationRenderer = new SimulationRenderer(map, overlay);
+      const simulationRenderer = new SimulationRenderer(map, overlay, { compact });
       rendererRef.current = simulationRenderer;
       setRenderer(simulationRenderer);
       // MapLibre has no API to start compact attribution collapsed; the (i) button still opens it.

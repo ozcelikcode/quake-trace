@@ -22,13 +22,14 @@ describe('ui store', () => {
     expect(useUiStore.getState().theme).toBe('dark');
   });
 
-  it('persists only the theme', () => {
+  it('persists only the theme and the terrain choice', () => {
     useUiStore.getState().toggleTheme();
+    useUiStore.getState().setTerrain(false);
     useUiStore.getState().setOpenDrawer('left');
     const stored = JSON.parse(localStorage.getItem(UI_STORAGE_KEY) ?? '{}') as {
       state?: Record<string, unknown>;
     };
-    expect(stored.state).toEqual({ theme: 'light' });
+    expect(stored.state).toEqual({ theme: 'light', terrain: false });
   });
 
   it('tracks drawer and panel selection', () => {

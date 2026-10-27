@@ -21,9 +21,24 @@ interface TimelineBarProps {
   className?: string;
 }
 
+/** Slider positions per scale: finer steps than this do not move the thumb by a pixel. */
+const SLIDER_STEPS = 2000;
+
+/**
+ * The clock rounded to a slider step, so the bar re-renders when the thumb moves rather than on
+ * every animation frame.
+ */
+function sliderTime(timeS: number, durationS: number): number {
+  if (durationS <= 0) return 0;
+  const step = durationS / SLIDER_STEPS;
+  return Math.min(durationS, Math.round(timeS / step) * step);
+}
+
 export function TimelineBar({ compact = false, className }: TimelineBarProps) {
   const { t } = useTranslation();
-  const timeS = usePlaybackStore((state) => state.timeS);
+  const timeS = usePlaybackStore((state) => sliderTime(state.timeS, state.durationS));
+  // The readout changes ten times a second (formatClock shows tenths).
+  const clock = usePlaybackStore((state) => formatClock(state.timeS));
   const durationS = usePlaybackStore((state) => state.durationS);
   const playing = usePlaybackStore((state) => state.playing);
   const speed = usePlaybackStore((state) => state.speed);
@@ -111,7 +126,7 @@ export function TimelineBar({ compact = false, className }: TimelineBarProps) {
           {/* Phones show the clock in the status bar, so the slider keeps the width. */}
           {!compact && (
             <span className="w-16 shrink-0 num text-caption text-fg" aria-hidden>
-              {formatClock(timeS)}
+              {clock}
             </span>
           )}
           <div className="relative min-w-0 flex-1 ruler px-1">

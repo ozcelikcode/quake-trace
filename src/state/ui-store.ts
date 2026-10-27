@@ -38,7 +38,7 @@ export function isRightPanelId(value: string): value is RightPanelId {
  */
 function terrainByDefault(): boolean {
   if (typeof window === 'undefined') return false;
-  return window.matchMedia('(min-width: 641px)').matches && navigator.hardwareConcurrency >= 6;
+  return window.innerWidth > 640 && navigator.hardwareConcurrency >= 6;
 }
 
 /** Storage key read by the inline script in index.html to apply the theme before first paint. */

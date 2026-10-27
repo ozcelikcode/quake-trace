@@ -106,15 +106,18 @@ Budget (acceptance for the whole phase):
     - There is one DEM source with `maxzoom` 12.
     - `pixelRatio` is capped at `min(devicePixelRatio, 2)` on desktop and 1.5 on phones.
     - Phone pitch is 0.
-- [ ] **13.4 GPU playback.**
-  - Goal: no per-frame CPU work proportional to the grid.
-  - Files: `src/features/map/lib/{simulation-renderer.ts,simulation-frames.ts}`, a new custom deck.gl layer in `src/features/map/lib/`.
-  - Done when:
-    - The intensity raster and the wavefront bands are drawn by a shader from tP/tS/MMI textures uploaded once per scenario, with time as a uniform.
-    - The 3D curtains rebuild at most 10 times per second from preallocated typed buffers.
-    - Static layers are cached.
-    - A Playwright trace of 10 s of playback shows no long task over 50 ms.
-- [ ] **13.5 React updates.**
+- [x] **13.4 Playback cost.** Done without a custom shader layer: the intensity raster stays a MapLibre image source because it must drape on terrain, which deck.gl layers do not.
+  - The raster upload and the wavefront isolines are redrawn at most 15 times a second, with a trailing update.
+  - The intensity raster stops repainting once the last cell has faded in, and the tsunami raster after its last frame.
+  - Fronts that have left the grid are skipped.
+  - Rupture and station positions are cached.
+  - Compact maps draw at most 30 frames a second.
+  - Measured on the north-marmara preset, Chromium on Apple silicon, 10 s window during playback, main-thread busy time (CDP `TaskDuration`):
+    - desktop: 44 % → 36 %;
+    - phone viewport with 4× CPU throttling: 100 % → 55 %.
+    - No long tasks over 50 ms during steady playback, before or after (the long-task metric does not separate them on this machine).
+  - A custom deck.gl layer remains an option if phone heat persists.
+- [x] **13.5 React updates.**
   - Files: `src/app/simulation-clock.tsx`, the timeline bar, `src/features/telemetry/hooks/use-canvas-frame.ts`.
   - Done when:
     - The clock and slider update the DOM through refs.

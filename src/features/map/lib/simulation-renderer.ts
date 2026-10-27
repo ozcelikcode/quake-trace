@@ -36,6 +36,7 @@ import {
   tsunamiCellIndex,
   tsunamiLookupTable,
   rupturedPath,
+  SHAKING_FADE_S,
   wavefrontCurtain,
   type CurtainBuffers,
   type CurtainStyle,
@@ -80,11 +81,36 @@ const CRITICAL: [number, number, number] = [235, 87, 70];
 /** A triggered station flashes with one expanding ring, then keeps a steady P-coloured dot. */
 const TRIGGER_PULSE_S = 1.2;
 const STATION_LIFT_M = 60;
+/**
+ * The raster upload (which also re-drapes every terrain tile) and the wavefront isolines are
+ * redrawn at most this often while the clock runs; the cheap deck.gl marks follow every frame.
+ * Fifteen updates a second keep the 1.5 s fade and the fronts smooth at a fraction of the cost.
+ */
+const HEAVY_INTERVAL_MS = 1000 / 15;
+
+/** Largest finite value of a field (the last arrival), or -Infinity when there is none. */
+function lastFinite(values: Float32Array): number {
+  let last = Number.NEGATIVE_INFINITY;
+  for (const value of values) if (value > last && Number.isFinite(value)) last = value;
+  return last;
+}
 
 interface StationPoint {
   station: StationRecord;
   position: [number, number, number];
 }
+
+interface StaticPositions {
+  extent: [number, number, number][];
+  stations: StationPoint[];
+}
+
+const EMPTY_CURTAIN: CurtainBuffers = {
+  length: 0,
+  sourcePositions: new Float32Array(0),
+  targetPositions: new Float32Array(0),
+  colors: new Uint8Array(0),
+};
 
 function curtainLayer(id: string, curtain: CurtainBuffers): LineLayer {
   return new LineLayer({
@@ -124,6 +150,16 @@ export class SimulationRenderer {
   #pixels: Uint32Array | null = null;
   #rowMap: Int32Array | null = null;
   #lastTimeS = Number.NaN;
+  /** Raster time last painted, and when (performance.now()); NaN forces the next paint. */
+  #rasterTimeS = Number.NaN;
+  #heavyAtMs = Number.NEGATIVE_INFINITY;
+  #trailing: ReturnType<typeof setTimeout> | undefined;
+  /** Wavefront curtains of the last heavy update, reused by the frames in between. */
+  #curtains: { s: CurtainBuffers; p: CurtainBuffers } | null = null;
+  /** Per-result constants: when the fronts leave the grid and when the intensity stops changing. */
+  #lastArrival = { s: Number.NEGATIVE_INFINITY, p: Number.NEGATIVE_INFINITY };
+  /** Positions that only change with the result or the elevation. */
+  #static: StaticPositions | null = null;
   #theme: Theme = 'dark';
   #focusedStation = -1;
   #blindZone: CurtainBuffers | null = null;
@@ -131,33 +167,40 @@ export class SimulationRenderer {
   readonly #facilityCodes = new Map<string, number>();
   readonly #reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  constructor(map: MapLibreMap, overlay: MapLibreOverlay) {
+  /** Shortest interval between drawn frames; phones draw at most 30 a second. */
+  readonly #frameIntervalMs: number;
+  #frameAtMs = Number.NEGATIVE_INFINITY;
+  #pendingFrame: ReturnType<typeof setTimeout> | undefined;
+
+  constructor(map: MapLibreMap, overlay: MapLibreOverlay, { compact }: { compact: boolean }) {
     this.#map = map;
     this.#overlay = overlay;
+    this.#frameIntervalMs = compact ? 1000 / 30 - 2 : 0;
   }
 
   /** Ground elevation on the result's grid (m), used to lift 3D elements onto the terrain. */
   setElevation(values: Float32Array | undefined): void {
     this.#elevation = values;
     this.#blindZone = null;
-    this.#lastTimeS = Number.NaN;
+    this.#static = null;
+    this.#invalidate();
   }
 
   setTheme(theme: Theme): void {
     this.#theme = theme;
-    this.#lastTimeS = Number.NaN;
+    this.#invalidate();
   }
 
   setRaster(raster: MapRaster): void {
     this.#raster = raster;
-    this.#lastTimeS = Number.NaN;
+    this.#invalidate();
   }
 
   /** The tsunami of the current scenario, drawn when the tsunami raster is chosen. */
   setTsunami(result: TsunamiResult | null): void {
     const matches = result && result.scenarioId === this.#result?.scenarioId;
     this.#tsunami = matches ? { result, cellIndex: tsunamiCellIndex(result) } : null;
-    this.#lastTimeS = Number.NaN;
+    this.#invalidate();
   }
 
   /** The road graph the routing result indexes; corridors need it for their geometry. */
@@ -178,8 +221,9 @@ export class SimulationRenderer {
     this.#result = result;
     if (this.#tsunami?.result.scenarioId !== result?.scenarioId) this.#tsunami = null;
     this.#blindZone = null;
+    this.#static = null;
     this.resetFacilityStates();
-    this.#lastTimeS = Number.NaN;
+    this.#invalidate();
     this.#removeRaster();
     this.#buildResponse();
     if (!result) {
@@ -188,6 +232,7 @@ export class SimulationRenderer {
       this.#overlay.setProps({ layers: [] });
       return;
     }
+    this.#lastArrival = { s: lastFinite(result.tS), p: lastFinite(result.tP) };
     const image = new ImageData(result.grid.nx, result.grid.ny);
     this.#image = image;
     this.#pixels = new Uint32Array(image.data.buffer);
@@ -219,7 +264,27 @@ export class SimulationRenderer {
       below,
     );
     this.#attachResponse();
+    this.#invalidate();
+  }
+
+  /** Forces the next `render` to redraw everything, raster included. */
+  #invalidate(): void {
     this.#lastTimeS = Number.NaN;
+    this.#rasterTimeS = Number.NaN;
+    this.#heavyAtMs = Number.NEGATIVE_INFINITY;
+  }
+
+  /**
+   * The time the raster shows for `timeS`: the intensity stops changing once the last cell has
+   * faded in, and the tsunami after its last frame, so later frames reuse the painted image.
+   */
+  #rasterTime(result: SimulationResult, timeS: number): number {
+    if (this.#raster === 'tsunami' && this.#tsunami) {
+      const { frameCount, frameIntervalS } = this.#tsunami.result;
+      return Math.min(timeS, (frameCount - 1) * frameIntervalS);
+    }
+    if (this.#raster === 'network' && result.network) return timeS;
+    return Math.min(timeS, this.#lastArrival.s + SHAKING_FADE_S);
   }
 
   #buildResponse(): void {
@@ -292,41 +357,40 @@ export class SimulationRenderer {
   render(timeS: number): void {
     const result = this.#result;
     if (!result || timeS === this.#lastTimeS) return;
+    clearTimeout(this.#pendingFrame);
+    const frameWaitMs = this.#frameAtMs + this.#frameIntervalMs - performance.now();
+    if (frameWaitMs > 0 && !Number.isNaN(this.#lastTimeS)) {
+      this.#pendingFrame = setTimeout(() => {
+        this.render(timeS);
+      }, frameWaitMs);
+      return;
+    }
+    this.#frameAtMs = performance.now();
     this.#lastTimeS = timeS;
 
-    if (this.#pixels && this.#rowMap && this.#image) {
-      const tsunami = this.#tsunami;
-      if (this.#raster === 'tsunami' && tsunami) {
-        paintTsunami(
-          this.#pixels,
-          this.#rowMap,
-          tsunami.result,
-          tsunami.cellIndex,
-          this.#tsunamiLookup,
-          timeS,
-        );
-      } else if (this.#raster === 'network' && result.network) {
-        paintNetwork(
-          this.#pixels,
-          result.grid,
-          this.#rowMap,
-          result.network,
-          this.#loadLookup,
-          timeS,
-        );
-      } else {
-        paintIntensity(
-          this.#pixels,
-          result.grid,
-          this.#rowMap,
-          result.tS,
-          result.mmi,
-          this.#lookup,
-          timeS,
-        );
-      }
-      this.#map.getSource<ImageSource>(INTENSITY_SOURCE)?.updateImage({ image: this.#image });
+    // Heavy work runs at most every HEAVY_INTERVAL_MS; a trailing update draws the final time
+    // when the clock stops between two of them.
+    clearTimeout(this.#trailing);
+    const now = performance.now();
+    const waitMs = this.#heavyAtMs + HEAVY_INTERVAL_MS - now;
+    const heavy = waitMs <= 0;
+    if (heavy) {
+      this.#heavyAtMs = now;
+      this.#paintRaster(result, timeS);
+      this.#curtains = {
+        s: this.#curtain(result.tS, this.#lastArrival.s, result.grid, timeS, S_STYLE),
+        p: this.#curtain(result.tP, this.#lastArrival.p, result.grid, timeS, P_STYLE),
+      };
+    } else {
+      this.#trailing = setTimeout(() => {
+        this.#heavyAtMs = Number.NEGATIVE_INFINITY;
+        this.#lastTimeS = Number.NaN;
+        this.render(timeS);
+      }, waitMs);
     }
+    this.#static ??= this.#staticPositions(result);
+    const { extent } = this.#static;
+    const curtains = this.#curtains;
 
     const { rupture } = result;
     const lift = (point: readonly [number, number]): [number, number, number] => [
@@ -334,7 +398,6 @@ export class SimulationRenderer {
       point[1],
       this.#groundAt(result.grid, point[0], point[1]) + RUPTURE_LIFT_M,
     ];
-    const extent = rupture.trace.map(lift);
     const front = rupturedPath(rupture.trace, rupture.traceTimesS, timeS).map(lift);
     const epicentre = lift([rupture.hypocenter.lon, rupture.hypocenter.lat]);
 
@@ -368,20 +431,85 @@ export class SimulationRenderer {
         lineWidthUnits: 'pixels',
         stroked: true,
       }),
-      curtainLayer(
-        'scenario-s-wave',
-        wavefrontCurtain(result.tS, result.grid, timeS, this.#elevation, S_STYLE),
-      ),
-      curtainLayer(
-        'scenario-p-wave',
-        wavefrontCurtain(result.tP, result.grid, timeS, this.#elevation, P_STYLE),
-      ),
+      ...(curtains
+        ? [curtainLayer('scenario-s-wave', curtains.s), curtainLayer('scenario-p-wave', curtains.p)]
+        : []),
       ...this.#stationLayers(result, timeS),
       ...this.#warningLayers(result, timeS),
     ];
     this.#overlay.setProps({ layers });
     this.#updateFacilities(result, timeS);
     this.#updateResponse(result, timeS);
+  }
+
+  /** A wavefront curtain, or an empty one once the front has passed the last cell. */
+  #curtain(
+    arrival: Float32Array,
+    lastArrival: number,
+    grid: GridSpec,
+    timeS: number,
+    style: CurtainStyle,
+  ): CurtainBuffers {
+    if (timeS > lastArrival) return EMPTY_CURTAIN;
+    return wavefrontCurtain(arrival, grid, timeS, this.#elevation, style);
+  }
+
+  #staticPositions(result: SimulationResult): StaticPositions {
+    const lift = (point: readonly [number, number]): [number, number, number] => [
+      point[0],
+      point[1],
+      this.#groundAt(result.grid, point[0], point[1]) + RUPTURE_LIFT_M,
+    ];
+    return {
+      extent: result.rupture.trace.map(lift),
+      stations: result.records.stations.map((station) => ({
+        station,
+        position: [
+          station.lon,
+          station.lat,
+          this.#groundAt(result.grid, station.lon, station.lat) + STATION_LIFT_M,
+        ],
+      })),
+    };
+  }
+
+  #paintRaster(result: SimulationResult, timeS: number): void {
+    const rasterTimeS = this.#rasterTime(result, timeS);
+    if (rasterTimeS === this.#rasterTimeS) return;
+    this.#rasterTimeS = rasterTimeS;
+    if (this.#pixels && this.#rowMap && this.#image) {
+      const tsunami = this.#tsunami;
+      if (this.#raster === 'tsunami' && tsunami) {
+        paintTsunami(
+          this.#pixels,
+          this.#rowMap,
+          tsunami.result,
+          tsunami.cellIndex,
+          this.#tsunamiLookup,
+          rasterTimeS,
+        );
+      } else if (this.#raster === 'network' && result.network) {
+        paintNetwork(
+          this.#pixels,
+          result.grid,
+          this.#rowMap,
+          result.network,
+          this.#loadLookup,
+          rasterTimeS,
+        );
+      } else {
+        paintIntensity(
+          this.#pixels,
+          result.grid,
+          this.#rowMap,
+          result.tS,
+          result.mmi,
+          this.#lookup,
+          rasterTimeS,
+        );
+      }
+      this.#map.getSource<ImageSource>(INTENSITY_SOURCE)?.updateImage({ image: this.#image });
+    }
   }
 
   /** Forgets written facility states, for a new result, style or facility source. */
@@ -441,14 +569,8 @@ export class SimulationRenderer {
   }
 
   #stationLayers(result: SimulationResult, timeS: number): Layer[] {
-    const points: StationPoint[] = result.records.stations.map((station) => ({
-      station,
-      position: [
-        station.lon,
-        station.lat,
-        this.#groundAt(result.grid, station.lon, station.lat) + STATION_LIFT_M,
-      ],
-    }));
+    this.#static ??= this.#staticPositions(result);
+    const points = this.#static.stations;
     const triggered = points.filter(
       ({ station }) => station.triggerS !== null && station.triggerS <= timeS,
     );
@@ -503,6 +625,8 @@ export class SimulationRenderer {
   }
 
   dispose(): void {
+    clearTimeout(this.#trailing);
+    clearTimeout(this.#pendingFrame);
     this.#removeRaster();
     this.#overlay.setProps({ layers: [] });
     this.#result = null;
