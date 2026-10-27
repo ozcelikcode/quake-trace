@@ -2,9 +2,11 @@
 
 ## Current focus
 
-v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phase 12 is done; phase 13 (performance) is in progress: 13.1–13.6 done, next 13.7 (bundle). Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
+v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback on the public deploy: rectangle-clipped footprint, Marmara-only map, 1–2 minute load and hot phones, unverified intensity/tsunami display, generic design. Phases 12 and 13 are done; next is phase 14 (event-centred grid and world map), task 14.1. Phases 0–11 are in `main` and deployed at https://quake-trace.ozcelikcode.workers.dev.
 
 ## Recent changes (2026-10-27, phase 13)
+
+- 13.7: telemetry, impact and events panels lazy (`app/panels.ts`, Suspense in the tab layouts), About dialog lazy in `features/about/index.ts` and mounted only while open, report mounted only with a result.
 
 - 13.6: tsunami runs are scheduled (`useTsunamiStore.schedule`, status `pending`) and start at the end of the shaking playback (`useTsunamiTrigger` in the app shell), on the Tsunami scale button (opens the scale when ready, `openWhenReady`) or when the tsunami summary mounts.
 
@@ -95,7 +97,7 @@ v2 plan in `roadmap.md` (phases 12–17), written 2026-10-27 after user feedback
 
 ## Next steps
 
-1. Roadmap phase 13 (performance), starting with 13.1 lazy data; then phases 14–17 in order.
+1. Roadmap phase 14 (event-centred grid and world map), starting with 14.1; then phases 15–17 in order. Deploy phase 13 when the user asks (`npm run deploy`, then `gh workflow run smoke.yml`).
 2. After each deploy: `gh workflow run smoke.yml` (the developer's network cannot reach `*.workers.dev`).
 3. Optional: OpenCelliD key in `pipeline/.env`, then `build cells`; the engine uses real sites unchanged.
 

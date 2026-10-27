@@ -6,13 +6,25 @@ import {
   SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react';
-import type { ComponentType } from 'react';
+import { lazy, type ComponentType } from 'react';
 
-import { EventsPanel } from '@/features/events';
-import { ImpactPanel } from '@/features/impact';
 import { ScenarioPanel } from '@/features/scenario';
-import { TelemetryPanel } from '@/features/telemetry';
 import type { PanelId } from '@/state/ui-store';
+
+/*
+ * The scenario panel is the first thing used; the others load with their tab (Radix tabs mount
+ * only the active content), which keeps them out of the start-up bundle. Layouts render panels
+ * inside a Suspense boundary.
+ */
+const TelemetryPanel = lazy(() =>
+  import('@/features/telemetry').then((module) => ({ default: module.TelemetryPanel })),
+);
+const ImpactPanel = lazy(() =>
+  import('@/features/impact').then((module) => ({ default: module.ImpactPanel })),
+);
+const EventsPanel = lazy(() =>
+  import('@/features/events').then((module) => ({ default: module.EventsPanel })),
+);
 
 interface PanelDefinition {
   titleKey: ParseKeys;

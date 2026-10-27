@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { BottomSheet, type SheetHeight } from '@/components/ui/bottom-sheet';
@@ -65,7 +65,9 @@ export function PhoneLayout() {
             const { Component } = panelRegistry[id];
             return (
               <TabsContent key={id} value={id}>
-                <Component />
+                <Suspense fallback={null}>
+                  <Component />
+                </Suspense>
               </TabsContent>
             );
           })}

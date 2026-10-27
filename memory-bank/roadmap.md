@@ -131,12 +131,11 @@ Budget (acceptance for the whole phase):
   - Not done, with reasons:
     - **Phone 1800 s tsunami duration:** results must stay identical across devices for a given scenario.
     - **Road graph loaded once in the worker, and corridors built in the worker:** a CPU profile of a preset run (8 s) shows map rendering dominating. The structured clone and `#buildResponse` were not hotspots.
-- [ ] **13.7 Bundle.**
-  - Files: `vite.config.ts`, `src/app/*`.
-  - Done when:
-    - zod, Radix and i18n have their own chunks.
-    - Panels and dialogs are lazy-loaded.
-    - The shell chunk shrinks, with the before and after sizes recorded in `progress.md`.
+- [x] **13.7 Bundle.**
+  - The telemetry, impact and events panels, the About dialog and the printable report are lazy: the panels load with their tab, About on first open, and the report once a scenario exists.
+  - Rolldown already splits the shared code into its own chunks: React (87 KB), zod and the data layer (129 KB), and the UI store. A `manualChunks` setting was therefore not added.
+  - JavaScript loaded at start, before the map chunk: 771 KB → about 684 KB raw. The `index` chunk alone went from 243 KB to 147 KB gzipped.
+  - The map chunk (MapLibre + deck.gl, 487 KB gzipped) was already lazy.
 
 ## Phase 14 — Event-centred grid and world map
 

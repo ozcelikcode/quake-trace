@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,7 +34,9 @@ export function RightPanelTabs() {
         const { Component } = panelRegistry[id];
         return (
           <TabsContent key={id} value={id}>
-            <Component />
+            <Suspense fallback={null}>
+              <Component />
+            </Suspense>
           </TabsContent>
         );
       })}
